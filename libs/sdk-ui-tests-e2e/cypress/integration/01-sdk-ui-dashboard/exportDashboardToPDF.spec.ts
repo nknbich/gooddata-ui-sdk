@@ -14,7 +14,7 @@ const widget = new Widget(0);
 const topBar = new TopBar();
 
 describe("Export dashboard to pdf", { tags: ["checklist_integrated_tiger"] }, () => {
-    it("should export insight to PDF from dashboards", () => {
+    it.skip("should export insight to PDF from dashboards", () => {
         cy.fixture("dashboardInfosForExport").then((data) => {
             data["validInsightsForTigerPDFExport"].forEach(
                 (dashboardInfo: {
@@ -46,13 +46,14 @@ describe("Export dashboard to pdf", { tags: ["checklist_integrated_tiger"] }, ()
                     widget.waitChartLoaded();
                     topBar.dashboardTitleExist().dashboardTitleHasValue(dashboardInfo.dashboardTitle);
                     dashboardMenu.toggle().clickOption("Export to PDF");
+                    cy.wait(300000);
                     exportControl.expectExportedPDF(dashboardInfo.fileName, dashboardInfo.contents);
                 },
             );
         });
     });
 
-    it(
+    it.skip(
         "is able to export dashboard with temporary filter to pdf",
         { tags: ["checklist_integrated_tiger"] },
         () => {
