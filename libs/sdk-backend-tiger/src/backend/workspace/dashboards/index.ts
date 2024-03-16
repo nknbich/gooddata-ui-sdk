@@ -1,4 +1,4 @@
-// (C) 2020-2023 GoodData Corporation
+// (C) 2020-2024 GoodData Corporation
 import {
     EntitiesApiGetEntityAnalyticalDashboardsRequest,
     isDashboardPluginsItem,
@@ -23,6 +23,7 @@ import {
     TimeoutError,
     IExportResult,
     IGetDashboardPluginOptions,
+    IDashboardsQuery,
 } from "@gooddata/sdk-backend-spi";
 import {
     areObjRefsEqual,
@@ -45,6 +46,7 @@ import {
     FilterContextItem,
     isAllTimeDashboardDateFilter,
     objRefToString,
+    IDateFilter,
 } from "@gooddata/sdk-model";
 import isEqual from "lodash/isEqual.js";
 import {
@@ -63,12 +65,14 @@ import {
 } from "../../../convertors/toBackend/AnalyticalDashboardConverter.js";
 import { TigerAuthenticatedCallGuard } from "../../../types/index.js";
 import { objRefsToIdentifiers, objRefToIdentifier } from "../../../utils/api.js";
-import { resolveWidgetFilters } from "./widgetFilters.js";
+import { resolveWidgetFilters, resolveWidgetFiltersWithMultipleDateFilters } from "./widgetFilters.js";
 import includes from "lodash/includes.js";
 import { buildDashboardPermissions, TigerDashboardPermissionType } from "./dashboardPermissions.js";
 import { convertExportMetadata as convertToBackendExportMetadata } from "../../../convertors/toBackend/ExportMetadataConverter.js";
 import { convertExportMetadata as convertFromBackendExportMetadata } from "../../../convertors/fromBackend/ExportMetadataConverter.js";
 import { parseNameFromContentDisposition } from "../../../utils/downloadFile.js";
+import { GET_OPTIMIZED_WORKSPACE_PARAMS } from "../constants.js";
+import { DashboardsQuery } from "./dashboardsQuery.js";
 
 const DEFAULT_POLL_DELAY = 5000;
 const MAX_POLL_ATTEMPTS = 50;
@@ -94,6 +98,12 @@ export class TigerWorkspaceDashboards implements IWorkspaceDashboardsService {
         });
 
         return convertAnalyticalDashboardToListItems(result);
+    };
+
+    public getDashboardsQuery = (): IDashboardsQuery => {
+        return new DashboardsQuery(this.authCall, {
+            workspaceId: this.workspace,
+        });
     };
 
     public getDashboard = async (
@@ -467,6 +477,20 @@ export class TigerWorkspaceDashboards implements IWorkspaceDashboardsService {
         );
     };
 
+    public getResolvedFiltersForWidgetWithMultipleDateFilters = async (
+        widget: IWidget,
+        commonDateFilters: IDateFilter[],
+        otherFilters: IFilter[],
+    ): Promise<IFilter[]> => {
+        return resolveWidgetFiltersWithMultipleDateFilters(
+            commonDateFilters,
+            otherFilters,
+            widget.ignoreDashboardFilters,
+            widget.dateDataSet,
+            (refs) => objRefsToIdentifiers(refs, this.authCall),
+        );
+    };
+
     public createDashboardPlugin = async (plugin: IDashboardPluginDefinition): Promise<IDashboardPlugin> => {
         const pluginContent = convertDashboardPluginToBackend(plugin);
 
@@ -617,7 +641,7 @@ export class TigerWorkspaceDashboards implements IWorkspaceDashboardsService {
             const workspaceWithPermissionsResponse = await this.authCall((client) => {
                 return client.entities.getEntityWorkspaces({
                     id: this.workspace,
-                    metaInclude: ["permissions"],
+                    ...GET_OPTIMIZED_WORKSPACE_PARAMS,
                 });
             });
 

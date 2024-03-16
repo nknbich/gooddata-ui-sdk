@@ -1,4 +1,4 @@
-// (C) 2019-2023 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 /**
  * This package provides several React components related to filters.
  *
@@ -37,6 +37,7 @@ export {
     IDateTranslator,
     IMessageTranslator,
     getLocalizedIcuDateFormatPattern,
+    IFilterConfigurationProps,
 } from "./DateFilter/index.js";
 export {
     MeasureValueFilter,
@@ -76,6 +77,7 @@ export {
     IAttributeFilterLoader,
     ILoadElementsResult,
     ILoadElementsOptions,
+    ILoadIrrelevantElementsResult,
     OnInitCancelCallbackPayload,
     OnInitErrorCallbackPayload,
     OnInitStartCallbackPayload,
@@ -102,6 +104,10 @@ export {
     OnInitTotalCountCancelCallbackPayload,
     OnSelectionChangedCallbackPayload,
     OnSelectionCommittedCallbackPayload,
+    OnLoadIrrelevantElementsStartCallbackPayload,
+    OnLoadIrrelevantElementsSuccessCallbackPayload,
+    OnLoadIrrelevantElementsCancelCallbackPayload,
+    OnLoadIrrelevantElementsErrorCallbackPayload,
     // Options
     IAttributeFilterHandlerOptions,
     IAttributeFilterHandlerOptionsBase,
@@ -179,7 +185,7 @@ export {
     SingleSelectionAttributeFilterStatusBar,
     AttributeDatasetInfo,
     IAttributeDatasetInfoProps,
-    AttributeFilterButtonToolip,
+    AttributeFilterButtonTooltip,
     EmptyElementsSearchBar,
     IAttributeDisplayFormSelectProps,
     IAttributeFilterAllValuesFilteredResultProps,
@@ -194,4 +200,8 @@ export {
     AttributeFilterController,
     AttributeFilterControllerData,
     AttributeFilterControllerCallbacks,
+    AttributeFilterDependencyTooltip,
+    IAttributeFilterDependencyTooltipProps,
 } from "./AttributeFilter/index.js";
+
+export { IFilterButtonCustomIcon, VisibilityMode } from "./shared/index.js";

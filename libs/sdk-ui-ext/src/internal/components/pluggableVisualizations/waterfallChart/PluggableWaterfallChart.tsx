@@ -15,6 +15,7 @@ import {
     WATERFALL_UICONFIG_WITH_MULTIPLE_METRICS,
     UICONFIG,
     WATERFALL_UICONFIG_WITH_ONE_METRIC,
+    MAX_METRICS_COUNT,
 } from "../../../constants/uiConfig.js";
 import {
     IExtendedReferencePoint,
@@ -23,6 +24,7 @@ import {
     IUiConfig,
     IBucketItem,
     IVisualizationProperties,
+    IVisProps,
 } from "../../../interfaces/Visualization.js";
 import { configureOverTimeComparison, configurePercent } from "../../../utils/bucketConfig.js";
 import {
@@ -143,8 +145,9 @@ export class PluggableWaterfallChart extends PluggableBaseChart {
                 },
             ]);
         } else {
-            const measures = getMeasureItems(buckets);
-            if (measures.length > 1) {
+            const limitedBuckets = limitNumberOfMeasuresInBuckets(buckets, MAX_METRICS_COUNT, true);
+            const limitedMeasures = getMeasureItems(limitedBuckets);
+            if (limitedMeasures.length > 1) {
                 set(newReferencePoint, UICONFIG, cloneDeep(WATERFALL_UICONFIG_WITH_MULTIPLE_METRICS));
             } else {
                 set(newReferencePoint, UICONFIG, cloneDeep(WATERFALL_UICONFIG_WITH_ONE_METRIC));
@@ -153,7 +156,7 @@ export class PluggableWaterfallChart extends PluggableBaseChart {
             set(newReferencePoint, BUCKETS, [
                 {
                     localIdentifier: BucketNames.MEASURES,
-                    items: measures,
+                    items: limitedMeasures,
                 },
                 {
                     localIdentifier: BucketNames.VIEW,
@@ -236,10 +239,14 @@ export class PluggableWaterfallChart extends PluggableBaseChart {
         });
     }
 
-    protected renderConfigurationPanel(insight: IInsightDefinition): void {
+    protected renderConfigurationPanel(insight: IInsightDefinition, options: IVisProps): void {
         const configPanelElement = this.getConfigPanelElement();
 
         if (configPanelElement) {
+            const panelConfig = {
+                supportsAttributeHierarchies: this.backendCapabilities.supportsAttributeHierarchies,
+            };
+
             this.renderFun(
                 <WaterfallChartConfigurationPanel
                     locale={this.locale}
@@ -254,6 +261,8 @@ export class PluggableWaterfallChart extends PluggableBaseChart {
                     featureFlags={this.featureFlags}
                     references={this.references}
                     dataLabelDefaultValue="auto"
+                    panelConfig={panelConfig}
+                    configurationPanelRenderers={options.custom?.configurationPanelRenderers}
                 />,
                 configPanelElement,
             );

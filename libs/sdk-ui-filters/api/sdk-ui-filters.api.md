@@ -8,7 +8,6 @@
 
 import { AttributeFiltersOrPlaceholders } from '@gooddata/sdk-ui';
 import { DashboardAttributeFilterSelectionMode } from '@gooddata/sdk-model';
-import { DashboardDateFilterConfigMode } from '@gooddata/sdk-model';
 import { DateFilterGranularity } from '@gooddata/sdk-model';
 import { DateFilterOption as DateFilterOption_2 } from './interfaces/index.js';
 import { DateString } from '@gooddata/sdk-model';
@@ -74,7 +73,7 @@ export const AttributeFilterAllValuesFilteredResult: React_2.FC<IAttributeFilter
 export const AttributeFilterButton: React_2.FC<IAttributeFilterButtonProps>;
 
 // @beta
-export const AttributeFilterButtonToolip: React_2.FC<{
+export const AttributeFilterButtonTooltip: React_2.FC<{
     children?: React_2.ReactNode;
 }>;
 
@@ -91,6 +90,9 @@ export type AttributeFilterControllerCallbacks = {
     onSearch: (search: string) => void;
     onSelect: (selectedItems: IAttributeElement[], isInverted: boolean) => void;
     onReset: () => void;
+    onOpen: () => void;
+    onShowFilteredElements: () => void;
+    onClearIrrelevantSelection: () => void;
 };
 
 // @public
@@ -119,10 +121,16 @@ export type AttributeFilterControllerData = {
     parentFilterAttributes: IAttributeMetadataObject[];
     displayForms: IAttributeDisplayFormMetadataObject[];
     currentDisplayFormRef: ObjRef;
+    enableShowingFilteredElements?: boolean;
+    irrelevantSelection?: IAttributeElement[];
+    limitingValidationItems?: ObjRef[];
 };
 
 // @internal (undocumented)
 export const AttributeFilterDeleteButton: React_2.VFC<IAttributeFilterDeleteButtonProps>;
+
+// @internal (undocumented)
+export const AttributeFilterDependencyTooltip: React_2.FC<IAttributeFilterDependencyTooltipProps>;
 
 // @beta
 export const AttributeFilterDropdownActions: React_2.VFC<IAttributeFilterDropdownActionsProps>;
@@ -205,7 +213,7 @@ export class DateFilter extends React_2.PureComponent<IDateFilterProps, IDateFil
     // (undocumented)
     static getDerivedStateFromProps(nextProps: IDateFilterProps, prevState: IDateFilterState): IDateFilterState;
     // (undocumented)
-    render(): JSX.Element;
+    render(): React_2.JSX.Element;
 }
 
 // @beta (undocumented)
@@ -287,6 +295,7 @@ export interface IAttributeDropdownItem {
 export interface IAttributeElementLoader {
     cancelCustomElementsLoad(correlation?: Correlation): void;
     cancelInitialElementsPageLoad(): void;
+    cancelIrrelevantElementsLoad(correlation?: Correlation): void;
     cancelNextElementsPageLoad(): void;
     getAllElements(): IAttributeElement[];
     getElementsByKey(keys: AttributeElementKey[]): IAttributeElement[];
@@ -299,6 +308,7 @@ export interface IAttributeElementLoader {
     getLimitingAttributeFiltersAttributes(): IAttributeMetadataObject[];
     getLimitingDateFilters(): IRelativeDateFilter[];
     getLimitingMeasures(): IMeasure[];
+    getLimitingValidationItems(): ObjRef[];
     getNextElementsPageError(): GoodDataSdkError | undefined;
     getNextElementsPageStatus(): AsyncOperationStatus;
     getOffset(): number;
@@ -309,6 +319,7 @@ export interface IAttributeElementLoader {
     initTotalCount(correlation?: Correlation): void;
     loadCustomElements(options: ILoadElementsOptions, correlation?: Correlation): void;
     loadInitialElementsPage(correlation?: Correlation): void;
+    loadIrrelevantElements(correlation?: Correlation): void;
     loadNextElementsPage(correlation?: Correlation): void;
     onInitTotalCountCancel: CallbackRegistration<OnInitTotalCountCancelCallbackPayload>;
     onInitTotalCountError: CallbackRegistration<OnInitTotalCountErrorCallbackPayload>;
@@ -322,6 +333,10 @@ export interface IAttributeElementLoader {
     onLoadInitialElementsPageError: CallbackRegistration<OnLoadInitialElementsPageErrorCallbackPayload>;
     onLoadInitialElementsPageStart: CallbackRegistration<OnLoadInitialElementsPageStartCallbackPayload>;
     onLoadInitialElementsPageSuccess: CallbackRegistration<OnLoadInitialElementsPageSuccessCallbackPayload>;
+    onLoadIrrelevantElementsCancel: CallbackRegistration<OnLoadIrrelevantElementsCancelCallbackPayload>;
+    onLoadIrrelevantElementsError: CallbackRegistration<OnLoadIrrelevantElementsErrorCallbackPayload>;
+    onLoadIrrelevantElementsStart: CallbackRegistration<OnLoadIrrelevantElementsStartCallbackPayload>;
+    onLoadIrrelevantElementsSuccess: CallbackRegistration<OnLoadIrrelevantElementsSuccessCallbackPayload>;
     onLoadNextElementsPageCancel: CallbackRegistration<OnLoadNextElementsPageCancelCallbackPayload>;
     onLoadNextElementsPageError: CallbackRegistration<OnLoadNextElementsPageErrorCallbackPayload>;
     onLoadNextElementsPageStart: CallbackRegistration<OnLoadNextElementsPageStartCallbackPayload>;
@@ -330,6 +345,7 @@ export interface IAttributeElementLoader {
     setLimitingAttributeFilters(filters: IElementsQueryAttributeFilter[]): void;
     setLimitingDateFilters(filters: IRelativeDateFilter[]): void;
     setLimitingMeasures(measures: IMeasure[]): void;
+    setLimitingValidationItems(validateBy: ObjRef[]): void;
     setOrder(order: SortDirection): void;
     setSearch(search: string): void;
 }
@@ -337,7 +353,11 @@ export interface IAttributeElementLoader {
 // @beta
 export interface IAttributeFilterAllValuesFilteredResultProps {
     // (undocumented)
+    enableShowingFilteredElements: boolean;
+    // (undocumented)
     parentFilterTitles: string[];
+    // (undocumented)
+    searchString: string;
 }
 
 // @public (undocumented)
@@ -345,7 +365,9 @@ export interface IAttributeFilterBaseProps extends IAttributeFilterCoreProps, IA
 }
 
 // @public (undocumented)
-export type IAttributeFilterButtonProps = IAttributeFilterBaseProps;
+export type IAttributeFilterButtonProps = Omit<IAttributeFilterBaseProps, "disabled"> & {
+    attributeFilterMode?: VisibilityMode;
+};
 
 // @internal (undocumented)
 export interface IAttributeFilterConfigurationButtonProps {
@@ -354,12 +376,16 @@ export interface IAttributeFilterConfigurationButtonProps {
 }
 
 // @beta
-export type IAttributeFilterContext = AttributeFilterController & Pick<IAttributeFilterCoreProps, "fullscreenOnMobile" | "title" | "selectionMode" | "selectFirst">;
+export type IAttributeFilterContext = AttributeFilterController & Pick<IAttributeFilterCoreProps, "fullscreenOnMobile" | "title" | "selectionMode" | "selectFirst" | "disabled" | "customIcon">;
 
 // @public (undocumented)
 export interface IAttributeFilterCoreProps {
     backend?: IAnalyticalBackend;
     connectToPlaceholder?: IPlaceholder<IAttributeFilter>;
+    // @alpha
+    customIcon?: IFilterButtonCustomIcon;
+    // @alpha
+    disabled?: boolean;
     filter?: IAttributeFilter;
     fullscreenOnMobile?: boolean;
     hiddenElements?: string[];
@@ -374,6 +400,7 @@ export interface IAttributeFilterCoreProps {
     selectionMode?: DashboardAttributeFilterSelectionMode;
     staticElements?: IAttributeElement[];
     title?: string;
+    validateElementsBy?: ObjRef[];
     workspace?: string;
 }
 
@@ -413,6 +440,12 @@ export interface IAttributeFilterDeleteButtonProps {
     onDelete: () => void;
 }
 
+// @internal (undocumented)
+export interface IAttributeFilterDependencyTooltipProps {
+    // (undocumented)
+    tooltipContent: React_2.ReactNode;
+}
+
 // @beta
 export interface IAttributeFilterDropdownActionsProps {
     isApplyDisabled?: boolean;
@@ -429,6 +462,11 @@ export interface IAttributeFilterDropdownBodyProps {
 
 // @beta
 export interface IAttributeFilterDropdownButtonProps {
+    className?: string;
+    // @alpha
+    customIcon?: IFilterButtonCustomIcon;
+    // @alpha
+    disabled?: boolean;
     icon?: ReactNode;
     isDraggable?: boolean;
     // (undocumented)
@@ -443,6 +481,8 @@ export interface IAttributeFilterDropdownButtonProps {
     showSelectionCount?: boolean;
     subtitle?: string;
     title?: string;
+    // @alpha
+    titleExtension?: ReactNode;
     TooltipContentComponent?: React_2.ComponentType;
 }
 
@@ -487,16 +527,21 @@ export interface IAttributeFilterElementsSelectLoadingProps {
 
 // @beta
 export interface IAttributeFilterElementsSelectProps {
+    attributeTitle?: string;
+    enableShowingFilteredElements?: boolean;
     error?: GoodDataSdkError;
+    irrelevantSelection?: IAttributeElement[];
     isFilteredByParentFilters: boolean;
     isInverted: boolean;
     isLoading: boolean;
     isLoadingNextPage: boolean;
     items: IAttributeElement[];
     nextPageSize: number;
+    onClearIrrelevantSelection?: () => void;
     onLoadNextPage: () => void;
     onSearch: (searchString: string) => void;
     onSelect: (selectedItems: IAttributeElement[], isInverted: boolean) => void;
+    onShowFilteredElements?: () => void;
     parentFilterTitles: string[];
     searchString: string;
     selectedItems: IAttributeElement[];
@@ -506,6 +551,7 @@ export interface IAttributeFilterElementsSelectProps {
 
 // @beta
 export interface IAttributeFilterEmptyResultProps {
+    enableShowingFilteredElements?: boolean;
     height: number;
     isFilteredByParentFilters: boolean;
     parentFilterTitles?: string[];
@@ -574,9 +620,15 @@ export interface IAttributeFilterSelectionStatusProps {
 
 // @beta
 export interface IAttributeFilterStatusBarProps {
+    attributeTitle?: string;
+    enableShowingFilteredElements?: boolean;
     getItemTitle: (item: IAttributeElement) => string;
+    irrelevantSelection?: IAttributeElement[];
+    isFilteredByLimitingValidationItems?: boolean;
     isFilteredByParentFilters: boolean;
     isInverted: boolean;
+    onClearIrrelevantSelection?: () => void;
+    onShowFilteredElements?: () => void;
     parentFilterTitles: string[];
     selectedItems: IAttributeElement[];
     selectedItemsLimit: number;
@@ -643,10 +695,14 @@ export interface IDateFilterOwnProps extends IDateFilterStatePropsIntersection {
     availableGranularities: DateFilterGranularity[];
     // (undocumented)
     customFilterName?: string;
+    // @alpha
+    customIcon?: IFilterButtonCustomIcon;
     // (undocumented)
-    dateFilterMode: DashboardDateFilterConfigMode;
+    dateFilterMode: VisibilityMode;
     // (undocumented)
     dateFormat?: string;
+    // @alpha
+    FilterConfigurationComponent?: React_2.ComponentType<IFilterConfigurationProps>;
     // (undocumented)
     filterOptions: IDateFilterOptionsByType;
     // (undocumented)
@@ -655,6 +711,10 @@ export interface IDateFilterOwnProps extends IDateFilterStatePropsIntersection {
     isTimeForAbsoluteRangeEnabled?: boolean;
     // (undocumented)
     locale?: string;
+    // (undocumented)
+    openOnInit?: boolean;
+    // (undocumented)
+    showDropDownHeaderMessage?: boolean;
     // (undocumented)
     weekStart?: WeekStart;
 }
@@ -701,6 +761,20 @@ export interface IExtendedDateFilterErrors {
     relativeForm?: IDateFilterRelativeFormErrors;
 }
 
+// @alpha
+export interface IFilterButtonCustomIcon {
+    bubbleAlignPoints?: IAlignPoint[];
+    bubbleClassNames?: string;
+    icon: string;
+    tooltip: string;
+}
+
+// @alpha
+export interface IFilterConfigurationProps {
+    onCancelButtonClick: () => void;
+    onSaveButtonClick: () => void;
+}
+
 // @public
 export interface IInvertableSelectionHandler<T extends InvertableSelection<any>> {
     changeSelection(selection: T): void;
@@ -727,6 +801,8 @@ export interface ILoadElementsOptions {
     // (undocumented)
     limitingMeasures?: IMeasure[];
     // (undocumented)
+    limitingValidationItems?: ObjRef[];
+    // (undocumented)
     offset?: number;
     // (undocumented)
     order?: SortDirection;
@@ -737,11 +813,19 @@ export interface ILoadElementsOptions {
 // @public
 export interface ILoadElementsResult {
     // (undocumented)
+    cacheId?: string;
+    // (undocumented)
     elements: IAttributeElement[];
     // (undocumented)
     options: ILoadElementsOptions;
     // (undocumented)
     totalCount: number;
+}
+
+// @public
+export interface ILoadIrrelevantElementsResult {
+    // (undocumented)
+    elementTitles: string[];
 }
 
 // @beta (undocumented)
@@ -821,6 +905,8 @@ export type InvertableAttributeElementSelection = InvertableSelection<AttributeE
 
 // @public (undocumented)
 export interface InvertableSelection<T> {
+    // (undocumented)
+    irrelevantKeys?: T[];
     // (undocumented)
     isInverted: boolean;
     // (undocumented)
@@ -982,7 +1068,7 @@ export class MeasureValueFilter extends React_2.PureComponent<IMeasureValueFilte
     // (undocumented)
     static defaultProps: Partial<IMeasureValueFilterProps>;
     // (undocumented)
-    render(): JSX.Element;
+    render(): React_2.JSX.Element;
     // (undocumented)
     state: IMeasureValueFilterState;
 }
@@ -992,7 +1078,7 @@ export class MeasureValueFilterDropdown extends React_2.PureComponent<IMeasureVa
     // (undocumented)
     static defaultProps: Pick<IMeasureValueFilterDropdownProps, "displayTreatNullAsZeroOption" | "treatNullAsZeroDefaultValue" | "enableOperatorSelection">;
     // (undocumented)
-    render(): JSX.Element;
+    render(): React_2.JSX.Element;
 }
 
 // @public (undocumented)
@@ -1077,6 +1163,20 @@ export type OnLoadInitialElementsPageStartCallbackPayload = CallbackPayloadWithC
 export type OnLoadInitialElementsPageSuccessCallbackPayload = CallbackPayloadWithCorrelation<ILoadElementsResult>;
 
 // @public
+export type OnLoadIrrelevantElementsCancelCallbackPayload = Partial<CallbackPayloadWithCorrelation>;
+
+// @public
+export type OnLoadIrrelevantElementsErrorCallbackPayload = Partial<CallbackPayloadWithCorrelation> & {
+    error: GoodDataSdkError;
+};
+
+// @public
+export type OnLoadIrrelevantElementsStartCallbackPayload = Partial<CallbackPayloadWithCorrelation>;
+
+// @public
+export type OnLoadIrrelevantElementsSuccessCallbackPayload = Partial<CallbackPayloadWithCorrelation> & ILoadIrrelevantElementsResult;
+
+// @public
 export type OnLoadNextElementsPageCancelCallbackPayload = CallbackPayloadWithCorrelation;
 
 // @public
@@ -1141,6 +1241,9 @@ export const useAutoOpenAttributeFilterDropdownButton: (props: IAttributeFilterD
 
 // @internal
 export const useOnCloseAttributeFilterDropdownButton: (props: IAttributeFilterDropdownButtonProps, onClose: () => void) => void;
+
+// @public
+export type VisibilityMode = "readonly" | "hidden" | "active";
 
 // @beta (undocumented)
 export type WarningMessage = string | IWarningMessage;

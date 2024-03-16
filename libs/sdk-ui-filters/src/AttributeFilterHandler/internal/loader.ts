@@ -1,4 +1,4 @@
-// (C) 2022 GoodData Corporation
+// (C) 2022-2024 GoodData Corporation
 import { v4 as uuid } from "uuid";
 import { invariant } from "ts-invariant";
 import { IElementsQueryAttributeFilter } from "@gooddata/sdk-backend-spi";
@@ -9,6 +9,7 @@ import {
     IMeasure,
     IRelativeDateFilter,
     SortDirection,
+    ObjRef,
 } from "@gooddata/sdk-model";
 import { GoodDataSdkError } from "@gooddata/sdk-ui";
 
@@ -42,6 +43,10 @@ import {
     OnInitTotalCountErrorCallbackPayload,
     OnInitTotalCountStartCallbackPayload,
     OnInitTotalCountSuccessCallbackPayload,
+    OnLoadIrrelevantElementsStartCallbackPayload,
+    OnLoadIrrelevantElementsSuccessCallbackPayload,
+    OnLoadIrrelevantElementsErrorCallbackPayload,
+    OnLoadIrrelevantElementsCancelCallbackPayload,
 } from "../types/index.js";
 import { AttributeFilterReduxBridge } from "./bridge.js";
 import { AttributeFilterHandlerConfig } from "./types.js";
@@ -70,6 +75,10 @@ export class AttributeFilterLoader implements IAttributeFilterLoader {
         invariant(
             !(this.config.staticElements?.length && this.getLimitingMeasures()?.length),
             "Using limitingMeasures is not supported when using static attribute elements",
+        );
+        invariant(
+            !(this.config.staticElements?.length && this.getLimitingValidationItems()?.length),
+            "Using limitingValidationItems is not supported when using static attribute elements",
         );
     };
 
@@ -179,6 +188,12 @@ export class AttributeFilterLoader implements IAttributeFilterLoader {
     // Initial elements page
 
     loadInitialElementsPage = (correlation: Correlation = uuid()): void => {
+        if (this.bridge.getInitStatus() === "error") {
+            // do not try to fetch any elements when filter is in error state as we would end up with
+            // "blank page" error in production. This can happen when user sets limiting metric that
+            // is not LDM compatible (cannot be sliced) with the attribute filter's attribute.
+            return;
+        }
         invariant(
             this.bridge.getInitStatus() === "success",
             "Cannot call loadInitialElementsPage() before successful initialization.",
@@ -304,6 +319,42 @@ export class AttributeFilterLoader implements IAttributeFilterLoader {
         return this.bridge.onLoadCustomElementsCancel(cb);
     };
 
+    //
+    // Irrelevant elements
+    //
+
+    loadIrrelevantElements = (correlation?: Correlation): void => {
+        this.bridge.loadIrrelevantElements(correlation);
+    };
+
+    cancelIrrelevantElementsLoad(correlation?: Correlation): void {
+        this.bridge.cancelIrrelevantElementsLoad(correlation);
+    }
+
+    onLoadIrrelevantElementsStart: CallbackRegistration<OnLoadIrrelevantElementsStartCallbackPayload> = (
+        cb,
+    ) => {
+        return this.bridge.onLoadIrrelevantElementsStart(cb);
+    };
+
+    onLoadIrrelevantElementsSuccess: CallbackRegistration<OnLoadIrrelevantElementsSuccessCallbackPayload> = (
+        cb,
+    ) => {
+        return this.bridge.onLoadIrrelevantElementsSuccess(cb);
+    };
+
+    onLoadIrrelevantElementsError: CallbackRegistration<OnLoadIrrelevantElementsErrorCallbackPayload> = (
+        cb,
+    ) => {
+        return this.bridge.onLoadIrrelevantElementsError(cb);
+    };
+
+    onLoadIrrelevantElementsCancel: CallbackRegistration<OnLoadIrrelevantElementsCancelCallbackPayload> = (
+        cb,
+    ) => {
+        return this.bridge.onLoadIrrelevantElementsCancel(cb);
+    };
+
     // Elements options
 
     getOffset = (): number => {
@@ -340,6 +391,14 @@ export class AttributeFilterLoader implements IAttributeFilterLoader {
 
     getLimitingMeasures = (): IMeasure[] => {
         return this.bridge.getLimitingMeasures();
+    };
+
+    setLimitingValidationItems = (validateBy: ObjRef[]): void => {
+        this.bridge.setLimitingValidationItems(validateBy);
+    };
+
+    getLimitingValidationItems = (): ObjRef[] => {
+        return this.bridge.getLimitingValidationItems();
     };
 
     setLimitingAttributeFilters = (filters: IElementsQueryAttributeFilter[]): void => {

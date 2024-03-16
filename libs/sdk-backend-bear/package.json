@@ -1,6 +1,6 @@
 {
     "name": "@gooddata/sdk-backend-bear",
-    "version": "9.3.0-alpha.5",
+    "version": "9.10.0-alpha.13",
     "author": "GoodData",
     "description": "GoodData Backend SPI implementation for the GoodData platform",
     "repository": {
@@ -26,11 +26,8 @@
         "start-wiremock-recording": "mkdir -p ./tests/wiremock/recordings && ./tests/wiremock/start_wiremock.sh detached && ./tests/wiremock/start_recording.sh",
         "stop-wiremock": "./tests/wiremock/stop_wiremock.sh",
         "remove-sensitive-data": "./tests/wiremock/remove_sensitive_data.sh",
-        "clean": "rm -rf ci dist esm coverage *.log",
-        "dev": "bash scripts/build.sh --dev-watch",
-        "build": "bash scripts/build.sh && npm run api-extractor",
-        "build-esm": "tsc -p tsconfig.build.json",
-        "build-dev": "bash scripts/build.sh --dev",
+        "clean": "rm -rf ci dist esm coverage *.log tsconfig.tsbuildinfo",
+        "build": "bash scripts/build.sh",
         "api-extractor": "mkdir -p api && [ -z \"${CI}\" ] && (api-extractor run -l) || (api-extractor run)",
         "integrated-test": "./scripts/integrated-test.sh",
         "integrated-test-rec": "GD_BEAR_REC=true NODE_TLS_REJECT_UNAUTHORIZED=0 vitest --config vite.integrated.config.ts run",
@@ -60,7 +57,7 @@
         "json-stable-stringify": "^1.0.1",
         "lodash": "^4.17.19",
         "spark-md5": "^3.0.0",
-        "ts-invariant": "^0.7.3",
+        "ts-invariant": "^0.7.5",
         "tslib": "^2.5.0",
         "uuid": "^8.3.2"
     },
@@ -71,7 +68,7 @@
         "@microsoft/api-documenter": "^7.17.0",
         "@microsoft/api-extractor": "^7.36.0",
         "@types/json-stable-stringify": "^1.0.32",
-        "@types/lodash": "^4.14.158",
+        "@types/lodash": "^4.14.202",
         "@types/node": "^18.17.6",
         "@types/spark-md5": "^3.0.1",
         "@types/uuid": "^8.3.4",
@@ -91,7 +88,7 @@
         "eslint-plugin-sonarjs": "^0.16.0",
         "eslint-plugin-tsdoc": "^0.2.14",
         "prettier": "~2.5.0",
-        "typescript": "5.0.2",
-        "vitest": "0.31.4"
+        "typescript": "5.3.3",
+        "vitest": "1.0.4"
     }
 }

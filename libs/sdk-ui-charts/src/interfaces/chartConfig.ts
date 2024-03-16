@@ -1,6 +1,6 @@
-// (C) 2020-2023 GoodData Corporation
+// (C) 2020-2024 GoodData Corporation
 import { IColorPalette, Identifier, ISeparators } from "@gooddata/sdk-model";
-import { VisType } from "@gooddata/sdk-ui";
+import { IDrillEventIntersectionElement, VisType } from "@gooddata/sdk-ui";
 import { IColorMapping } from "@gooddata/sdk-ui-vis-commons";
 import { IComparison } from "./comparison.js";
 
@@ -283,6 +283,46 @@ export interface IChartConfig {
      * @internal
      */
     orientation?: IOrientationConfig;
+
+    /**
+     * Disable the drill down attribute hierarchies for the chart
+     * @internal
+     */
+    disableDrillDown?: boolean;
+
+    /**
+     * Use generic interaction tooltip that may include multiple actions
+     * @internal
+     */
+    useGenericInteractionTooltip?: boolean;
+
+    /**
+     * Selected points to be highlighted defined by drill event intersections.
+     * @internal
+     */
+    selectedPoints?: IDrillEventIntersectionElement[][];
+
+    /**
+     * Configuration specific for hyperlinks in the chart.
+     */
+    hyperLinks?: IDisplayFormHyperlinksConfig;
+}
+
+/**
+ * Customize behavior of the hyperlink display forms in the chart.
+ *
+ * @public
+ */
+export interface IDisplayFormHyperlinksConfig {
+    /**
+     * Hyperlink display form local identifier
+     */
+    [displayFormLocalIdentifier: string]: {
+        /**
+         * Custom hyperlink text to display for the elements of the display form.
+         */
+        staticElementsText: string;
+    };
 }
 
 /**

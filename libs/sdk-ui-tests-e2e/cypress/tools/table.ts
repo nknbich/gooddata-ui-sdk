@@ -1,4 +1,4 @@
-// (C) 2021 GoodData Corporation
+// (C) 2021-2024 GoodData Corporation
 
 import { TotalTypes } from "./enum/TotalTypes";
 
@@ -12,6 +12,11 @@ export class Table {
 
     getElement(): Cypress.Chainable {
         return cy.get(this.parentSelector).find(".s-pivot-table");
+    }
+
+    public isEmpty() {
+        this.getElement().should("not.exist");
+        return this;
     }
 
     public waitLoaded(): this {
@@ -61,6 +66,7 @@ export class Table {
         } else {
             columnWidth().should("equal", expectedWidth);
         }
+        return this;
     }
 
     scrollTo(position: Cypress.PositionType) {
@@ -164,7 +170,18 @@ export class Table {
         this.getElement()
             .find(`.gd-column-index-${columnIndex} .s-value`)
             .each(($li) => {
-                return result.push($li.text());
+                result.push($li.text());
+            });
+        return cy.wrap(result);
+    }
+
+    getRowValues(rowIndex: number) {
+        this.waitLoaded();
+        const result = [] as string[];
+        this.getElement()
+            .find(`[row-index="${rowIndex}"] .s-value`)
+            .each(($li) => {
+                result.push($li.text());
             });
         return cy.wrap(result);
     }
@@ -209,10 +226,45 @@ export class Table {
         return this;
     }
 
+    hasHeaderColumnWidth(width: number) {
+        cy.get(".s-header-cell-label span")
+            .invoke("width")
+            .should("be.gte", width)
+            .should("be.lte", width + 2);
+        return this;
+    }
+
     isCellUnderlined(cellName: string, isUnderlined = true) {
         cy.get(`.s-header-cell-label.gd-pivot-table-header-label`)
             .contains(cellName)
             .trigger("mouseover")
             .should(isUnderlined ? "have.css" : "not.have.css", "text-decoration", "underline");
+    }
+
+    hasMetricHeaderInRow(rowIndex: number, columnIndex: number, metricName: string) {
+        this.getElement()
+            .find(`.s-cell-${rowIndex}-${columnIndex} .s-header-cell-label`)
+            .should("have.text", metricName);
+        return this;
+    }
+
+    hasColumnHeaderOnTop(columnHeaders: string) {
+        this.getElement().find(".s-table-column-group-header-descriptor").should("have.text", columnHeaders);
+        return this;
+    }
+
+    hasHeader(columnHeaders: string) {
+        this.getElement()
+            .find(".gd-column-group-header--first .gd-pivot-table-header-label--clickable")
+            .should("have.text", columnHeaders);
+        return this;
+    }
+
+    hasMeasureHeader(index: number, content: string, exist = false) {
+        this.getElement()
+            .find(`.s-table-measure-column-header-index-${index}`)
+            .should(exist ? "exist" : "not.exist")
+            .contains(content);
+        return this;
     }
 }

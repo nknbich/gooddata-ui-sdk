@@ -1,5 +1,5 @@
 /* eslint-disable */
-/* THIS FILE WAS AUTO-GENERATED USING CATALOG EXPORTER; YOU SHOULD NOT EDIT THIS FILE; GENERATE TIME: 2023-09-24T02:22:35.163Z; */
+/* THIS FILE WAS AUTO-GENERATED USING CATALOG EXPORTER; YOU SHOULD NOT EDIT THIS FILE; GENERATE TIME: 2023-11-06T04:05:54.938Z; */
 // @ts-ignore ignore unused imports here if they happen (e.g. when there is no measure in the workspace)
 import {
     newAttribute,
@@ -2341,6 +2341,34 @@ export const Insights = {
      * Insight Title: table has only measure and columns
      * Insight ID: aad4CkIv6mxL
      */ TableHasOnlyMeasureAndColumns: "aad4CkIv6mxL",
+    /**
+     * Insight Title: heat map only row measure
+     * Insight ID: aabVP3wpB5r2
+     */ HeatMapOnlyRowMeasure: "aabVP3wpB5r2",
+    /**
+     * Insight Title: heat map only column measure
+     * Insight ID: aakVNxRuB2o9
+     */ HeatMapOnlyColumnMeasure: "aakVNxRuB2o9",
+    /**
+     * Insight Title: heat map has measure column row
+     * Insight ID: aadVO9GtCbI9
+     */ HeatMapHasMeasureColumnRow: "aadVO9GtCbI9",
+    /**
+     * Insight Title: heat map only measures
+     * Insight ID: aacVQjGsHKYh
+     */ HeatMapOnlyMeasures: "aacVQjGsHKYh",
+    /**
+     * Insight Title: Column with two drillable attributes
+     * Insight ID: aaba0eSt4UX8
+     */ ColumnWithTwoDrillableAttributes: "aaba0eSt4UX8",
+    /**
+     * Insight Title: bullet with two attributes same bucket
+     * Insight ID: aagaVhl74Rj5
+     */ BulletWithTwoAttributesSameBucket: "aagaVhl74Rj5",
+    /**
+     * Insight Title: table transpose row left
+     * Insight ID: aacXBmMBL1DV
+     */ TableTransposeRowLeft: "aacXBmMBL1DV",
 };
 export const Dashboards = {
     /**
@@ -2544,4 +2572,12 @@ export const Dashboards = {
      * Dashboard Title: Dashboard table drill down
      * Dashboard ID: aab9lVBAGZ64
      */ DashboardTableDrillDown: "aab9lVBAGZ64",
+    /**
+     * Dashboard Title: Heat map chart with stack data
+     * Dashboard ID: aacVR9reHK0x
+     */ HeatMapChartWithStackData: "aacVR9reHK0x",
+    /**
+     * Dashboard Title: Dashboard drilldown on chart
+     * Dashboard ID: aada0C7azd0i
+     */ DashboardDrilldownOnChart: "aada0C7azd0i",
 };

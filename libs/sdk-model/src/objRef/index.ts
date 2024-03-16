@@ -1,4 +1,4 @@
-// (C) 2019-2022 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 
 import isEmpty from "lodash/isEmpty.js";
 import { invariant } from "ts-invariant";
@@ -50,7 +50,11 @@ export type ObjectType =
     | "colorPalette"
     | "filterContext"
     | "dashboardPlugin"
-    | "attributeHierarchy";
+    | "attributeHierarchy"
+    | "user"
+    | "userGroup"
+    | "dateHierarchyTemplate"
+    | "dateAttributeHierarchy";
 
 /**
  * Model object reference using object's unique identifier.
@@ -158,7 +162,7 @@ export function isLocalIdRef(obj: unknown): obj is LocalIdRef {
  * Retrieves string representation of object reference. This is purely for for representation of
  * references in text, debug and tests.
  *
- * @internal
+ * @public
  */
 export function objRefToString(objRef: ObjRef | ObjRefInScope): string {
     invariant(objRef, "object reference must be specified");

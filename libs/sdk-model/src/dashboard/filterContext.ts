@@ -1,4 +1,4 @@
-// (C) 2019-2023 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 import isEmpty from "lodash/isEmpty.js";
 import isNil from "lodash/isNil.js";
 import { DateFilterGranularity, DateString } from "../dateFilterConfig/index.js";
@@ -79,6 +79,12 @@ export interface IDashboardAttributeFilter {
          * @beta
          */
         filterElementsBy?: IDashboardAttributeFilterParent[];
+
+        /**
+         * Items that are limiting attribute elements available in this filter.
+         * @alpha
+         */
+        validateElementsBy?: ObjRef[];
 
         /**
          * Custom title of the attribute filter. If specified has priority over the default attribute filter title.
@@ -167,6 +173,11 @@ export interface IDashboardDateFilter {
          * Date attribute object ref
          */
         attribute?: ObjRef;
+
+        /**
+         * Identifier of the filter which is valid in the scope of the filter context
+         */
+        localIdentifier?: string;
     };
 }
 
@@ -176,6 +187,30 @@ export interface IDashboardDateFilter {
  */
 export function isDashboardDateFilter(obj: unknown): obj is IDashboardDateFilter {
     return !isEmpty(obj) && !!(obj as IDashboardDateFilter).dateFilter;
+}
+
+/**
+ * Type-guard testing whether the provided object is an instance of {@link IDashboardDateFilter} without date dataSet (aka dimension) defined.
+ * @alpha
+ */
+export function isDashboardCommonDateFilter(obj: unknown): obj is IDashboardDateFilter {
+    return (
+        !isEmpty(obj) &&
+        !!(obj as IDashboardDateFilter).dateFilter &&
+        !(obj as IDashboardDateFilter).dateFilter.dataSet
+    );
+}
+
+/**
+ * Type-guard testing whether the provided object is an instance of {@link IDashboardDateFilter} with date dataSet (aka dimension) defined.
+ * @alpha
+ */
+export function isDashboardDateFilterWithDimension(obj: unknown): obj is IDashboardDateFilter {
+    return (
+        !isEmpty(obj) &&
+        !!(obj as IDashboardDateFilter).dateFilter &&
+        !!(obj as IDashboardDateFilter).dateFilter.dataSet
+    );
 }
 
 /**
@@ -206,6 +241,7 @@ export function newRelativeDashboardDateFilter(
     granularity: DateFilterGranularity,
     from: number,
     to: number,
+    dataSet?: ObjRef,
 ): IDashboardDateFilter {
     return {
         dateFilter: {
@@ -213,6 +249,7 @@ export function newRelativeDashboardDateFilter(
             granularity,
             from,
             to,
+            dataSet,
         },
     };
 }
@@ -224,13 +261,18 @@ export function newRelativeDashboardDateFilter(
  * @param to - end of the interval in ISO-8601 calendar date format
  * @alpha
  */
-export function newAbsoluteDashboardDateFilter(from: DateString, to: DateString): IDashboardDateFilter {
+export function newAbsoluteDashboardDateFilter(
+    from: DateString,
+    to: DateString,
+    dataSet?: ObjRef,
+): IDashboardDateFilter {
     return {
         dateFilter: {
             type: "absolute",
             granularity: "GDC.time.date",
             from,
             to,
+            dataSet,
         },
     };
 }
@@ -240,11 +282,12 @@ export function newAbsoluteDashboardDateFilter(from: DateString, to: DateString)
  *
  * @alpha
  */
-export function newAllTimeDashboardDateFilter(): IDashboardDateFilter {
+export function newAllTimeDashboardDateFilter(dataSet?: ObjRef): IDashboardDateFilter {
     return {
         dateFilter: {
             type: "relative",
             granularity: "GDC.time.date",
+            dataSet,
         },
     };
 }
@@ -365,7 +408,7 @@ export function isTempFilterContext(obj: unknown): obj is ITempFilterContext {
  * This is commonly used to define filters to ignore
  * for the particular dashboard widget
  *
- * @alpha
+ * @public
  */
 export interface IDashboardDateFilterReference {
     /**
@@ -392,7 +435,7 @@ export function isDashboardDateFilterReference(obj: unknown): obj is IDashboardD
  * This is commonly used to define filters to ignore
  * for the particular dashboard widget
  *
- * @alpha
+ * @public
  */
 export interface IDashboardAttributeFilterReference {
     /**
@@ -408,7 +451,7 @@ export interface IDashboardAttributeFilterReference {
 
 /**
  * Type-guard testing whether the provided object is an instance of {@link IDashboardAttributeFilterReference}.
- * @alpha
+ * @public
  */
 export function isDashboardAttributeFilterReference(obj: unknown): obj is IDashboardAttributeFilterReference {
     return !isEmpty(obj) && (obj as IDashboardAttributeFilterReference).type === "attributeFilterReference";
@@ -419,7 +462,7 @@ export function isDashboardAttributeFilterReference(obj: unknown): obj is IDashb
  * This is commonly used to define filters to ignore
  * for the particular dashboard widget
  *
- * @alpha
+ * @public
  */
 export type IDashboardFilterReference = IDashboardDateFilterReference | IDashboardAttributeFilterReference;
 

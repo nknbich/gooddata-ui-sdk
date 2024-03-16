@@ -1,4 +1,4 @@
-// (C) 2021-2023 GoodData Corporation
+// (C) 2021-2024 GoodData Corporation
 import { createSelector } from "@reduxjs/toolkit";
 import {
     idRef,
@@ -6,7 +6,6 @@ import {
     IFilterContextDefinition,
     isTempFilterContext,
     IAccessControlAware,
-    isDashboardDateFilter,
     isDashboardAttributeFilter,
     IDashboardDefinition,
     IDashboardObjectIdentity,
@@ -18,6 +17,9 @@ import {
     IdentifierRef,
     ShareStatus,
     IDashboardWidget,
+    IDashboardDateFilterConfig,
+    isDashboardDateFilterWithDimension,
+    isDashboardCommonDateFilter,
 } from "@gooddata/sdk-model";
 import { invariant } from "ts-invariant";
 import { DashboardSelector, DashboardState } from "../types.js";
@@ -27,12 +29,15 @@ import {
     selectFilterContextAttributeFilters,
     selectFilterContextDateFilter,
     selectFilterContextDefinition,
+    selectFilterContextDraggableFilters,
     selectFilterContextIdentity,
 } from "../filterContext/filterContextSelectors.js";
 import { isDashboardLayoutEmpty } from "@gooddata/sdk-backend-spi";
 import isEqual from "lodash/isEqual.js";
 import { selectDateFilterConfigOverrides } from "../dateFilterConfig/dateFilterConfigSelectors.js";
 import { DashboardDescriptor } from "./metaState.js";
+import { selectAttributeFilterConfigsOverrides } from "../attributeFilterConfigs/attributeFilterConfigsSelectors.js";
+import { selectDateFilterConfigsOverrides } from "../dateFilterConfigs/dateFilterConfigsSelectors.js";
 
 const selectSelf = createSelector(
     (state: DashboardState) => state,
@@ -81,6 +86,12 @@ export const selectPersistedDashboardFilterContext: DashboardSelector<
     IFilterContext | ITempFilterContext | undefined
 > = createSelector(selectSelf, (state) => {
     return state.persistedDashboard?.filterContext ?? undefined;
+});
+
+export const selectPersistedDashboardFilterContextDateFilterConfig: DashboardSelector<
+    IDashboardDateFilterConfig | undefined
+> = createSelector(selectSelf, (state) => {
+    return state.persistedDashboard?.dateFilterConfig ?? undefined;
 });
 
 /**
@@ -294,6 +305,18 @@ export const selectDashboardShareInfo: DashboardSelector<IAccessControlAware> = 
     }),
 );
 
+/**
+ * Selects whether dashboard cross filtering is disabled.
+ *
+ * @public
+ */
+export const selectDisableDashboardCrossFiltering: DashboardSelector<boolean> = createSelector(
+    selectDashboardDescriptor,
+    (state) => {
+        return state.disableCrossFiltering ?? false;
+    },
+);
+
 //
 //
 //
@@ -322,7 +345,7 @@ const selectPersistedDashboardFilterContextFilters = createSelector(
 const selectPersistedDashboardFilterContextDateFilter = createSelector(
     selectPersistedDashboardFilterContextFilters,
     (persistedFilters) => {
-        return (persistedFilters ?? []).find(isDashboardDateFilter);
+        return (persistedFilters ?? []).find(isDashboardCommonDateFilter);
     },
 );
 
@@ -341,6 +364,22 @@ const selectPersistedDashboardFilterContextAttributeFilters = createSelector(
 );
 
 /**
+ * Selects persisted draggable filters (date filters with dimension and attribute filters) - that is the filters that were used to initialize
+ * the original filters of the dashboard component during the initial load of the dashboard.
+ *
+ * Note that this may be undefined when the dashboard component works with a dashboard that has not yet
+ * been persisted (typically newly created dashboard being edited).
+ */
+const selectPersistedDashboardFilterContextDraggableFilters = createSelector(
+    selectPersistedDashboardFilterContextFilters,
+    (persistedFilters) => {
+        return (persistedFilters ?? []).filter(
+            (f) => isDashboardDateFilterWithDimension(f) || isDashboardAttributeFilter(f),
+        );
+    },
+);
+
+/**
  * Selects persisted title - that is the title that was used to initialize the rest
  * of the dashboard state of the dashboard component during the initial load of the dashboard.
  *
@@ -349,6 +388,17 @@ const selectPersistedDashboardFilterContextAttributeFilters = createSelector(
  */
 const selectPersistedDashboardTitle = createSelector(selectSelf, (state) => {
     return state.persistedDashboard?.title;
+});
+
+/**
+ * Selects persisted  - that is the title that was used to initialize the rest
+ * of the dashboard state of the dashboard component during the initial load of the dashboard.
+ *
+ * Note that this may be undefined when the dashboard component works with a dashboard that has not yet
+ * been persisted (typically newly created dashboard being edited).
+ */
+const selectPersistedDashboardDisableCrossFiltering = createSelector(selectSelf, (state) => {
+    return state.persistedDashboard?.disableCrossFiltering;
 });
 
 /**
@@ -363,6 +413,52 @@ const selectPersistedDashboardLayout = createSelector(selectSelf, (state) => {
 });
 
 /**
+ * Selects persisted attribute filter configs - that is the attribute filter configs array object that was used to initialize the rest
+ * of the dashboard state of the dashboard component during the initial load of the dashboard.
+ *
+ * Note that this may be undefined when the dashboard component works with a dashboard that has not yet
+ * been persisted (typically newly created dashboard being edited).
+ */
+const selectPersistedDashboardAttributeFilterConfigs = createSelector(selectSelf, (state) => {
+    return state.persistedDashboard?.attributeFilterConfigs || [];
+});
+
+/**
+ * Selects a boolean indication if he dashboard has any changes to the dashboard filter compared to the persisted version (if any)
+ *
+ */
+export const selectIsAttributeFilterConfigsChanged: DashboardSelector<boolean> = createSelector(
+    selectPersistedDashboardAttributeFilterConfigs,
+    selectAttributeFilterConfigsOverrides,
+    (persistedAttributeFilterConfigs, currentAttributeFilterConfigs) => {
+        return !isEqual(persistedAttributeFilterConfigs, currentAttributeFilterConfigs);
+    },
+);
+
+/**
+ * Selects persisted attribute filter configs - that is the attribute filter configs array object that was used to initialize the rest
+ * of the dashboard state of the dashboard component during the initial load of the dashboard.
+ *
+ * Note that this may be undefined when the dashboard component works with a dashboard that has not yet
+ * been persisted (typically newly created dashboard being edited).
+ */
+const selectPersistedDashboardDateFilterConfigs = createSelector(selectSelf, (state) => {
+    return state.persistedDashboard?.dateFilterConfigs || [];
+});
+
+/**
+ * Selects a boolean indication if he dashboard has any changes to the dashboard date filter configs compared to the persisted version (if any)
+ *
+ */
+export const selectIsDateFilterConfigsChanged: DashboardSelector<boolean> = createSelector(
+    selectPersistedDashboardDateFilterConfigs,
+    selectDateFilterConfigsOverrides,
+    (persistedDateFilterConfigs, currentDateFilterConfigs) => {
+        return !isEqual(persistedDateFilterConfigs, currentDateFilterConfigs);
+    },
+);
+
+/**
  * Selects a boolean indication if he dashboard has any changes to the dashboard filter compared to the persisted version (if any)
  *
  * @internal
@@ -372,6 +468,14 @@ export const selectIsDateFilterChanged: DashboardSelector<boolean> = createSelec
     selectFilterContextDateFilter,
     (persistedDateFilter, currentDateFilter) => {
         return !isEqual(persistedDateFilter, currentDateFilter);
+    },
+);
+
+export const selectIsDateFilterConfigChanged: DashboardSelector<boolean> = createSelector(
+    selectPersistedDashboardFilterContextDateFilterConfig,
+    selectDateFilterConfigOverrides,
+    (persistedDateFilterConfig, currentDateFilterConfig) => {
+        return !isEqual(persistedDateFilterConfig, currentDateFilterConfig);
     },
 );
 
@@ -389,15 +493,53 @@ export const selectIsAttributeFiltersChanged: DashboardSelector<boolean> = creat
 );
 
 /**
+ * Selects a boolean indication if he dashboard has any changes to the date filters with dimension compared to the persisted version (if any)
+ *
+ * @internal
+ */
+export const selectIsOtherFiltersChanged: DashboardSelector<boolean> = createSelector(
+    selectPersistedDashboardFilterContextDraggableFilters,
+    selectFilterContextDraggableFilters,
+    (persistedFilters, currentFilters) => {
+        return !isEqual(persistedFilters, currentFilters);
+    },
+);
+
+/**
  * Selects a boolean indication if he dashboard has any changes to the any of the filters compared to the persisted version (if any)
  *
  * @internal
  */
 export const selectIsFiltersChanged: DashboardSelector<boolean> = createSelector(
     selectIsDateFilterChanged,
-    selectIsAttributeFiltersChanged,
-    (isDateFilterChanged, isAttributeFiltersChanged) => {
-        return isDateFilterChanged || isAttributeFiltersChanged;
+    selectIsOtherFiltersChanged,
+    selectIsAttributeFilterConfigsChanged,
+    selectIsDateFilterConfigsChanged,
+    (
+        isCommonDateFilterChanged,
+        isOtherFiltersChanged,
+        isAttributeFilterConfigsChanged,
+        isDateFilterConfigsChanged,
+    ) => {
+        return (
+            isCommonDateFilterChanged ||
+            isOtherFiltersChanged ||
+            isAttributeFilterConfigsChanged ||
+            isDateFilterConfigsChanged
+        );
+    },
+);
+
+/**
+ * Selects a boolean indication if he dashboard has any changes to the title compared to the persisted version (if any)
+ *
+ * @internal
+ */
+export const selectIsDisableCrossFilteringChanged: DashboardSelector<boolean> = createSelector(
+    selectPersistedDashboardDisableCrossFiltering,
+    selectDisableDashboardCrossFiltering,
+    (persistedDisableCrossFiltering = false, currentDisableCrossFiltering) => {
+        return persistedDisableCrossFiltering !== currentDisableCrossFiltering;
     },
 );
 
@@ -438,12 +580,28 @@ export const selectIsDashboardDirty: DashboardSelector<boolean> = createSelector
     selectIsFiltersChanged,
     selectIsTitleChanged,
     selectIsLayoutChanged,
-    (isNew, layout, isFiltersChanged, isTitleChanged, isLayoutChanged) => {
+    selectIsDateFilterConfigChanged,
+    selectIsDisableCrossFilteringChanged,
+    (
+        isNew,
+        layout,
+        isFiltersChanged,
+        isTitleChanged,
+        isLayoutChanged,
+        isDateFilterConfigChanged,
+        isDisableCrossFilteringChanged,
+    ) => {
         if (isNew) {
             return !isDashboardLayoutEmpty(layout);
         }
 
-        return [isFiltersChanged, isTitleChanged, isLayoutChanged].some(Boolean);
+        return [
+            isFiltersChanged,
+            isTitleChanged,
+            isLayoutChanged,
+            isDateFilterConfigChanged,
+            isDisableCrossFilteringChanged,
+        ].some(Boolean);
     },
 );
 

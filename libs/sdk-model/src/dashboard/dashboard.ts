@@ -1,4 +1,4 @@
-// (C) 2019-2023 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 import isEmpty from "lodash/isEmpty.js";
 import { IAuditableDates, IAuditableUsers, IAuditable } from "../base/metadata.js";
 import {
@@ -16,6 +16,40 @@ import { IDashboardWidget, IDashboardLayout } from "./layout.js";
  * @alpha
  */
 export type DashboardDateFilterConfigMode = "readonly" | "hidden" | "active";
+
+/**
+ * Represent the values of DashboardDateFilterConfigMode
+ *
+ * @internal
+ */
+export const DashboardDateFilterConfigModeValues: Record<
+    Uppercase<DashboardDateFilterConfigMode>,
+    DashboardDateFilterConfigMode
+> = {
+    READONLY: "readonly" as const,
+    HIDDEN: "hidden" as const,
+    ACTIVE: "active" as const,
+};
+
+/**
+ * Attribute filter configuration mode
+ * @alpha
+ */
+export type DashboardAttributeFilterConfigMode = "readonly" | "hidden" | "active";
+
+/**
+ * Represent the values of DashboardAttributeFilterConfigMode
+ *
+ * @internal
+ */
+export const DashboardAttributeFilterConfigModeValues: Record<
+    Uppercase<DashboardAttributeFilterConfigMode>,
+    DashboardAttributeFilterConfigMode
+> = {
+    READONLY: "readonly" as const,
+    HIDDEN: "hidden" as const,
+    ACTIVE: "active" as const,
+};
 
 /**
  * Date filter presets to add to the date filter for the current dashboard
@@ -61,6 +95,31 @@ export interface IDashboardDateFilterConfig {
      * Date filter presets to add to the date filter dropdown specific for the current dashboard
      */
     addPresets?: IDashboardDateFilterAddedPresets;
+}
+
+/**
+ * Extended attribute filter config
+ * @alpha
+ */
+export interface IDashboardAttributeFilterConfig {
+    /**
+     * Local identifier of the attribute filter to configure
+     */
+    localIdentifier: string;
+
+    /**
+     * Control visibility mode of the attribute filter
+     */
+    mode?: DashboardAttributeFilterConfigMode;
+}
+
+/**
+ * Extended date filter config item for date filters fully specified including date data set
+ * @alpha
+ */
+export interface IDashboardDateFilterConfigItem {
+    dateDataSet: ObjRef;
+    config: IDashboardDateFilterConfig;
 }
 
 /**
@@ -214,14 +273,29 @@ export interface IDashboard<TWidget = IDashboardWidget>
     readonly filterContext?: IFilterContext | ITempFilterContext;
 
     /**
-     * Dashboard extended date filter config
+     * Dashboard extended common date filter config
      */
     readonly dateFilterConfig?: IDashboardDateFilterConfig;
+
+    /**
+     * Dashboard extended date filters with date data set/dimension configs
+     */
+    readonly dateFilterConfigs?: IDashboardDateFilterConfigItem[];
+
+    /**
+     * Dashboard extended attribute filter configs
+     */
+    readonly attributeFilterConfigs?: IDashboardAttributeFilterConfig[];
 
     /**
      * Plugins used on this dashboard.
      */
     readonly plugins?: IDashboardPluginLink[];
+
+    /**
+     * Disables cross filtering for this dashboard.
+     */
+    readonly disableCrossFiltering?: boolean;
 }
 
 /**
@@ -246,14 +320,29 @@ export interface IDashboardDefinition<TWidget = IDashboardWidget>
     readonly filterContext?: IFilterContext | IFilterContextDefinition;
 
     /**
-     * Dashboard extended date filter config
+     * Dashboard extended common date filter config
      */
     readonly dateFilterConfig?: IDashboardDateFilterConfig;
+
+    /**
+     * Dashboard extended date filters with date data set/dimension configs
+     */
+    readonly dateFilterConfigs?: IDashboardDateFilterConfigItem[];
+
+    /**
+     * Dashboard extended attribute filter configs
+     */
+    readonly attributeFilterConfigs?: IDashboardAttributeFilterConfig[];
 
     /**
      * Plugins to use on this dashboard.
      */
     readonly plugins?: IDashboardPluginLink[];
+
+    /**
+     * Disables cross filtering for this dashboard.
+     */
+    readonly disableCrossFiltering?: boolean;
 }
 
 /**

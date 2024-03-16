@@ -1,9 +1,13 @@
-// (C) 2022 GoodData Corporation
+// (C) 2022-2024 GoodData Corporation
 import React, { useCallback } from "react";
 import cx from "classnames";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { ICatalogDateDataset, isInsightWidget, IWidget, ObjRef } from "@gooddata/sdk-model";
 import { getUnrelatedDateDataset } from "./utils.js";
+import { useCurrentDateFilterConfig } from "../../../dragAndDrop/index.js";
+import { IAlignPoint, ShortenedText } from "@gooddata/sdk-ui-kit";
+
+const tooltipAlignPoints: IAlignPoint[] = [{ align: "cl cr", offset: { x: -20, y: 0 } }];
 
 interface IDateFilterCheckboxProps {
     widget: IWidget;
@@ -15,6 +19,7 @@ interface IDateFilterCheckboxProps {
     selectedDateDatasetHidden?: boolean;
     dateFilterCheckboxDisabled?: boolean;
     onDateDatasetFilterEnabled: (enabled: boolean, dateDatasetRef: ObjRef | undefined) => void;
+    enableUnrelatedItemsVisibility?: boolean;
 }
 
 export const DateFilterCheckbox: React.FC<IDateFilterCheckboxProps> = (props) => {
@@ -28,6 +33,7 @@ export const DateFilterCheckbox: React.FC<IDateFilterCheckboxProps> = (props) =>
         relatedDateDatasets,
         widget,
         onDateDatasetFilterEnabled,
+        enableUnrelatedItemsVisibility,
     } = props;
 
     const unrelatedDateDataset =
@@ -41,7 +47,8 @@ export const DateFilterCheckbox: React.FC<IDateFilterCheckboxProps> = (props) =>
         !selectedDateDatasetHidden &&
         dateFilterEnabled &&
         !isDropdownLoading &&
-        !dateFilterCheckboxDisabled;
+        !dateFilterCheckboxDisabled &&
+        !enableUnrelatedItemsVisibility;
 
     const showError =
         (!!unrelatedDateDataset || showNoRelatedDate) &&
@@ -65,6 +72,11 @@ export const DateFilterCheckbox: React.FC<IDateFilterCheckboxProps> = (props) =>
         [onDateDatasetFilterEnabled, selectedDateDataset],
     );
 
+    const intl = useIntl();
+    const defaultDateFilterName = intl.formatMessage({ id: "dateFilterDropdown.title" });
+
+    const { title } = useCurrentDateFilterConfig(undefined, defaultDateFilterName);
+
     return (
         <div>
             <label className={classes} htmlFor="configurationPanel.date.input">
@@ -77,7 +89,9 @@ export const DateFilterCheckbox: React.FC<IDateFilterCheckboxProps> = (props) =>
                     onChange={handleChange}
                 />
                 <span className="input-label-text title">
-                    <FormattedMessage id="configurationPanel.date" />
+                    <ShortenedText tooltipAlignPoints={tooltipAlignPoints} tagName="span" className="title">
+                        {title}
+                    </ShortenedText>
                 </span>
                 {isFilterLoading ? <div className="gd-spinner small" /> : null}
             </label>

@@ -1,8 +1,14 @@
-// (C) 2021-2022 GoodData Corporation
+// (C) 2021-2024 GoodData Corporation
 import identity from "lodash/identity.js";
 import { PayloadAction } from "@reduxjs/toolkit";
 import { IElementsQueryAttributeFilter } from "@gooddata/sdk-backend-spi";
-import { IAttributeMetadataObject, IMeasure, IRelativeDateFilter, SortDirection } from "@gooddata/sdk-model";
+import {
+    IAttributeMetadataObject,
+    IMeasure,
+    IRelativeDateFilter,
+    SortDirection,
+    ObjRef,
+} from "@gooddata/sdk-model";
 import { GoodDataSdkError } from "@gooddata/sdk-ui";
 
 import { AttributeFilterReducer } from "../store/state.js";
@@ -82,6 +88,13 @@ const setLimitingMeasures: AttributeFilterReducer<PayloadAction<{ filters: IMeas
     state.elements.currentOptions.limitingMeasures = action.payload.filters;
 };
 
+const setLimitingValidationItems: AttributeFilterReducer<PayloadAction<{ validateBy: ObjRef[] }>> = (
+    state,
+    action,
+) => {
+    state.elements.currentOptions.limitingValidationItems = action.payload.validateBy;
+};
+
 const setLimitingDateFilters: AttributeFilterReducer<PayloadAction<{ filters: IRelativeDateFilter[] }>> = (
     state,
     action,
@@ -89,6 +102,12 @@ const setLimitingDateFilters: AttributeFilterReducer<PayloadAction<{ filters: IR
     state.elements.currentOptions.limitingDateFilters = action.payload.filters;
 };
 
+const setCacheId: AttributeFilterReducer<PayloadAction<{ cacheId: string | undefined }>> = (
+    state,
+    action,
+) => {
+    state.elements.cacheId = action.payload.cacheId;
+};
 /**
  * @internal
  */
@@ -106,6 +125,8 @@ export const elementsReducers = {
     setOrder,
     setLimitingAttributeFilters,
     setLimitingMeasures,
+    setLimitingValidationItems,
     setLimitingDateFilters,
     setLimitingAttributeFiltersAttributes,
+    setCacheId,
 };

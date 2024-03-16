@@ -1,6 +1,77 @@
 # Change Log - @gooddata/sdk-ui-all
 
-This log was last generated on Fri, 08 Sep 2023 07:19:23 GMT and should not be manually modified.
+This log was last generated on Fri, 15 Mar 2024 13:31:24 GMT and should not be manually modified.
+
+## 9.8.1
+Fri, 15 Mar 2024 13:31:24 GMT
+
+### Updates
+
+- Introduce theme loading status with better information about state of theme loading
+
+## 9.8.0
+Thu, 07 Mar 2024 09:02:52 GMT
+
+### Updates
+
+- Rename word 'Insight' to 'Visualization'
+- Add services to list insights and dashboards with paging
+
+## 9.7.0
+Thu, 22 Feb 2024 09:17:23 GMT
+
+### Updates
+
+- Added new RichText widget to render markdown on dashboard (available for GoodData.CN / GoodData Cloud only).
+- Introduced possibility to use multiple date filters (available for GoodData.CN / GoodData Cloud only).
+- Introduce ability to limit attribute filter values by metric on GoodData Cloud dashboards.
+
+## 9.6.0
+Thu, 25 Jan 2024 10:00:31 GMT
+
+### Updates
+
+- Deliver support for multiple date filters fully specified including date data set
+- Introduce cross-filtering highlighting in charts.
+
+## 9.5.0
+Thu, 11 Jan 2024 12:13:13 GMT
+
+### Updates
+
+- Users can create multiple insight interactions per attribute/measure for the Panther environment.
+- Users can create, edit, and delete attribute hierarchies in the UI. Additionally, they can view and interact with a list of drill-down interactions.
+- Support for dependent filters on Tiger backend added. Attribute filter on Tiger can now be dependent on other filters which will effectively filter out some of its elements. It supports circular dependencies in filters, keeping selected values when parent filter changes and showing/clearing of filtered out elements.
+- Introduce cross-filtering for GoodData Cloud
+- Dashboard plugins no longer support version lock of the GoodData.UI dependencies. Since now, all GoodData.UI dependencies will be injected to the plugin in their latest version at runtime. Also improve way to specify compatibility of the plugin.
+- Add support for attribute filter selection in drill to custom url.
+- Enable decorating attribute filters in plugins customization API.
+- Enable decorating dashboard content in plugins customization API.
+
+## 9.4.0
+Thu, 30 Nov 2023 11:57:11 GMT
+
+### Updates
+
+- Users can configure the dashboard filter to be interactive, locked, or hidden.
+- Remove `isDomainAdmin` method from Bear Legacy Functions. 
+
+## 9.3.0
+Thu, 02 Nov 2023 11:25:49 GMT
+
+### Updates
+
+- The headline allows two secondary measures to be displayed as the headline values.
+- The headline allows for the customization of comparison values and styles using the comparison config.
+- Introduce possibility to cache client calls
+
+## 9.2.0
+Fri, 06 Oct 2023 13:12:04 GMT
+
+### Updates
+
+- Supporting to share the dashboard with all workspace users.
+- Introduce new attribute hierarchy catalog entity which is used for implicit drill-down in dashboards.
 
 ## 9.1.0
 Fri, 08 Sep 2023 07:19:23 GMT
@@ -40,6 +111,13 @@ Thu, 27 Jul 2023 12:35:32 GMT
 - The new SPI export methods for downloading of insight and dashboard export data were added. The methods attach exported data as a blob to current browser window instance and return Object URL pointing to the blob and name of the downloaded file. There is no need to export data manually via URI. The dashboard component uses these new methods now. This means that export from dashboard component works even when provided backend uses Tiger token authentication.
 - Make it possible to hide/show on demand the web components tab on embedding dialogs
 - Add the continuous line configuration for the Line, Area and Combo charts
+
+## 8.12.3
+Thu, 05 Oct 2023 07:58:45 GMT
+
+### Updates
+
+- Use @gooddata/number-formatter instead of @gooddata/numberjs library
 
 ## 8.12.2
 Wed, 19 Jul 2023 14:12:54 GMT

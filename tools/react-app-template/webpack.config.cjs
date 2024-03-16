@@ -5,6 +5,7 @@ const { DefinePlugin } = require("webpack");
 const path = require("path");
 const { URL } = require("url");
 const pack = require("./package.json");
+const { EsbuildPlugin } = require("esbuild-loader");
 
 require("dotenv").config();
 
@@ -57,7 +58,6 @@ module.exports = (_env, argv) => {
                 },
             },
             resolve: {
-                
                 // Alias for ESM imports with .js suffix because
                 // `import { abc } from "../abc.js"` may be in fact importing from `abc.tsx` file
                 extensionAlias: {
@@ -74,26 +74,17 @@ module.exports = (_env, argv) => {
                         test: /\.tsx?$/,
                         use: [
                             {
-                                loader: "babel-loader",
-                            },
-                            {
-                                loader: "ts-loader",
-                                options: {
-                                    transpileOnly: true,
-                                },
+                                loader: "esbuild-loader",
                             },
                         ],
                     },
                     // JS source files in case JS is used
                     {
                         test: /\.jsx?$/,
+                        exclude: /node_modules/,
                         use: [
                             {
-                                loader: "babel-loader",
-                                options: {
-                                    compact: isProduction,
-                                    presets: ["@babel/preset-react"],
-                                },
+                                loader: "esbuild-loader",
                             },
                         ],
                     },
@@ -121,7 +112,7 @@ module.exports = (_env, argv) => {
                 new HtmlWebpackPlugin({
                     template: "./src/public/index.html",
                     favicon: "./src/public/favicon.ico",
-                    scriptLoading: "module"
+                    scriptLoading: "module",
                 }),
             ],
             // Some dependencies have invalid source maps, we do not care that much
@@ -134,6 +125,9 @@ module.exports = (_env, argv) => {
                 proxy,
                 server: protocol === "https:" ? "https" : "http",
                 open: true,
+            },
+            optimization: {
+                minimizer: [new EsbuildPlugin()],
             },
         },
     ];

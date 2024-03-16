@@ -4,6 +4,8 @@
 
 ```ts
 
+import { DashboardAttributeFilterConfigMode } from '@gooddata/sdk-model';
+import { DashboardDateFilterConfigMode } from '@gooddata/sdk-model';
 import { IBaseExportConfig } from '@gooddata/api-model-bear';
 import { IInsightDefinition } from '@gooddata/sdk-model';
 import { ILocalIdentifierQualifier as ILocalIdentifierQualifier_2 } from '@gooddata/api-model-bear';
@@ -15,6 +17,12 @@ import { ObjRef } from '@gooddata/sdk-model';
 
 // @public (undocumented)
 export type AbsoluteType = "absolute";
+
+// @beta
+export type AdAttributeHierarchyModifiedCommand = IGdcAdMessageEvent<GdcAdCommandType.AttributeHierarchyModified, undefined>;
+
+// @beta
+export type AdAttributeHierarchyModifiedCommandData = IGdcAdMessageEnvelope<GdcAdCommandType.AttributeHierarchyModified, undefined>;
 
 // @public
 export type AdClearCommand = IGdcAdMessageEvent<GdcAdCommandType.Clear, undefined>;
@@ -237,6 +245,8 @@ export type FilterItem = DateFilterItem | AttributeFilterItem | IRankingFilter;
 
 // @public
 export enum GdcAdCommandType {
+    // @beta
+    AttributeHierarchyModified = "attributeHierarchyModified",
     Clear = "clear",
     ClearInsight = "clearInsight",
     DrillableItems = "drillableItems",
@@ -255,6 +265,8 @@ export enum GdcAdCommandType {
 // @public
 export enum GdcAdEventType {
     ApiTokenIsAboutToExpire = "apiTokenIsAboutToExpire",
+    // @beta
+    AttributeHierarchyModified = "attributeHierarchyModified",
     ClearFinished = "clearFinished",
     ClearInsightFinished = "clearInsightFinished",
     Drill = "drill",
@@ -360,6 +372,10 @@ export interface IAbsoluteDateFilter {
         from: string;
         to: string;
     };
+    // @alpha
+    localIdentifier?: string;
+    // @alpha
+    mode?: DashboardDateFilterConfigMode;
 }
 
 // @public
@@ -680,6 +696,8 @@ export type ILocalIdentifierQualifier = ILocalIdentifierQualifier_2;
 
 // @public (undocumented)
 export interface INegativeAttributeFilter {
+    // @alpha
+    mode?: DashboardAttributeFilterConfigMode;
     // (undocumented)
     negativeAttributeFilter: {
         displayForm: ObjQualifier;
@@ -698,6 +716,8 @@ export interface IObjectMeta {
 
 // @public
 export interface IPositiveAttributeFilter {
+    // @alpha
+    mode?: DashboardAttributeFilterConfigMode;
     // (undocumented)
     positiveAttributeFilter: {
         displayForm: ObjQualifier;
@@ -728,6 +748,10 @@ export interface IRankingFilter {
 
 // @public (undocumented)
 export interface IRelativeDateFilter {
+    // @alpha
+    localIdentifier?: string;
+    // @alpha
+    mode?: DashboardDateFilterConfigMode;
     // (undocumented)
     relativeDateFilter: {
         dataSet?: ObjQualifier;
@@ -859,6 +883,9 @@ export function isAdUndoFinishedData(obj: unknown): obj is AdUndoFinishedData;
 
 // @public (undocumented)
 export function isAttributeFilter(filter: unknown): filter is AttributeFilterItem;
+
+// @beta
+export function isAttributeHierarchyModifiedCommandData(obj: unknown): obj is AdAttributeHierarchyModifiedCommandData;
 
 // @public
 export function isCommandFailedData<Product>(obj: unknown): obj is CommandFailedData<Product>;

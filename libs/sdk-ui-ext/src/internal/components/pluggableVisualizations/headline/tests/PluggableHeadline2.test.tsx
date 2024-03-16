@@ -1,4 +1,4 @@
-// (C) 2023 GoodData Corporation
+// (C) 2023-2024 GoodData Corporation
 import { PluggableHeadline } from "../PluggableHeadline.js";
 import * as referencePointMocks from "../../../../tests/mocks/referencePointMocks.js";
 import * as testMocks from "../../../../tests/mocks/testMocks.js";
@@ -232,6 +232,65 @@ describe("PluggableHeadline2", () => {
             });
         });
 
+        it("should correctly set default comparison configuration for new insight", () => {
+            const headline = createComponent({
+                featureFlags: {
+                    enableNewHeadline: true,
+                },
+            });
+
+            const options: IVisProps = getTestOptions({
+                lastSavedVisClassUrl: "local:headline",
+            });
+
+            headline.update(
+                options,
+                testMocks.insightWithSinglePrimaryAndSecondaryMeasureNoIdentifier,
+                emptyPropertiesMeta,
+                executionFactory,
+            );
+
+            const renderEl = getLastRenderEl<ICoreChartProps>(mockRenderFun, mockElement);
+            expect(renderEl.type).toBe(CoreHeadline);
+            expect(renderEl.props.config.comparison).toEqual({
+                enabled: true,
+            });
+        });
+
+        it("should correctly set default comparison configuration for migration in InsightOverlay", () => {
+            const headline = createComponent({
+                featureFlags: {
+                    enableNewHeadline: true,
+                },
+            });
+
+            const options: IVisProps = getTestOptions({
+                lastSavedVisClassUrl: "local:headline",
+                sourceInsightId: "dummy_insight",
+            });
+
+            headline.update(
+                options,
+                testMocks.insightWithSinglePrimaryAndSecondaryMeasureNoIdentifier,
+                emptyPropertiesMeta,
+                executionFactory,
+            );
+
+            const renderEl = getLastRenderEl<ICoreChartProps>(mockRenderFun, mockElement);
+            expect(renderEl.type).toBe(CoreHeadline);
+            expect(renderEl.props.config.comparison).toEqual({
+                enabled: true,
+                calculationType: CalculateAs.CHANGE,
+                format: "#,##0%",
+                colorConfig: {
+                    disabled: true,
+                },
+                labelConfig: {
+                    unconditionalValue: "Versus",
+                },
+            });
+        });
+
         it("should correctly set default comparison configuration for migration", () => {
             const headline = createComponent({
                 featureFlags: {
@@ -366,9 +425,9 @@ describe("PluggableHeadline2", () => {
 
                 expect(extendedReferencePoint.buckets).toEqual(referencePoint.buckets);
                 expect(extendedReferencePoint.uiConfig.customError).toEqual({
-                    heading: "No primary measure in your insight",
+                    heading: "No primary measure in your visualization",
                     text:
-                        "Add a primary measure to your insight, or switch to table.\n" +
+                        "Add a primary measure to your visualization, or switch to table.\n" +
                         "Once done, you'll be able to save it.",
                 });
             });

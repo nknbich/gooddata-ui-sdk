@@ -1,4 +1,4 @@
-// (C) 2021-2023 GoodData Corporation
+// (C) 2021-2024 GoodData Corporation
 
 import {
     InitializeDashboard,
@@ -9,6 +9,11 @@ import {
     ExportDashboardToPdf,
     DeleteDashboard,
     ChangeSharing,
+    SetDashboardDateFilterConfigMode,
+    SetDashboardAttributeFilterConfigMode,
+    SetDashboardDateFilterWithDimensionConfigMode,
+    SetDateFilterConfigTitle,
+    SetAttributeFilterLimitingItems,
 } from "./dashboard.js";
 import { TriggerEvent } from "./events.js";
 import { UpsertExecutionResult } from "./executionResults.js";
@@ -23,6 +28,9 @@ import {
     SetAttributeFilterDisplayForm,
     SetAttributeFilterTitle,
     SetAttributeFilterSelectionMode,
+    AddDateFilter,
+    RemoveDateFilters,
+    MoveDateFilter,
 } from "./filters.js";
 import {
     ChangeInsightWidgetFilterSettings,
@@ -35,6 +43,10 @@ import {
     RefreshInsightWidget,
     RemoveDrillsForInsightWidget,
     ExportInsightWidget,
+    RemoveDrillDownForInsightWidget,
+    AddDrillDownForInsightWidget,
+    ModifyDrillDownForInsightWidget,
+    AttributeHierarchyModified,
 } from "./insight.js";
 import {
     ChangeKpiWidgetComparison,
@@ -47,6 +59,7 @@ import {
     SetDrillForKpiWidget,
     RemoveDrillForKpiWidget,
 } from "./kpi.js";
+import { ChangeRichTextWidgetContent } from "./richText.js";
 import {
     AddLayoutSection,
     AddSectionItems,
@@ -73,6 +86,7 @@ import {
     DrillToInsight,
     DrillToLegacyDashboard,
     ChangeDrillableItems,
+    CrossFiltering,
 } from "./drill.js";
 import { AddDrillTargets } from "./drillTargets.js";
 import { RequestAsyncRender, ResolveAsyncRender } from "./render.js";
@@ -103,6 +117,21 @@ export {
     ChangeSharing,
     ChangeSharingPayload,
     changeSharing,
+    SetDashboardDateFilterConfigMode,
+    SetDashboardDateFilterConfigModePayload,
+    setDashboardDateFilterConfigMode,
+    SetDashboardDateFilterWithDimensionConfigMode,
+    SetDashboardDateFilterWithDimensionConfigModePayload,
+    setDashboardDateFilterWithDimensionConfigMode,
+    SetDashboardAttributeFilterConfigMode,
+    setDashboardAttributeFilterConfigMode,
+    SetDashboardAttributeFilterConfigModePayload,
+    SetDateFilterConfigTitle,
+    SetDateFilterConfigTitlePayload,
+    setDateFilterConfigTitle,
+    SetAttributeFilterLimitingItems,
+    SetAttributeFilterLimitingItemsPayload,
+    setAttributeFilterLimitingItems,
 } from "./dashboard.js";
 
 export { TriggerEvent, TriggerEventPayload, triggerEvent } from "./events.js";
@@ -121,6 +150,15 @@ export {
     RemoveAttributeFiltersPayload,
     removeAttributeFilter,
     removeAttributeFilters,
+    AddDateFilter,
+    AddDateFilterPayload,
+    addDateFilter,
+    RemoveDateFilters,
+    RemoveDateFiltersPayload,
+    removeDateFilter,
+    MoveDateFilter,
+    MoveDateFilterPayload,
+    moveDateFilter,
     ChangeAttributeFilterSelection,
     AttributeFilterSelectionType,
     resetAttributeFilterSelection,
@@ -234,6 +272,8 @@ export {
     ChangeDrillableItems,
     ChangeDrillableItemsPayload,
     DashboardDrillCommand,
+    CrossFiltering,
+    CrossFilteringPayload,
     drill,
     drillDown,
     drillToAttributeUrl,
@@ -242,6 +282,7 @@ export {
     drillToInsight,
     drillToLegacyDashboard,
     changeDrillableItems,
+    crossFiltering,
 } from "./drill.js";
 
 export {
@@ -302,6 +343,8 @@ export {
     replaceInsightWidgetIgnoredFilters,
     ignoreFilterOnInsightWidget,
     unignoreFilterOnInsightWidget,
+    ignoreDateFilterOnInsightWidget,
+    unignoreDateFilterOnInsightWidget,
     ChangeInsightWidgetVisProperties,
     ChangeInsightWidgetVisPropertiesPayload,
     changeInsightWidgetVisProperties,
@@ -317,6 +360,15 @@ export {
     RemoveDrillsForInsightWidget,
     RemoveDrillsForInsightWidgetPayload,
     removeDrillsForInsightWidget,
+    RemoveDrillDownForInsightWidget,
+    RemoveDrillDownForInsightWidgetPayload,
+    removeDrillDownForInsightWidget,
+    AddDrillDownForInsightWidget,
+    AddDrillDownForInsightWidgetPayload,
+    addDrillDownForInsightWidget,
+    ModifyDrillDownForInsightWidget,
+    ModifyDrillDownForInsightWidgetPayload,
+    modifyDrillDownForInsightWidget,
     RemoveDrillsSelector,
     RefreshInsightWidget,
     RefreshInsightWidgetPayload,
@@ -324,7 +376,15 @@ export {
     ExportInsightWidget,
     ExportInsightWidgetPayload,
     exportInsightWidget,
+    AttributeHierarchyModified,
+    attributeHierarchyModified,
 } from "./insight.js";
+
+export {
+    ChangeRichTextWidgetContent,
+    ChangeRichTextWidgetContentPayload,
+    changeRichTextWidgetContent,
+} from "./richText.js";
 
 export {
     RequestAsyncRender,
@@ -419,6 +479,7 @@ export type DashboardCommands =
     | SetAttributeFilterDisplayForm
     | SetAttributeFilterTitle
     | SetAttributeFilterSelectionMode
+    | ChangeRichTextWidgetContent
     //alpha
     | Drill
     | DrillDown
@@ -428,4 +489,17 @@ export type DashboardCommands =
     | DrillToInsight
     | DrillToLegacyDashboard
     | ChangeDrillableItems
-    | AddDrillTargets;
+    | AddDrillTargets
+    | SetDashboardDateFilterConfigMode
+    | SetDashboardAttributeFilterConfigMode
+    | RemoveDrillDownForInsightWidget
+    | AddDrillDownForInsightWidget
+    | ModifyDrillDownForInsightWidget
+    | CrossFiltering
+    | AttributeHierarchyModified
+    | AddDateFilter
+    | RemoveDateFilters
+    | MoveDateFilter
+    | SetDashboardDateFilterWithDimensionConfigMode
+    | SetDateFilterConfigTitle
+    | SetAttributeFilterLimitingItems;

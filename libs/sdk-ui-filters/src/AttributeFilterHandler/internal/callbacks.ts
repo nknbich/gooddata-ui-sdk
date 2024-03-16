@@ -1,4 +1,4 @@
-// (C) 2022 GoodData Corporation
+// (C) 2022-2024 GoodData Corporation
 import {
     actions,
     selectInvertableCommittedSelection,
@@ -36,8 +36,12 @@ import {
     OnInitTotalCountErrorCallbackPayload,
     OnInitTotalCountStartCallbackPayload,
     OnInitTotalCountSuccessCallbackPayload,
+    OnLoadIrrelevantElementsStartCallbackPayload,
+    OnLoadIrrelevantElementsSuccessCallbackPayload,
+    OnLoadIrrelevantElementsErrorCallbackPayload,
+    OnLoadIrrelevantElementsCancelCallbackPayload,
 } from "../types/index.js";
-import { GoodDataSdkError } from "@gooddata/sdk-ui";
+import { GoodDataSdkError, isGoodDataSdkError } from "@gooddata/sdk-ui";
 
 const newCallbackRegistrations = () => {
     return {
@@ -76,6 +80,12 @@ const newCallbackRegistrations = () => {
         loadCustomElementsSuccess: newCallbackHandler<OnLoadCustomElementsSuccessCallbackPayload>(),
         loadCustomElementsError: newCallbackHandler<OnLoadCustomElementsErrorCallbackPayload>(),
         loadCustomElementsCancel: newCallbackHandler<OnLoadCustomElementsCancelCallbackPayload>(),
+
+        // Irrelevant elements
+        loadIrrelevantElementsStart: newCallbackHandler<OnLoadIrrelevantElementsStartCallbackPayload>(),
+        loadIrrelevantElementsSuccess: newCallbackHandler<OnLoadIrrelevantElementsSuccessCallbackPayload>(),
+        loadIrrelevantElementsError: newCallbackHandler<OnLoadIrrelevantElementsErrorCallbackPayload>(),
+        loadIrrelevantElementsCancel: newCallbackHandler<OnLoadIrrelevantElementsCancelCallbackPayload>(),
 
         // Selection
         selectionChanged:
@@ -117,9 +127,13 @@ const newCallbackRegistrationsWithGlobalUnsubscribe = () => {
 };
 
 function logError(activity: string, error: GoodDataSdkError): void {
-    const cause = error.getCause();
-    const formattedCause = cause ? `\nInner error: ${cause}` : "";
-    console.error(`Error while ${activity}: ${error.getMessage()}${formattedCause}`);
+    if (isGoodDataSdkError(error)) {
+        const cause = error.getCause();
+        const formattedCause = cause ? `\nInner error: ${cause}` : "";
+        console.error(`Error while ${activity}: ${error.getMessage()}${formattedCause}`);
+    } else {
+        console.error(`Error while ${activity}:`, error);
+    }
 }
 
 /**
@@ -202,6 +216,18 @@ export const newAttributeFilterCallbacks = () => {
             registrations.loadCustomElementsCancel.invoke(action.payload);
         }
 
+        // Irrelevant elements
+        if (actions.loadIrrelevantElementsStart.match(action)) {
+            registrations.loadIrrelevantElementsStart.invoke(action.payload);
+        } else if (actions.loadIrrelevantElementsSuccess.match(action)) {
+            registrations.loadIrrelevantElementsSuccess.invoke(action.payload);
+        } else if (actions.loadIrrelevantElementsError.match(action)) {
+            logError("loading irrelevant elements", action.payload.error);
+            registrations.loadIrrelevantElementsError.invoke(action.payload);
+        } else if (actions.loadIrrelevantElementsCancel.match(action)) {
+            registrations.loadIrrelevantElementsCancel.invoke(action.payload);
+        }
+
         // Selection
         if (
             [
@@ -243,6 +269,11 @@ export const newAttributeFilterCallbacks = () => {
                 actions.loadNextElementsPageError.match,
                 actions.loadNextElementsPageCancel.match,
 
+                actions.loadIrrelevantElementsStart.match,
+                actions.loadIrrelevantElementsSuccess.match,
+                actions.loadIrrelevantElementsError.match,
+                actions.loadIrrelevantElementsCancel.match,
+
                 actions.changeSelection.match,
                 actions.revertSelection.match,
                 actions.invertSelection.match,
@@ -253,6 +284,7 @@ export const newAttributeFilterCallbacks = () => {
                 actions.setOrder.match,
                 actions.setSearch.match,
                 actions.setLimitingMeasures.match,
+                actions.setLimitingValidationItems.match,
                 actions.setLimitingAttributeFilters.match,
                 actions.setLimitingDateFilters.match,
             ].some((m) => m(action))

@@ -1,4 +1,4 @@
-// (C) 2021-2023 GoodData Corporation
+// (C) 2021-2024 GoodData Corporation
 export {
     ParentFilterOverAttributeType,
     OnApplyCallbackType,
@@ -32,7 +32,7 @@ export {
     AttributeFilterSimpleDropdownButtonWithSelection,
     AttributeFilterStatusBar,
     SingleSelectionAttributeFilterStatusBar,
-    AttributeFilterButtonToolip,
+    AttributeFilterButtonTooltip,
     AttributeDatasetInfo,
     IAttributeDatasetInfoProps,
     EmptyElementsSearchBar,
@@ -57,6 +57,8 @@ export {
     IAttributeFilterSelectionStatusProps,
     useAutoOpenAttributeFilterDropdownButton,
     useOnCloseAttributeFilterDropdownButton,
+    AttributeFilterDependencyTooltip,
+    IAttributeFilterDependencyTooltipProps,
 } from "./Components/index.js";
 export { AttributeFilter, IAttributeFilterProps } from "./AttributeFilter.js";
 export { AttributeFilterButton, IAttributeFilterButtonProps } from "./AttributeFilterButton.js";

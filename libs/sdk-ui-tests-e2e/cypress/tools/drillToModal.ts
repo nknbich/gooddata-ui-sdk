@@ -73,11 +73,20 @@ export class DrillToModal {
             .find(".s-drill-down")
             .should("be.visible")
             .contains(`${attr}`)
-            .click();
+            .click({ force: true });
+        return this;
+    }
+
+    selectCrossFiltering() {
+        cy.get(".gd-drill-modal-picker-dropdown")
+            .find(".s-cross-filtering")
+            .should("be.visible")
+            .click({ force: true });
         return this;
     }
 
     hasTitleHeader(title: string) {
         this.getTitleElement().should("have.text", title);
+        return this;
     }
 }

@@ -1,4 +1,4 @@
-// (C) 2022 GoodData Corporation
+// (C) 2022-2024 GoodData Corporation
 import {
     ElementsQueryOptionsElementsSpecification,
     IElementsQueryAttributeFilter,
@@ -9,6 +9,7 @@ import {
     IMeasure,
     IRelativeDateFilter,
     SortDirection,
+    ObjRef,
 } from "@gooddata/sdk-model";
 import { GoodDataSdkError } from "@gooddata/sdk-ui";
 import {
@@ -28,6 +29,16 @@ export interface ILoadElementsResult {
     elements: IAttributeElement[];
     totalCount: number;
     options: ILoadElementsOptions;
+    cacheId?: string;
+}
+
+/**
+ * Result of checking for irrelevant subset of selection.
+ *
+ * @public
+ */
+export interface ILoadIrrelevantElementsResult {
+    elementTitles: string[];
 }
 
 /**
@@ -43,6 +54,7 @@ export interface ILoadElementsOptions {
     limitingAttributeFilters?: IElementsQueryAttributeFilter[];
     limitingMeasures?: IMeasure[];
     limitingDateFilters?: IRelativeDateFilter[];
+    limitingValidationItems?: ObjRef[];
     elements?: ElementsQueryOptionsElementsSpecification;
     includeTotalCountWithoutFilters?: boolean;
     excludePrimaryLabel?: boolean;
@@ -123,6 +135,30 @@ export interface IAttributeElementLoader {
     cancelCustomElementsLoad(correlation?: Correlation): void;
 
     /**
+     * Loads the irrelevant subset of currently selected elements.
+     *
+     * Irrelevant elements are the selected elements that may be filtered out by limiting filters.
+     *
+     * @remarks
+     * This is useful, if you want to load additional irrelevant elements with different options than the currently set.
+     *
+     * Multiple loads will run in parallel.
+     *
+     * Cancels the running irrelevant elements load, if it matches the specified correlation, and starts it again.
+     *
+     * You can provide a correlation that will be included in the payload of all callbacks fired as a result of calling this method.
+     *
+     * @param options - options to apply for the custom elements load
+     * @param correlation - correlation that will be included in all callbacks fired by this method
+     */
+    loadIrrelevantElements(correlation?: Correlation): void;
+
+    /**
+     * Cancels the running irrelevant elements load, if it matches the specified correlation.
+     */
+    cancelIrrelevantElementsLoad(correlation?: Correlation): void;
+
+    /**
      * Set the limit for the upcoming attribute element loads.
      *
      * @remarks
@@ -163,6 +199,18 @@ export interface IAttributeElementLoader {
     setLimitingMeasures(measures: IMeasure[]): void;
 
     /**
+     * Set the validation items to filter the upcoming attribute element loads.
+     *
+     * @remarks
+     * When you change the options for the attribute element loads, you should call initial elements page load.
+     *
+     * Throws error when the backend implementation does not support elements validation filtering.
+     *
+     * @param validateBy - measures to use.
+     */
+    setLimitingValidationItems(validateBy: ObjRef[]): void;
+
+    /**
      * Set the attribute filters to filter the upcoming attribute element loads.
      *
      * @remarks
@@ -180,7 +228,7 @@ export interface IAttributeElementLoader {
      * @remarks
      * When you change the options for the attribute element loads, you should call initial elements page load.
      *
-     * @param measures - measures to use.
+     * @param filters - filters to use.
      */
     setLimitingDateFilters(filters: IRelativeDateFilter[]): void;
 
@@ -213,6 +261,11 @@ export interface IAttributeElementLoader {
      * Returns the current attribute filters used to filter the attribute element loads.
      */
     getLimitingAttributeFilters(): IElementsQueryAttributeFilter[];
+
+    /**
+     * Return the current validation items used to filter the attribute element loads.
+     */
+    getLimitingValidationItems(): ObjRef[];
 
     /**
      * Returns the current date filters used to filter the attribute element loads.
@@ -453,6 +506,49 @@ export interface IAttributeElementLoader {
      * @param callback - callback to run
      */
     onLoadCustomElementsCancel: CallbackRegistration<OnLoadCustomElementsCancelCallbackPayload>;
+
+    /**
+     * Registers a callback that will be fired when the irrelevant elements load starts.
+     * Returns unsubscribe function, that will unregister it, once called.
+     *
+     * Multiple callbacks can be registered by this function.
+     *
+     * @param callback - callback to run
+     */
+    onLoadIrrelevantElementsStart: CallbackRegistration<OnLoadIrrelevantElementsStartCallbackPayload>;
+
+    /**
+     * Registers a callback that will be fired when the irrelevant elements load is successfuly completed.
+     * Returns unsubscribe function, that will unregister it.
+     *
+     * @remarks
+     * Multiple callbacks can be registered by this function.
+     *
+     * @param callback - callback to run
+     */
+    onLoadIrrelevantElementsSuccess: CallbackRegistration<OnLoadIrrelevantElementsSuccessCallbackPayload>;
+
+    /**
+     * Registers a callback that will be fired when error is thrown during the irrelevant elements load.
+     * Returns unsubscribe function, that will unregister it.
+     *
+     * @remarks
+     * Multiple callbacks can be registered by this function.
+     *
+     * @param callback - callback to run
+     */
+    onLoadIrrelevantElementsError: CallbackRegistration<OnLoadIrrelevantElementsErrorCallbackPayload>;
+
+    /**
+     * Registers a callback that will be fired when the irrelevant elements load was canceled.
+     * Returns unsubscribe function, that will unregister it.
+     *
+     * @remarks
+     * Multiple callbacks can be registered by this function.
+     *
+     * @param callback - callback to run
+     */
+    onLoadIrrelevantElementsCancel: CallbackRegistration<OnLoadIrrelevantElementsCancelCallbackPayload>;
 }
 
 /**
@@ -547,6 +643,37 @@ export type OnLoadCustomElementsErrorCallbackPayload = Partial<CallbackPayloadWi
  * @public
  */
 export type OnLoadCustomElementsCancelCallbackPayload = Partial<CallbackPayloadWithCorrelation>;
+
+/**
+ * Payload of the onLoadIrrelevantElementsStart callback.
+ *
+ * @public
+ */
+export type OnLoadIrrelevantElementsStartCallbackPayload = Partial<CallbackPayloadWithCorrelation>;
+
+/**
+ * Payload of the onLoadIrrelevantElementsSuccess callback.
+ *
+ * @public
+ */
+export type OnLoadIrrelevantElementsSuccessCallbackPayload = Partial<CallbackPayloadWithCorrelation> &
+    ILoadIrrelevantElementsResult;
+
+/**
+ * Payload of the onLoadIrrelevantElementsError callback.
+ *
+ * @public
+ */
+export type OnLoadIrrelevantElementsErrorCallbackPayload = Partial<CallbackPayloadWithCorrelation> & {
+    error: GoodDataSdkError;
+};
+
+/**
+ * Payload of the onLoadIrrelevantElementsCancel callback.
+ *
+ * @public
+ */
+export type OnLoadIrrelevantElementsCancelCallbackPayload = Partial<CallbackPayloadWithCorrelation>;
 
 /**
  * Payload of the onInitTotalCountStart callback.

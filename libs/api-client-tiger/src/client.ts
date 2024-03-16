@@ -1,4 +1,4 @@
-// (C) 2019-2023 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 import { tigerExecutionClientFactory } from "./execution.js";
 import { tigerExecutionResultClientFactory } from "./executionResult.js";
 import {
@@ -47,6 +47,9 @@ import {
     ScanModelActionsApiInterface,
     tigerScanModelClientFactory,
 } from "./scanModel.js";
+import { tigerValidDescendantsClientFactory } from "./validDescendants.js";
+import { tigerResultClientFactory, ResultActionsApiInterface } from "./result.js";
+import { tigerUserManagementClientFactory } from "./userManagement.js";
 
 export {
     tigerExecutionClientFactory,
@@ -54,6 +57,7 @@ export {
     tigerExecutionResultClientFactory,
     tigerLabelElementsClientFactory,
     tigerValidObjectsClientFactory,
+    tigerValidDescendantsClientFactory,
     tigerLayoutClientFactory,
     tigerAfmExplainClientFactory,
     tigerProfileClientFactory,
@@ -61,6 +65,8 @@ export {
     tigerAuthActionsClientFactory,
     tigerScanModelClientFactory,
     tigerExportClientFactory,
+    tigerResultClientFactory,
+    tigerUserManagementClientFactory,
     MetadataConfiguration,
     MetadataConfigurationParameters,
     MetadataBaseApi,
@@ -83,6 +89,7 @@ export {
     ActionsApiCreateTabularExportRequest,
     TabularExportRequest,
     ActionsApiGetTabularExportRequest,
+    ResultActionsApiInterface,
 };
 
 export interface ITigerClient {
@@ -91,6 +98,7 @@ export interface ITigerClient {
     executionResult: ReturnType<typeof tigerExecutionResultClientFactory>;
     labelElements: ReturnType<typeof tigerLabelElementsClientFactory>;
     validObjects: ReturnType<typeof tigerValidObjectsClientFactory>;
+    validDescendants: ReturnType<typeof tigerValidDescendantsClientFactory>;
     explain: ReturnType<typeof tigerAfmExplainClientFactory>;
     declarativeLayout: ReturnType<typeof tigerLayoutClientFactory>;
     entities: ReturnType<typeof tigerEntitiesObjectsClientFactory>;
@@ -99,6 +107,8 @@ export interface ITigerClient {
     authActions: ReturnType<typeof tigerAuthActionsClientFactory>;
     scanModel: ReturnType<typeof tigerScanModelClientFactory>;
     export: ReturnType<typeof tigerExportClientFactory>;
+    result: ReturnType<typeof tigerResultClientFactory>;
+    userManagement: ReturnType<typeof tigerUserManagementClientFactory>;
 
     /**
      * Updates tiger client to send the provided API TOKEN in `Authorization` header of all
@@ -119,6 +129,7 @@ export const tigerClientFactory = (axios: AxiosInstance): ITigerClient => {
     const executionResult = tigerExecutionResultClientFactory(axios);
     const labelElements = tigerLabelElementsClientFactory(axios);
     const validObjects = tigerValidObjectsClientFactory(axios);
+    const validDescendants = tigerValidDescendantsClientFactory(axios);
     const declarativeLayout = tigerLayoutClientFactory(axios);
     const explain = tigerAfmExplainClientFactory(axios);
     const entities = tigerEntitiesObjectsClientFactory(axios);
@@ -127,6 +138,8 @@ export const tigerClientFactory = (axios: AxiosInstance): ITigerClient => {
     const authActions = tigerAuthActionsClientFactory(axios);
     const scanModel = tigerScanModelClientFactory(axios);
     const exportFactory = tigerExportClientFactory(axios);
+    const result = tigerResultClientFactory(axios);
+    const userManagement = tigerUserManagementClientFactory(axios);
 
     return {
         axios,
@@ -134,6 +147,7 @@ export const tigerClientFactory = (axios: AxiosInstance): ITigerClient => {
         executionResult,
         labelElements,
         validObjects,
+        validDescendants,
         declarativeLayout,
         explain,
         entities,
@@ -141,6 +155,8 @@ export const tigerClientFactory = (axios: AxiosInstance): ITigerClient => {
         actions,
         authActions,
         scanModel,
+        result,
+        userManagement,
         setApiToken: (token: string | undefined): void => {
             setAxiosAuthorizationToken(axios, token);
         },

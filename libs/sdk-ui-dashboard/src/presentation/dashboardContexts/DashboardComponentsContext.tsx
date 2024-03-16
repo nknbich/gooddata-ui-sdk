@@ -1,4 +1,4 @@
-// (C) 2019-2023 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 import React, { createContext, useContext } from "react";
 import {
     ErrorComponent,
@@ -25,6 +25,7 @@ import { CustomSaveAsDialogComponent } from "../saveAs/types.js";
 import { CustomShareDialogComponent } from "../shareDialog/types.js";
 import {
     AttributeFilterComponentProvider,
+    DashboardContentComponentProvider,
     DateFilterComponentProvider,
     InsightBodyComponentProvider,
     InsightComponentProvider,
@@ -32,13 +33,16 @@ import {
     InsightMenuComponentProvider,
     InsightMenuTitleComponentProvider,
     KpiComponentProvider,
+    RichTextComponentProvider,
     WidgetComponentProvider,
 } from "./types.js";
 import { CustomSidebarComponent } from "../dashboard/DashboardSidebar/types.js";
 import {
     AttributeFilterComponentSet,
+    DateFilterComponentSet,
     InsightWidgetComponentSet,
     KpiWidgetComponentSet,
+    RichTextWidgetComponentSet,
 } from "../componentDefinition/types.js";
 import { CustomToolbarComponent } from "../toolbar/types.js";
 
@@ -56,6 +60,7 @@ interface IDashboardComponentsContext {
     InsightMenuComponentProvider: InsightMenuComponentProvider;
     InsightMenuTitleComponentProvider: InsightMenuTitleComponentProvider;
     KpiComponentProvider: KpiComponentProvider;
+    RichTextComponentProvider: RichTextComponentProvider;
     ButtonBarComponent: CustomButtonBarComponent;
     MenuButtonComponent: CustomMenuButtonComponent;
     TitleComponent: CustomTitleComponent;
@@ -71,9 +76,12 @@ interface IDashboardComponentsContext {
     SidebarComponent: CustomSidebarComponent;
     InsightWidgetComponentSet: InsightWidgetComponentSet;
     KpiWidgetComponentSet: KpiWidgetComponentSet;
+    RichTextWidgetComponentSet: RichTextWidgetComponentSet;
     AttributeFilterComponentSet: AttributeFilterComponentSet;
+    DateFilterComponentSet: DateFilterComponentSet;
     EmptyLayoutDropZoneBodyComponent: CustomEmptyLayoutDropZoneBodyComponent;
     SaveButtonComponent: CustomSaveButtonComponent;
+    DashboardContentComponentProvider: DashboardContentComponentProvider;
 }
 
 const ThrowMissingComponentError = (componentName: string) => () => {
@@ -95,6 +103,7 @@ const DashboardComponentsContext = createContext<IDashboardComponentsContext>({
     InsightMenuComponentProvider: ThrowMissingComponentError("InsightMenuComponent"),
     InsightMenuTitleComponentProvider: ThrowMissingComponentError("InsightMenuTitleComponent"),
     KpiComponentProvider: ThrowMissingComponentError("KpiComponent"),
+    RichTextComponentProvider: ThrowMissingComponentError("RichTextComponent"),
     WidgetComponentProvider: ThrowMissingComponentError("WidgetComponent"),
     ButtonBarComponent: ThrowMissingComponentError("ButtonBarComponent"),
     MenuButtonComponent: ThrowMissingComponentError("MenuButtonComponent"),
@@ -115,9 +124,12 @@ const DashboardComponentsContext = createContext<IDashboardComponentsContext>({
     SidebarComponent: ThrowMissingComponentError("SidebarComponent"),
     InsightWidgetComponentSet: null as any, // TODO how to throw here
     KpiWidgetComponentSet: null as any, // TODO how to throw here
+    RichTextWidgetComponentSet: null as any, // TODO how to throw here
     AttributeFilterComponentSet: null as any, // TODO how to throw here
+    DateFilterComponentSet: null as any, // TODO how to throw here
     EmptyLayoutDropZoneBodyComponent: ThrowMissingComponentError("EmptyLayoutDropZoneBodyComponent"),
     SaveButtonComponent: ThrowMissingComponentError("SaveButtonComponent"),
+    DashboardContentComponentProvider: ThrowMissingComponentError("DashboardContentComponentProvider"),
 });
 DashboardComponentsContext.displayName = "DashboardComponentsContext";
 

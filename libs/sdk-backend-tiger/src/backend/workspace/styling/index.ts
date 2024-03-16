@@ -1,4 +1,4 @@
-// (C) 2019-2023 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 import { IWorkspaceStylingService } from "@gooddata/sdk-backend-spi";
 import { ApiEntitlementNameEnum } from "@gooddata/api-client-tiger";
 import {
@@ -25,13 +25,16 @@ export class TigerWorkspaceStyling implements IWorkspaceStylingService {
      * @returns boolean
      */
     private async isStylizable(activeStyleId: string): Promise<boolean> {
-        const isCustomThemingIncludedInEntitlements = await this.authCall(async (client) =>
-            client.actions
-                .resolveRequestedEntitlements({
-                    entitlementsRequest: { entitlementsName: [ApiEntitlementNameEnum.CUSTOM_THEMING] },
-                })
-                .then((res) => res?.data?.length === 1),
-        );
+        const isCustomThemingIncludedInEntitlements = await this.authCall(async (client) => {
+            const profile = await client.profile.getCurrent();
+            const entitlements =
+                profile.entitlements ??
+                (await this.authCall((client) => client.actions.resolveAllEntitlements())).data;
+            const customTheming = entitlements.find(
+                (entitlement) => entitlement.name === ApiEntitlementNameEnum.CUSTOM_THEMING,
+            );
+            return !!customTheming;
+        });
 
         return isCustomThemingIncludedInEntitlements && activeStyleId !== "";
     }

@@ -1,4 +1,4 @@
-// (C) 2021-2023 GoodData Corporation
+// (C) 2021-2024 GoodData Corporation
 import {
     DashboardInitialized,
     DashboardDeinitialized,
@@ -67,6 +67,7 @@ import {
     DashboardInsightWidgetExportResolved,
     DashboardInsightWidgetRefreshed,
 } from "./insight.js";
+import { DashboardRichTextWidgetContentChanged } from "./richText.js";
 import {
     DashboardWidgetExecutionStarted,
     DashboardWidgetExecutionSucceeded,
@@ -101,6 +102,10 @@ import {
 } from "./drill.js";
 import { DashboardRenderModeChanged } from "./renderMode.js";
 import { CreateInsightRequested } from "./lab.js";
+import {
+    CreateAttributeHierarchyRequested,
+    DeleteAttributeHierarchyRequested,
+} from "./attributeHierarchies.js";
 
 export {
     IDashboardEvent,
@@ -189,6 +194,10 @@ export {
     DashboardAttributeFilterMovedPayload,
     DashboardAttributeFilterAdded,
     DashboardAttributeFilterAddedPayload,
+    DashboardAttributeFilterConfigModeChanged,
+    DashboardAttributeFilterConfigModeChangedPayload,
+    DashboardAttributeFilterConfigLimitingItemsChanged,
+    DashboardAttributeFilterConfigLimitingItemsChangedPayload,
     isDashboardAttributeFilterAdded,
     isDashboardAttributeFilterMoved,
     isDashboardAttributeFilterParentChanged,
@@ -198,6 +207,8 @@ export {
     isDashboardAttributeFilterTitleChanged,
     isDashboardDateFilterSelectionChanged,
     isDashboardFilterContextChanged,
+    isDashboardAttributeFilterConfigModeChanged,
+    isDashboardAttributeFilterConfigLimitingItemsChanged,
 } from "./filters.js";
 
 export {
@@ -300,6 +311,13 @@ export {
 } from "./insight.js";
 
 export {
+    DashboardRichTextWidgetContentChanged,
+    DashboardRichTextWidgetContentChangedPayload,
+    isDashboardRichTextWidgetContentChanged,
+    richTextWidgetContentChanged,
+} from "./richText.js";
+
+export {
     DashboardWidgetExecutionStarted,
     DashboardWidgetExecutionStartedPayload,
     DashboardWidgetExecutionSucceeded,
@@ -362,6 +380,10 @@ export {
     DashboardDrillToLegacyDashboardResolvedPayload,
     DashboardDrillableItemsChanged,
     DashboardDrillableItemsChangedPayload,
+    DashboardCrossFilteringRequested,
+    DashboardCrossFilteringRequestedPayload,
+    DashboardCrossFilteringResolved,
+    DashboardCrossFilteringResolvedPayload,
     isDashboardDrillDownRequested,
     isDashboardDrillDownResolved,
     isDashboardDrillRequested,
@@ -377,6 +399,8 @@ export {
     isDashboardDrillToLegacyDashboardRequested,
     isDashboardDrillToLegacyDashboardResolved,
     isDashboardDrillableItemsChanged,
+    isDashboardCrossFilteringRequested,
+    isDashboardCrossFilteringResolved,
 } from "./drill.js";
 
 export {
@@ -408,6 +432,15 @@ export {
 } from "./renderMode.js";
 
 export { createInsightRequested, CreateInsightRequested, isCreateInsightRequested } from "./lab.js";
+
+export {
+    createAttributeHierarchyRequested,
+    CreateAttributeHierarchyRequested,
+    isCreateAttributeHierarchyRequested,
+    deleteAttributeHierarchyRequested,
+    DeleteAttributeHierarchyRequested,
+    isDeleteAttributeHierarchyRequested,
+} from "./attributeHierarchies.js";
 
 /**
  * Union type that contains all available built-in dashboard events.
@@ -484,6 +517,7 @@ export type DashboardEvents =
     | DashboardInsightWidgetExportRequested
     | DashboardInsightWidgetExportResolved
     | DashboardInsightWidgetRefreshed
+    | DashboardRichTextWidgetContentChanged
     | DashboardWidgetExecutionStarted
     | DashboardWidgetExecutionSucceeded
     | DashboardWidgetExecutionFailed
@@ -509,7 +543,9 @@ export type DashboardEvents =
     | DashboardDrillRequested
     | DashboardDrillableItemsChanged
     // internal
-    | CreateInsightRequested;
+    | CreateInsightRequested
+    | CreateAttributeHierarchyRequested
+    | DeleteAttributeHierarchyRequested;
 
 /**
  * Creates DashboardEvent predicate that test whether the provided event matches it.

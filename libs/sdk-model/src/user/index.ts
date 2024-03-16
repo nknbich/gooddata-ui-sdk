@@ -1,6 +1,9 @@
-// (C) 2021-2022 GoodData Corporation
+// (C) 2021-2024 GoodData Corporation
 import { invariant } from "ts-invariant";
+import isEmpty from "lodash/isEmpty.js";
+
 import { ObjRef } from "../objRef/index.js";
+import { IDataSourcePermissionAssignment, IWorkspacePermissionAssignment } from "../organization/index.js";
 
 /**
  * Represents platform user.
@@ -50,6 +53,33 @@ export interface IUser {
      * Permission of the user
      */
     permissions?: string[];
+
+    /**
+     * Authentication id of the user.
+     */
+    authenticationId?: string;
+}
+
+/**
+ * Represents platform user group.
+ *
+ * @alpha
+ */
+export interface IUserGroup {
+    /**
+     * Stored user reference.
+     */
+    ref: ObjRef;
+
+    /**
+     * ID of the user group.
+     */
+    id: string;
+
+    /**
+     * Optional name of the user group;
+     */
+    name?: string;
 }
 
 /**
@@ -113,4 +143,61 @@ export function userFullName(user: IUser): string | undefined {
     invariant(user, "user to get full name of must be specified");
 
     return user.fullName;
+}
+
+/**
+ * User with organization related information.
+ *
+ * @alpha
+ */
+export interface IOrganizationUser {
+    ref: ObjRef;
+    id: string;
+    fullName?: string;
+    email?: string;
+    isOrganizationAdmin: boolean;
+    assignedUserGroups: IUserGroup[];
+    assignedWorkspaces: IWorkspacePermissionAssignment[];
+    assignedDataSources: IDataSourcePermissionAssignment[];
+}
+
+/**
+ * Test if provided object is of IOrganizationUser type
+ *
+ * @param obj - tested object
+ *
+ * @returns true if object is IOrganizationUser, false if it is not
+ *
+ * @alpha
+ */
+export function isIOrganizationUser(obj: unknown): obj is IOrganizationUser {
+    return !isEmpty(obj) && (obj as IOrganizationUser).id !== undefined;
+}
+
+/**
+ * User group with organization related information.
+ *
+ * @alpha
+ */
+export interface IOrganizationUserGroup {
+    ref: ObjRef;
+    id: string;
+    name?: string;
+    isOrganizationAdmin: boolean;
+    assignedUsersCount: number;
+    assignedWorkspaces: IWorkspacePermissionAssignment[];
+    assignedDataSources: IDataSourcePermissionAssignment[];
+}
+
+/**
+ * Test if provided object is of IOrganizationUser type
+ *
+ * @param obj - tested object
+ *
+ * @returns true if object is IOrganizationUser, false if it is not
+ *
+ * @alpha
+ */
+export function isIOrganizationUserGroup(obj: unknown): obj is IOrganizationUserGroup {
+    return !isEmpty(obj) && (obj as IOrganizationUserGroup).id !== undefined;
 }

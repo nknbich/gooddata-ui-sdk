@@ -1,4 +1,4 @@
-// (C) 2019-2023 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 
 import {
     IDashboardReferences,
@@ -16,6 +16,7 @@ import {
     UnexpectedResponseError,
     walkLayout,
     IGetDashboardPluginOptions,
+    IDashboardsQuery,
 } from "@gooddata/sdk-backend-spi";
 import {
     areObjRefsEqual,
@@ -42,6 +43,7 @@ import {
     IDashboardPluginDefinition,
     IDashboardPermissions,
     IExistingDashboard,
+    IDateFilter,
 } from "@gooddata/sdk-model";
 import cloneDeep from "lodash/cloneDeep.js";
 import isEqual from "lodash/isEqual.js";
@@ -113,6 +115,10 @@ export class RecordedDashboards implements IWorkspaceDashboardsService {
 
         return Promise.resolve(result);
     };
+
+    public getDashboardsQuery(): IDashboardsQuery {
+        throw new NotSupported("not supported");
+    }
 
     public getDashboard = (ref: ObjRef, filterContextRef?: ObjRef): Promise<IDashboard> => {
         if (filterContextRef) {
@@ -310,6 +316,14 @@ export class RecordedDashboards implements IWorkspaceDashboardsService {
                 },
             },
         ]);
+    }
+
+    public getResolvedFiltersForWidgetWithMultipleDateFilters(
+        widget: IWidget,
+        commonDateFilters: IDateFilter[],
+        otherFilters: IFilter[],
+    ): Promise<IFilter[]> {
+        return this.getResolvedFiltersForWidget(widget, [...commonDateFilters, ...otherFilters]);
     }
 
     public getScheduledMailsForDashboard(

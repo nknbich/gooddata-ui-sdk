@@ -1,4 +1,4 @@
-// (C) 2022-2023 GoodData Corporation
+// (C) 2022-2024 GoodData Corporation
 import isEmpty from "lodash/isEmpty.js";
 import {
     IAnalyticalBackend,
@@ -72,6 +72,7 @@ export async function loadElementsFromBackend(
     context: AttributeFilterHandlerStoreContext,
     options: ILoadElementsOptions & CancelableOptions & { displayFormRef: ObjRef },
     hiddenElementsInfo: IHiddenElementsInfo,
+    cacheId?: string,
 ): Promise<IElementsQueryResult> {
     const { backend, workspace } = context;
     const {
@@ -81,6 +82,7 @@ export async function loadElementsFromBackend(
         limitingAttributeFilters,
         limitingDateFilters,
         limitingMeasures,
+        limitingValidationItems,
         offset,
         search,
         order,
@@ -118,7 +120,9 @@ export async function loadElementsFromBackend(
     }
 
     let loader = backend.workspace(workspace).attributes().elements().forDisplayForm(displayFormRef);
-    const loaderOptions: IElementsQueryOptions = {};
+    const loaderOptions: IElementsQueryOptions = {
+        cacheId: cacheId,
+    };
 
     if (limit) {
         loader = loader.withLimit(limit);
@@ -172,6 +176,10 @@ export async function loadElementsFromBackend(
 
     if (signal) {
         loader.withSignal(signal);
+    }
+
+    if (backend.capabilities.supportsAttributeFilterElementsLimiting && limitingValidationItems?.length > 0) {
+        loader = loader.withAvailableElementsOnly(limitingValidationItems);
     }
 
     return loader.query().catch((error) => {

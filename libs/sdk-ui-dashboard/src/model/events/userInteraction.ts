@@ -1,4 +1,4 @@
-// (C) 2021-2023 GoodData Corporation
+// (C) 2021-2024 GoodData Corporation
 import { AccessGranularPermission, ShareStatus } from "@gooddata/sdk-model";
 import isString from "lodash/isString.js";
 import { DashboardEventBody, IDashboardEvent } from "./base.js";
@@ -88,9 +88,49 @@ export type ShareDialogInteractionPayload = UserInteractionPayloadWithDataBase<
 /**
  * @beta
  */
+export type AttributeFilterInteractionType =
+    | "attributeFilterTitleResetClicked"
+    | "attributeFilterConfigurationOpened"
+    | "attributeFilterClearIrrelevantValuesClicked"
+    | "attributeFilterShowAllValuesClicked"
+    | "attributeFilterLimitAddButtonClicked"
+    | "attributeFilterLimitAddParentFilterOptionClicked"
+    | "attributeFilterLimitAddMetricOptionClicked"
+    | "attributeFilterLimitParentFilterClicked"
+    | "attributeFilterLimitMetricClicked"
+    | "attributeFilterLimitFactMetricClicked"
+    | "attributeFilterLimitAttributeMetricClicked"
+    | "attributeFilterLimitRemoveParentFilterClicked"
+    | "attributeFilterLimitRemoveMetricClicked";
+
+/**
+ * @beta
+ */
+export type AttributeHierarchiesInteractionType =
+    | "attributeHierarchyDrillDownSelected"
+    | "attributeHierarchyDrillDownCreateClicked"
+    | "attributeHierarchyAddAttributeClicked"
+    | "attributeHierarchyCreateClicked";
+
+/**
+ * @beta
+ */
 export interface BareUserInteractionPayload {
-    interaction: "kpiAlertDialogClosed" | "poweredByGDLogoClicked" | "attributeFilterTitleResetClicked";
+    interaction:
+        | "kpiAlertDialogClosed"
+        | "poweredByGDLogoClicked"
+        | "filterContextStateReset"
+        | "interactionPanelOpened"
+        | "addInteractionClicked"
+        | AttributeHierarchiesInteractionType
+        | AttributeFilterInteractionType
+        | DateFilterInteractionType;
 }
+
+/**
+ * @beta
+ */
+export type DateFilterInteractionType = "dateFilterTitleResetClicked" | "dateFilterConfigurationOpened";
 
 /**
  * @beta

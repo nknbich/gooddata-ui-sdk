@@ -1,5 +1,5 @@
-// (C) 2022 GoodData Corporation
-import { IDashboardAttributeFilter, IInsight, IKpi } from "@gooddata/sdk-model";
+// (C) 2022-2024 GoodData Corporation
+import { IDashboardAttributeFilter, IDashboardDateFilter, IInsight, IKpi } from "@gooddata/sdk-model";
 import { ICustomWidget } from "../../model/types/layoutTypes.js";
 
 /**
@@ -7,12 +7,15 @@ import { ICustomWidget } from "../../model/types/layoutTypes.js";
  */
 export type DraggableContentItemType =
     | "attributeFilter"
+    | "dateFilter"
     | "attributeFilter-placeholder"
     | "insightListItem"
     | "insight"
     | "insight-placeholder"
     | "kpi"
     | "kpi-placeholder"
+    | "richText"
+    | "richTextListItem"
     | "custom";
 
 /**
@@ -45,6 +48,22 @@ export type AttributeFilterDraggableItem = {
  */
 export function isAttributeFilterDraggableItem(item: any): item is AttributeFilterDraggableItem {
     return item.type === "attributeFilter";
+}
+
+/**
+ * @internal
+ */
+export type DateFilterDraggableItem = {
+    type: "dateFilter";
+    filter: IDashboardDateFilter;
+    filterIndex: number;
+};
+
+/**
+ * @internal
+ */
+export function isDateFilterDraggableItem(item: any): item is DateFilterDraggableItem {
+    return item.type === "dateFilter";
 }
 
 /**
@@ -114,6 +133,34 @@ export type KpiDraggableItem = BaseDraggableMovingItem & {
  */
 export function isKpiDraggableItem(item: any): item is KpiDraggableItem {
     return item.type === "kpi";
+}
+
+/**
+ * @internal
+ */
+export type RichTextDraggableItem = BaseDraggableMovingItem & {
+    type: "richText";
+};
+
+/**
+ * @internal
+ */
+export function isRichTextDraggableItem(item: any): item is InsightDraggableItem {
+    return item.type === "richText";
+}
+
+/**
+ * @internal
+ */
+export type RichTextDraggableListItem = BaseDraggableLayoutItem & {
+    type: "richTextListItem";
+};
+
+/**
+ * @internal
+ */
+export function isRichTextDraggableListItem(item: any): item is RichTextDraggableListItem {
+    return item.type === "richTextListItem";
 }
 
 /**
@@ -197,18 +244,25 @@ export type CustomDraggableItem = {
 export type DraggableContentItem =
     | AttributeFilterDraggableItem
     | AttributeFilterPlaceholderDraggableItem
+    | DateFilterDraggableItem
     | InsightDraggableItem
     | InsightDraggableListItem
     | InsightPlaceholderDraggableItem
     | KpiDraggableItem
     | KpiPlaceholderDraggableItem
+    | RichTextDraggableItem
+    | RichTextDraggableListItem
     | CustomWidgetDraggableItem
     | CustomDraggableItem;
 
 /**
  * @internal
  */
-export type DraggableLayoutItem = InsightDraggableItem | KpiDraggableItem | CustomWidgetDraggableItem;
+export type DraggableLayoutItem =
+    | InsightDraggableItem
+    | KpiDraggableItem
+    | RichTextDraggableItem
+    | CustomWidgetDraggableItem;
 
 /**
  * @internal
@@ -230,12 +284,15 @@ export type DraggableItemTypeMapping = DraggableItemComponentTypeMapping & Dragg
  */
 export type DraggableItemComponentTypeMapping = {
     attributeFilter: AttributeFilterDraggableItem;
+    dateFilter: DateFilterDraggableItem;
     "attributeFilter-placeholder": AttributeFilterPlaceholderDraggableItem;
     insight: InsightDraggableItem;
     insightListItem: InsightDraggableListItem;
     "insight-placeholder": InsightPlaceholderDraggableItem;
     kpi: KpiDraggableItem;
     "kpi-placeholder": KpiPlaceholderDraggableItem;
+    richText: RichTextDraggableItem;
+    richTextListItem: RichTextDraggableListItem;
     custom: CustomDraggableItem;
 };
 

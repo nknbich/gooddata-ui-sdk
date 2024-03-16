@@ -1,4 +1,4 @@
-// (C) 2019-2023 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 import {
     IFilter,
     ObjRef,
@@ -19,8 +19,10 @@ import {
     IDashboardPluginDefinition,
     IDashboardPermissions,
     IExistingDashboard,
+    IDateFilter,
 } from "@gooddata/sdk-model";
 import { IExportResult } from "../execution/export.js";
+import { IPagedResource } from "../../common/paging.js";
 
 /**
  * Dashboard referenced objects
@@ -186,6 +188,13 @@ export interface IWorkspaceDashboardsService {
      * @returns promise of list of the dashboards
      */
     getDashboards(options?: IGetDashboardOptions): Promise<IListedDashboard[]>;
+
+    /**
+     * List dashboards
+     *
+     * @returns methods for querying dashboards
+     */
+    getDashboardsQuery(): IDashboardsQuery;
 
     /**
      * Load dashboard by its reference,
@@ -389,6 +398,7 @@ export interface IWorkspaceDashboardsService {
      * Takes a widget and a list of filters and returns filters that can be used for the widget.
      * - for attribute filters, these are filters that should NOT be ignored according to the ignoreDashboardFilters property.
      * - for date filters it is the last filter with the same date dimension as specified in dateDataSet property.
+     * DOES NOT SUPPORT MULTIPLE DATE FILTERS. If you want to provide multiple date filters, pls refer to getResolvedFiltersForWidgetWithMultipleDateFilters
      *
      * The implementation MUST take different ObjRef types into account, for example if an incoming filter
      * uses idRef and an ignoreDashboardFilters item uses uriRef but they point to the same metadata object,
@@ -399,6 +409,27 @@ export interface IWorkspaceDashboardsService {
      * @returns promise with the filters with the ignored filters removed
      */
     getResolvedFiltersForWidget(widget: IWidget, filters: IFilter[]): Promise<IFilter[]>;
+
+    /**
+     * Takes a widget, commonDateFilters and a list of other filters and returns filters that can be used for the widget.
+     * - common date filters are used only when match widget's date data set. If multiple of them match the last one is used
+     * - other date filters - these are filters that should NOT be ignored according to the ignoreDashboardFilters property. May have date data sets different from one in widget's definition
+     * - for attribute filters - these are filters that should NOT be ignored according to the ignoreDashboardFilters property.
+     *
+     * The implementation MUST take different ObjRef types into account, for example if an incoming filter
+     * uses idRef and an ignoreDashboardFilters item uses uriRef but they point to the same metadata object,
+     * the filter MUST NOT be included in the result.
+     *
+     * @param widget - widget to get filters for
+     * @param commonDateFilters - date filters to apply on the widget only when matching its date dataSet
+     * @param otherFilters - filters to apply on the widget
+     * @returns promise with the filters with the ignored filters removed
+     */
+    getResolvedFiltersForWidgetWithMultipleDateFilters(
+        widget: IWidget,
+        commonDateFilters: IDateFilter[],
+        otherFilters: IFilter[],
+    ): Promise<IFilter[]>;
 
     /**
      * Gets all dashboard plugins registered in the current workspace.
@@ -458,3 +489,59 @@ export interface IWorkspaceDashboardsService {
      */
     validateDashboardsExistence(dashboardRefs: ObjRef[]): Promise<IExistingDashboard[]>;
 }
+
+/**
+ * Service to query dashboards.
+ *
+ * @public
+ */
+export interface IDashboardsQuery {
+    /**
+     * Sets number of dashboards to return per page.
+     * Default size: 50
+     *
+     * @param size - desired max number of dashboards per page must be a positive number
+     * @returns dashboards query
+     */
+    withSize(size: number): IDashboardsQuery;
+
+    /**
+     * Sets starting page for the query. Backend WILL return no data if the page is greater than
+     * total number of pages.
+     * Default page: 0
+     *
+     * @param page - zero indexed, must be non-negative
+     * @returns dashboards query
+     */
+    withPage(page: number): IDashboardsQuery;
+
+    /**
+     * Sets filter for the query.
+     *
+     * @param filter - filter to apply
+     * @returns dashboards query
+     */
+    withFilter(filter: { title?: string }): IDashboardsQuery;
+
+    /**
+     * Sets sorting for the query.
+     *
+     * @param sort - Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.
+     * @returns dashboards query
+     */
+    withSorting(sort: string[]): IDashboardsQuery;
+
+    /**
+     * Starts the dashboards query.
+     *
+     * @returns promise of first page of the results
+     */
+    query(): Promise<IDashboardsQueryResult>;
+}
+
+/**
+ * Queried dashboards are returned in a paged representation.
+ *
+ * @public
+ */
+export type IDashboardsQueryResult = IPagedResource<IListedDashboard>;

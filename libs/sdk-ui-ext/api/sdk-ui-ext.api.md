@@ -11,6 +11,7 @@ import { EmbedType } from '@gooddata/sdk-ui-kit';
 import { ExplicitDrill } from '@gooddata/sdk-ui';
 import { GoodDataSdkError } from '@gooddata/sdk-ui';
 import { IAnalyticalBackend } from '@gooddata/sdk-backend-spi';
+import { ICatalogAttributeHierarchy } from '@gooddata/sdk-model';
 import { IChartConfig } from '@gooddata/sdk-ui-charts';
 import { IColorPalette } from '@gooddata/sdk-model';
 import { IDrillEvent } from '@gooddata/sdk-ui';
@@ -36,7 +37,28 @@ import { WithIntlProps } from 'react-intl';
 import { WrappedComponentProps } from 'react-intl';
 
 // @internal (undocumented)
+export const AddDataSourceToSubjects: React_2.FC<IAddDataSourceToSubjectsProps>;
+
+// @internal (undocumented)
 export function addIntersectionFiltersToInsight(source: IInsight, intersection: IDrillEventIntersectionElement[], backendSupportsElementUris: boolean): IInsight;
+
+// @internal (undocumented)
+export const AddUserGroupsToUsersDialog: React_2.FC<IAddUserGroupsToUsersDialogProps>;
+
+// @internal (undocumented)
+export const AddUsersToUserGroupsDialog: React_2.FC<IAddUsersToUserGroupsDialogProps>;
+
+// @internal (undocumented)
+export const AddWorkspaceToSubjects: React_2.FC<IAddWorkspaceToSubjectsProps>;
+
+// @internal (undocumented)
+export const AttributeHierarchyDetailBubble: React_2.FC<IAttributeHierarchyDetailBubbleProps>;
+
+// @internal (undocumented)
+export const AttributeHierarchyDetailPanel: React_2.FC<IAttributeHierarchyDetailPanelProps>;
+
+// @internal (undocumented)
+export const AttributeHierarchyDialog: React_2.FC<IAttributeHierarchyDialogProps>;
 
 // @public
 export function clearInsightViewCaches(): void;
@@ -45,7 +67,28 @@ export function clearInsightViewCaches(): void;
 export type CreateRoot = (container: Element | DocumentFragment, options?: any) => Root;
 
 // @internal (undocumented)
+export const CreateUserGroupDialog: React_2.FC<ICreateUserGroupDialogProps>;
+
+// @internal (undocumented)
 export const DASHBOARD_LAYOUT_DEFAULT_VIS_HEIGHT_PX = 450;
+
+// @internal (undocumented)
+export type DataSourcePermission = "USE" | "MANAGE";
+
+// @internal (undocumented)
+export type DataSourcePermissionSubject = "user" | "userGroup";
+
+// @internal (undocumented)
+export const DeleteUserDialog: React_2.FC<IDeleteUserDialogProps>;
+
+// @internal (undocumented)
+export const DeleteUserGroupDialog: React_2.FC<IDeleteUserGroupDialogProps>;
+
+// @internal (undocumented)
+export const DeleteUserGroupsDialog: React_2.FC<IDeleteUserGroupsDialogProps>;
+
+// @internal (undocumented)
+export const DeleteUsersDialog: React_2.FC<IDeleteUsersDialogProps>;
 
 // @internal (undocumented)
 export const EmbedInsightDialog: React_2.VFC<IEmbedInsightDialogProps>;
@@ -84,6 +127,164 @@ export function getInsightVisualizationMeta(insight: IInsightDefinition): IVisua
 
 // @internal (undocumented)
 export function getInsightWithAppliedDrillDown(insight: IInsight, drillEvent: IDrillEvent, drillDefinition: IDrillDownDefinition, backendSupportsElementUris: boolean): IInsight;
+
+// @internal (undocumented)
+export interface IAddDataSourceToSubjectsProps extends IWithTelemetryProps {
+    // (undocumented)
+    ids: string[];
+    // (undocumented)
+    onClose: () => void;
+    // (undocumented)
+    onSuccess: () => void;
+    // (undocumented)
+    organizationId: string;
+    // (undocumented)
+    renderDataSourceIcon?: (dataSource: IGrantedDataSource) => JSX.Element;
+    // (undocumented)
+    subjectType: DataSourcePermissionSubject;
+}
+
+// @internal (undocumented)
+export interface IAddUserGroupsToUsersDialogProps extends IWithTelemetryProps {
+    // (undocumented)
+    onClose: () => void;
+    // (undocumented)
+    onSuccess: () => void;
+    // (undocumented)
+    organizationId: string;
+    // (undocumented)
+    userIds: string[];
+}
+
+// @internal (undocumented)
+export interface IAddUsersToUserGroupsDialogProps extends IWithTelemetryProps {
+    // (undocumented)
+    onClose: () => void;
+    // (undocumented)
+    onSuccess: () => void;
+    // (undocumented)
+    organizationId: string;
+    // (undocumented)
+    userGroupIds: string[];
+}
+
+// @internal (undocumented)
+export interface IAddWorkspaceToSubjectsProps extends IWithTelemetryProps {
+    // (undocumented)
+    ids: string[];
+    // (undocumented)
+    onClose: () => void;
+    // (undocumented)
+    onSuccess: () => void;
+    // (undocumented)
+    organizationId: string;
+    // (undocumented)
+    subjectType: WorkspacePermissionSubject;
+}
+
+// @internal (undocumented)
+export interface IAttributeHierarchyDetailBubbleProps {
+    // (undocumented)
+    children?: React_2.ReactNode;
+    // (undocumented)
+    className?: string;
+}
+
+// @internal (undocumented)
+export interface IAttributeHierarchyDetailItem {
+    // (undocumented)
+    isDate: boolean;
+    // (undocumented)
+    title: string;
+}
+
+// @internal (undocumented)
+export interface IAttributeHierarchyDetailPanelProps {
+    // (undocumented)
+    attributes: IAttributeHierarchyDetailItem[];
+    // (undocumented)
+    description?: string;
+    // (undocumented)
+    onEdit?: () => void;
+    // (undocumented)
+    title: string;
+}
+
+// @internal (undocumented)
+export interface IAttributeHierarchyDialogProps {
+    // (undocumented)
+    editingAttributeHierarchy?: ICatalogAttributeHierarchy;
+    // (undocumented)
+    initialAttributeRef?: ObjRef;
+    // (undocumented)
+    onAddAttributeClicked?: () => void;
+    // (undocumented)
+    onClose?: () => void;
+    // (undocumented)
+    onCreateHierarchyClicked?: () => void;
+    // (undocumented)
+    onDeleteSuccess?: () => void;
+    // (undocumented)
+    onSaveOrUpdateSuccess?: (attributeHierarchy: ICatalogAttributeHierarchy) => void;
+}
+
+// @internal (undocumented)
+export interface ICreateUserGroupDialogProps extends IWithTelemetryProps {
+    // (undocumented)
+    onCancel: () => void;
+    // (undocumented)
+    onSuccess: () => void;
+    // (undocumented)
+    organizationId: string;
+}
+
+// @internal (undocumented)
+export interface IDeleteUserDialogProps extends IWithTelemetryProps {
+    // (undocumented)
+    onClose: () => void;
+    // (undocumented)
+    onSuccess: () => void;
+    // (undocumented)
+    organizationId: string;
+    // (undocumented)
+    userId: string;
+}
+
+// @internal (undocumented)
+export interface IDeleteUserGroupDialogProps extends IWithTelemetryProps {
+    // (undocumented)
+    onClose: () => void;
+    // (undocumented)
+    onSuccess: () => void;
+    // (undocumented)
+    organizationId: string;
+    // (undocumented)
+    userGroupId: string;
+}
+
+// @internal (undocumented)
+export interface IDeleteUserGroupsDialogProps extends IWithTelemetryProps {
+    // (undocumented)
+    onClose: () => void;
+    // (undocumented)
+    onSuccess: () => void;
+    // (undocumented)
+    organizationId: string;
+    // (undocumented)
+    userGroupIds: string[];
+}
+
+// @internal (undocumented)
+export interface IDeleteUsersDialogProps extends IWithTelemetryProps {
+    // (undocumented)
+    onClose: () => void;
+    // (undocumented)
+    onSuccess: () => void;
+    // (undocumented)
+    organizationId: string;
+    // (undocumented)
+    userIds: string[];
+}
 
 // @beta
 export interface IDrillDownDefinition {
@@ -135,6 +336,16 @@ export interface IFluidLayoutDescriptor extends ILayoutDescriptor {
     toHeightInPx(height: number): number;
     // (undocumented)
     type: "fluid";
+}
+
+// @internal (undocumented)
+export interface IGrantedDataSource {
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    permission: DataSourcePermission;
+    // (undocumented)
+    title: string;
 }
 
 // @internal (undocumented)
@@ -213,7 +424,7 @@ export const InsightRenderer: React_2.FC<IInsightRendererProps>;
 // @public
 export class InsightView extends React_2.Component<IInsightViewProps> {
     // (undocumented)
-    render(): JSX.Element;
+    render(): React_2.JSX.Element;
 }
 
 // @beta
@@ -236,6 +447,44 @@ export interface ISizeInfo {
 export type ISizeInfoDefault = ISizeInfo & {
     default: number;
 };
+
+// @internal (undocumented)
+export interface IUserEditDialogProps extends IWithTelemetryProps {
+    // (undocumented)
+    changeUserMembership?: boolean;
+    // (undocumented)
+    initialView?: UserEditDialogMode;
+    // (undocumented)
+    isAdmin: boolean;
+    // (undocumented)
+    onClose: () => void;
+    // (undocumented)
+    onSuccess: () => void;
+    // (undocumented)
+    organizationId: string;
+    // (undocumented)
+    renderDataSourceIcon?: (dataSource: IGrantedDataSource) => JSX.Element;
+    // (undocumented)
+    userId: string;
+}
+
+// @internal (undocumented)
+export interface IUserGroupEditDialogProps extends IWithTelemetryProps {
+    // (undocumented)
+    initialView?: UserGroupEditDialogMode;
+    // (undocumented)
+    isAdmin: boolean;
+    // (undocumented)
+    onClose: () => void;
+    // (undocumented)
+    onSuccess: () => void;
+    // (undocumented)
+    organizationId: string;
+    // (undocumented)
+    renderDataSourceIcon?: (dataSource: IGrantedDataSource) => JSX.Element;
+    // (undocumented)
+    userGroupId: string;
+}
 
 // @alpha
 export interface IVisualizationDefaultSizeInfo {
@@ -261,6 +510,12 @@ export interface IVisualizationSizeInfo {
 }
 
 // @internal (undocumented)
+export interface IWithTelemetryProps {
+    // (undocumented)
+    onEvent: TrackEventCallback;
+}
+
+// @internal (undocumented)
 export const KPI_WIDGET_SIZE_INFO_DEFAULT: IVisualizationDefaultSizeInfo;
 
 // @internal (undocumented)
@@ -272,6 +527,7 @@ export type LayoutType = "fluid";
 // @alpha (undocumented)
 export const PluggableVisualizationErrorCodes: {
     INVALID_BUCKETS: string;
+    INVALID_COLUMNS: string;
     EMPTY_AFM: string;
 };
 
@@ -280,6 +536,9 @@ export type PluggableVisualizationErrorType = keyof typeof PluggableVisualizatio
 
 // @public
 export function provideCreateRoot(createRoot: CreateRoot): void;
+
+// @internal (undocumented)
+export const RICH_TEXT_WIDGET_SIZE_INFO_DEFAULT: IVisualizationDefaultSizeInfo;
 
 // @public
 export interface Root {
@@ -290,6 +549,27 @@ export interface Root {
 }
 
 // @internal (undocumented)
+export type TelemetryEvent = "multiple-users-deleted" | "multiple-groups-deleted" | "group-deleted" | "user-deleted" | "group-created" | "user-detail-updated" | "group-detail-updated" | "groups-added-to-single-user" | "groups-added-to-multiple-users" | "users-added-to-single-group" | "users-added-to-multiple-groups" | "permission-added-to-single-user" | "permission-added-to-single-group" | "permission-added-to-multiple-users" | "permission-added-to-multiple-groups" | "user-permission-changed-to-hierarchy" | "user-permission-changed-to-single-workspace" | "group-permission-changed-to-hierarchy" | "group-permission-changed-to-single-workspace" | "user-permission-changed-to-view" | "group-permission-changed-to-view" | "user-permission-changed-to-view-export" | "group-permission-changed-to-view-export" | "user-permission-changed-to-analyze" | "group-permission-changed-to-analyze" | "user-permission-changed-to-analyze-export" | "group-permission-changed-to-analyze-export" | "user-permission-changed-to-manage" | "group-permission-changed-to-manage" | "user-data-source-permission-changed-to-use" | "group-data-source-permission-changed-to-use" | "user-data-source-permission-changed-to-manage" | "group-data-source-permission-changed-to-manage" | "user-role-changed-to-admin" | "user-role-changed-to-member";
+
+// @internal (undocumented)
+export type TrackEventCallback = (event: TelemetryEvent) => void;
+
+// @internal (undocumented)
+export const UserEditDialog: React_2.FC<IUserEditDialogProps>;
+
+// @internal (undocumented)
+export type UserEditDialogMode = "VIEW" | "WORKSPACE" | "USER_GROUPS" | "DATA_SOURCES" | "DETAIL";
+
+// @internal (undocumented)
+export const UserGroupEditDialog: React_2.FC<IUserGroupEditDialogProps>;
+
+// @internal (undocumented)
+export type UserGroupEditDialogMode = "VIEW" | "WORKSPACE" | "USERS" | "DATA_SOURCES" | "DETAIL";
+
+// @internal (undocumented)
 export const WIDGET_DROPZONE_SIZE_INFO_DEFAULT: IVisualizationDefaultSizeInfo;
+
+// @internal (undocumented)
+export type WorkspacePermissionSubject = "user" | "userGroup";
 
 ```

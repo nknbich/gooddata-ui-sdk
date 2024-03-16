@@ -1,4 +1,4 @@
-// (C) 2019-2022 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 import { IAnalyticalBackend, IExecutionFactory } from "@gooddata/sdk-backend-spi";
 import {
     ISettings,
@@ -11,6 +11,7 @@ import {
     IExecutionConfig,
 } from "@gooddata/sdk-model";
 import React from "react";
+// eslint-disable-next-line react/no-deprecated
 import { render } from "react-dom";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -32,6 +33,7 @@ import {
     IDrillDownContext,
     IVisProps,
     IExtendedReferencePoint,
+    IConfigurationPanelRenderers,
 } from "../interfaces/Visualization.js";
 import { PluggableVisualizationFactory } from "../interfaces/VisualizationDescriptor.js";
 import { FullVisualizationCatalog, IVisualizationCatalog } from "./VisualizationCatalog.js";
@@ -69,6 +71,7 @@ export interface IBaseVisualizationProps extends IVisCallbacks {
     configPanelClassName?: string;
     theme?: ITheme;
     lastSavedVisClassUrl?: string;
+    sourceInsightId?: string;
     onExtendedReferencePointChanged?(referencePoint: IExtendedReferencePoint, sortConfig?: ISortConfig): void;
     onSortingChanged?(sortConfig: ISortConfig): void;
 
@@ -76,6 +79,7 @@ export interface IBaseVisualizationProps extends IVisCallbacks {
 
     renderer?(component: any, target: Element): void;
     unmount?(): void;
+    configurationPanelRenderers?: IConfigurationPanelRenderers;
 }
 
 export class BaseVisualization extends React.PureComponent<IBaseVisualizationProps> {
@@ -138,6 +142,18 @@ export class BaseVisualization extends React.PureComponent<IBaseVisualizationPro
 
         if (newDerivedBucketItemsChanged) {
             this.triggerPlaceNewDerivedBucketItems(nextProps);
+            return;
+        }
+
+        // buckets changed from within inner visualization logic
+        const bucketsToUpdate = this.visualization.getBucketsToUpdate(
+            this.props.referencePoint,
+            nextProps.referencePoint,
+        );
+
+        if (bucketsToUpdate) {
+            this.triggerPlaceNewDerivedBucketItems(nextProps, bucketsToUpdate);
+            this.triggerExtendedReferencePointChanged(nextProps, this.props);
             return;
         }
 
@@ -305,12 +321,21 @@ export class BaseVisualization extends React.PureComponent<IBaseVisualizationPro
         );
     }
 
-    private triggerPlaceNewDerivedBucketItems(props: IBaseVisualizationProps) {
+    private triggerPlaceNewDerivedBucketItems(
+        props: IBaseVisualizationProps,
+        newBucketItemsFromVisualization?: IBucketItem[],
+    ) {
         const { newDerivedBucketItems, referencePoint, onNewDerivedBucketItemsPlaced } = props;
+        const newDerivedBucketItemsToPlace = newBucketItemsFromVisualization ?? newDerivedBucketItems;
 
-        if (this.visualization && referencePoint && newDerivedBucketItems && onNewDerivedBucketItemsPlaced) {
+        if (
+            this.visualization &&
+            referencePoint &&
+            newDerivedBucketItemsToPlace &&
+            onNewDerivedBucketItemsPlaced
+        ) {
             this.visualization
-                .addNewDerivedBucketItems(referencePoint, newDerivedBucketItems)
+                .addNewDerivedBucketItems(referencePoint, newDerivedBucketItemsToPlace)
                 .then(onNewDerivedBucketItemsPlaced);
         }
     }
@@ -392,6 +417,8 @@ export class BaseVisualization extends React.PureComponent<IBaseVisualizationPro
                 drillableItems: this.props.drillableItems,
                 totalsEditAllowed: this.props.totalsEditAllowed,
                 lastSavedVisClassUrl: this.props.lastSavedVisClassUrl,
+                sourceInsightId: this.props.sourceInsightId,
+                configurationPanelRenderers: this.props.configurationPanelRenderers,
             },
             config: this.props.config,
             theme: this.props.theme,

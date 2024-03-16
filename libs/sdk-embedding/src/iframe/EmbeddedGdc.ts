@@ -1,10 +1,11 @@
-// (C) 2020-2023 GoodData Corporation
+// (C) 2020-2024 GoodData Corporation
 import {
     ILocalIdentifierQualifier as IBearLocalIdentifierQualifier,
     ObjQualifier as BearObjQualifier,
     isObjIdentifierQualifier as isBearObjIdentifierQualifier,
     isObjectUriQualifier as isBearObjectUriQualifier,
 } from "@gooddata/api-model-bear";
+import { DashboardDateFilterConfigMode, DashboardAttributeFilterConfigMode } from "@gooddata/sdk-model";
 import isEmpty from "lodash/isEmpty.js";
 
 /**
@@ -19,6 +20,12 @@ export interface IPositiveAttributeFilter {
         textFilter?: boolean;
         selectionMode?: AttributeFilterItemSelectionMode;
     };
+    /**
+     * Configures the visibility mode of the attribute filter.
+     *
+     * @alpha
+     */
+    mode?: DashboardAttributeFilterConfigMode;
 }
 
 /**
@@ -31,6 +38,12 @@ export interface INegativeAttributeFilter {
         textFilter?: boolean;
         selectionMode?: "multi";
     };
+    /**
+     * Configures the visibility mode of the attribute filter.
+     *
+     * @alpha
+     */
+    mode?: DashboardAttributeFilterConfigMode;
 }
 
 /**
@@ -43,6 +56,18 @@ export interface IAbsoluteDateFilter {
         from: string;
         to: string;
     };
+    /**
+     * Configures the visibility mode of the date filter.
+     *
+     * @alpha
+     */
+    mode?: DashboardDateFilterConfigMode;
+    /**
+     * Local identifier of the date filter.
+     *
+     * @alpha
+     */
+    localIdentifier?: string;
 }
 
 /**
@@ -56,6 +81,18 @@ export interface IRelativeDateFilter {
         from: number;
         to: number;
     };
+    /**
+     * Configures the visibility mode of the date filter.
+     *
+     * @alpha
+     */
+    mode?: DashboardDateFilterConfigMode;
+    /**
+     * Local identifier of the date filter.
+     *
+     * @alpha
+     */
+    localIdentifier?: string;
 }
 
 /**

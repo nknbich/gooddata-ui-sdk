@@ -1,13 +1,15 @@
-// (C) 2021-2023 GoodData Corporation
+// (C) 2021-2024 GoodData Corporation
 import {
     IDashboardLayoutSize,
     IDashboardLayout,
+    IDashboardWidget,
     ObjRef,
     areObjRefsEqual,
     IDashboardLayoutItem,
     IWidget,
     isInsightWidget,
     isKpiWidget,
+    isRichTextWidget,
 } from "@gooddata/sdk-model";
 import { IVisualizationSizeInfo } from "@gooddata/sdk-ui-ext";
 
@@ -27,6 +29,23 @@ export function getWidgetCoordinates(
         };
     }
     return undefined;
+}
+
+export function getWidgetsOfType(layout: IDashboardLayout<IDashboardWidget>, types: string[]) {
+    const result = [];
+    for (let sectionIndex = 0; sectionIndex < layout.sections.length; sectionIndex++) {
+        const section = layout.sections[sectionIndex];
+
+        for (let itemIndex = 0; itemIndex < section.items.length; itemIndex++) {
+            const item = section.items[itemIndex];
+
+            if (item.widget?.type !== undefined && types.includes(item.widget?.type)) {
+                result.push(item.widget);
+            }
+        }
+    }
+
+    return result;
 }
 
 export function getWidgetCoordinatesAndItem(layout: IDashboardLayout<ExtendedDashboardWidget>, ref: ObjRef) {
@@ -54,7 +73,7 @@ export function isItemWithBaseWidget(
 ): obj is IDashboardLayoutItem<IWidget> {
     const widget = obj.widget;
 
-    return isInsightWidget(widget) || isKpiWidget(widget);
+    return isInsightWidget(widget) || isKpiWidget(widget) || isRichTextWidget(widget);
 }
 
 export function resizeInsightWidget(

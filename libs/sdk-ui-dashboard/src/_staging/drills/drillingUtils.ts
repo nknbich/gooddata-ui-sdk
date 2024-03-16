@@ -17,6 +17,7 @@ import {
     ICatalogDateAttribute,
     isMeasureDescriptor,
     IAttributeDescriptor,
+    isCrossFiltering,
 } from "@gooddata/sdk-model";
 import {
     HeaderPredicates,
@@ -28,10 +29,18 @@ import {
 } from "@gooddata/sdk-ui";
 import first from "lodash/first.js";
 import last from "lodash/last.js";
-import { DashboardDrillDefinition, IDrillDownDefinition } from "../../types.js";
+import {
+    DashboardDrillDefinition,
+    IDrillDownDefinition,
+    IGlobalDrillDownAttributeHierarchyDefinition,
+} from "../../types.js";
 import isEqual from "lodash/isEqual.js";
 
-export { getAttributeIdentifiersPlaceholdersFromUrl } from "@gooddata/sdk-model/internal";
+export {
+    getAttributeIdentifiersPlaceholdersFromUrl,
+    getDashboardAttributeFilterPlaceholdersFromUrl,
+    getInsightAttributeFilterPlaceholdersFromUrl,
+} from "@gooddata/sdk-model/internal";
 
 interface IImplicitDrillWithPredicates {
     drillDefinition: DrillDefinition | IDrillDownDefinition;
@@ -122,6 +131,7 @@ export function getDrillsBySourceLocalIdentifiers(
     return widgetDrillDefinition.filter(
         (d) =>
             isDrillToLegacyDashboard(d) ||
+            isCrossFiltering(d) ||
             drillSourceLocalIdentifiers.includes(getDrillOriginLocalIdentifier(d)),
     );
 }
@@ -166,7 +176,10 @@ export function filterDrillsByDrillEvent(
 }
 
 export function getDrillOriginLocalIdentifier(
-    drillDefinition: InsightDrillDefinition | IDrillDownDefinition,
+    drillDefinition:
+        | InsightDrillDefinition
+        | IDrillDownDefinition
+        | IGlobalDrillDownAttributeHierarchyDefinition,
 ): string {
     const { origin } = drillDefinition;
 

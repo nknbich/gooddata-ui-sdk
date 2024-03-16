@@ -1,4 +1,4 @@
-// (C) 2022 GoodData Corporation
+// (C) 2022-2024 GoodData Corporation
 
 import {
     IAttributeDisplayFormMetadataObject,
@@ -133,6 +133,23 @@ export type AttributeFilterControllerData = {
      * Current attribute filter display form {@link @gooddata/sdk-model#ObjRef}.
      */
     currentDisplayFormRef: ObjRef;
+
+    /**
+     * This enables "show filtered elements" option which manages showing filtered elements.
+     */
+    enableShowingFilteredElements?: boolean;
+
+    /**
+     * Irrelevant/filtered out selection elements which are still effective.
+     *
+     * @remarks Used only when showing filtered elements is enabled.
+     */
+    irrelevantSelection?: IAttributeElement[];
+
+    /**
+     * Current validation items used to limit attribute filter elements.
+     */
+    limitingValidationItems?: ObjRef[];
 };
 
 /**
@@ -165,6 +182,21 @@ export type AttributeFilterControllerCallbacks = {
      * Reset working selection.
      */
     onReset: () => void;
+
+    /**
+     * Filter open callback.
+     */
+    onOpen: () => void;
+
+    /**
+     * Request to see filtered elements when some are filtered out by limiting filters.
+     */
+    onShowFilteredElements: () => void;
+
+    /**
+     * Clear irrelevant/filtered out selection callback.
+     */
+    onClearIrrelevantSelection: () => void;
 };
 
 /**

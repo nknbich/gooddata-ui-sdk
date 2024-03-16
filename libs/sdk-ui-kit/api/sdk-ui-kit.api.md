@@ -64,7 +64,7 @@ export type Alignment = {
 };
 
 // @internal (undocumented)
-export const AppHeader: React_2.ComponentType<Omit<WithIntlProps<IAppHeaderProps & WrappedComponentProps>, "theme" | "themeIsLoading">>;
+export const AppHeader: React_2.ComponentType<Omit<WithIntlProps<IAppHeaderProps & WrappedComponentProps>, "theme" | "themeIsLoading" | "themeStatus">>;
 
 // @internal (undocumented)
 export type ArrowDirections = Record<string, string>;
@@ -76,7 +76,7 @@ export type ArrowOffset = number[];
 export type ArrowOffsets = Record<string, ArrowOffset>;
 
 // @internal (undocumented)
-export function AsyncList<T>(props: IAsyncListProps<T>): JSX.Element;
+export function AsyncList<T>(props: IAsyncListProps<T>): React_2.JSX.Element;
 
 // @internal (undocumented)
 export class AutoSize extends Component<IAutoSizeProps> {
@@ -85,13 +85,16 @@ export class AutoSize extends Component<IAutoSizeProps> {
     // (undocumented)
     componentWillUnmount(): void;
     // (undocumented)
-    render(): JSX.Element;
+    render(): React_2.JSX.Element;
     // (undocumented)
     state: {
         width: number;
         height: number;
     };
 }
+
+// @internal (undocumented)
+export const BackButton: React_2.FC<IBackButtonProps>;
 
 // @internal (undocumented)
 export class Bubble extends React_2.Component<IBubbleProps, IBubbleState> {
@@ -130,7 +133,7 @@ export class Bubble extends React_2.Component<IBubbleProps, IBubbleState> {
     // (undocumented)
     onAlign: (alignment: IAlignPoint) => void;
     // (undocumented)
-    render(): JSX.Element;
+    render(): React_2.JSX.Element;
     // (undocumented)
     shouldComponentUpdate(nextProps: IBubbleProps, nextState: IBubbleState): boolean;
 }
@@ -147,7 +150,7 @@ export class BubbleFocusTrigger extends BubbleTrigger<BubbleFocusTriggerProps> {
 export type BubbleFocusTriggerProps = IBubbleTriggerProps;
 
 // @internal (undocumented)
-export const BubbleHeaderSeparator: ({ title, message }: IBubbleHeaderSeparatorProps) => JSX.Element;
+export const BubbleHeaderSeparator: ({ title, message }: IBubbleHeaderSeparatorProps) => React_2.JSX.Element;
 
 // @internal (undocumented)
 export class BubbleHoverTrigger extends BubbleTrigger<IBubbleHoverTriggerProps> {
@@ -170,7 +173,7 @@ export class BubbleTrigger<P extends IBubbleTriggerProps> extends React_2.PureCo
     // (undocumented)
     protected eventListeners(): any;
     // (undocumented)
-    render(): JSX.Element;
+    render(): React_2.JSX.Element;
     // (undocumented)
     readonly state: Readonly<IBubbleTriggerState>;
 }
@@ -193,7 +196,7 @@ export class Button extends React_2.Component<IButtonProps> {
         iconRight: string;
     };
     // (undocumented)
-    render(): JSX.Element;
+    render(): React_2.JSX.Element;
 }
 
 // @internal (undocumented)
@@ -242,7 +245,7 @@ export class Checkbox extends React_2.PureComponent<CheckboxProps> {
     // (undocumented)
     onChange: (e: React_2.ChangeEvent<HTMLInputElement>) => void;
     // (undocumented)
-    render(): JSX.Element;
+    render(): React_2.JSX.Element;
 }
 
 // @internal (undocumented)
@@ -287,7 +290,7 @@ export const ColorPicker: React_2.FC<WithIntlProps<IColorPickerProps & WrappedCo
 export const ColorPickerPointer: React_2.FC;
 
 // @internal (undocumented)
-export const ColorPreview: (props: IColorPreviewProps) => JSX.Element;
+export const ColorPreview: (props: IColorPreviewProps) => React_2.JSX.Element;
 
 // @internal (undocumented)
 export const CommunityEditionDialog: React_2.FC<ICommunityEditionDialogProps>;
@@ -310,7 +313,7 @@ export class ConfirmDialogBase extends DialogBase<IConfirmDialogBaseProps> {
 }
 
 // @internal (undocumented)
-export const ContentDivider: React_2.VFC;
+export const ContentDivider: React_2.FC;
 
 // @internal (undocumented)
 export type CopyCodeOriginType = "keyboard" | "button";
@@ -329,7 +332,7 @@ export const DateDatasetsListItem: React_2.FC<IDateDatasetsListItemProps>;
 // @internal (undocumented)
 export class Datepicker extends React_2.PureComponent<IDatePickerOwnProps> {
     // (undocumented)
-    render(): JSX.Element;
+    render(): React_2.JSX.Element;
 }
 
 // @internal (undocumented)
@@ -517,7 +520,7 @@ export enum ENUM_KEY_CODE {
 // @internal (undocumented)
 export class ErrorOverlay extends React_2.PureComponent<IErrorOverlayProps> {
     // (undocumented)
-    render(): JSX.Element;
+    render(): React_2.JSX.Element;
 }
 
 // @internal (undocumented)
@@ -570,6 +573,9 @@ export type FormatMessageParams = Parameters<IntlShape["formatMessage"]>;
 
 // @internal (undocumented)
 export function formatTime(h: number, m: number, format?: string): string;
+
+// @internal (undocumented)
+export type FormatXMLElementFn<T, R = string | T | (string | T)[]> = (parts: Array<string | T>) => R;
 
 // @internal (undocumented)
 export class FullScreenOverlay extends Overlay<IOverlayState> {
@@ -875,6 +881,8 @@ export interface IAsyncListProps<T> {
     // (undocumented)
     renderItem: (props: IRenderListItemProps<T>) => JSX.Element;
     // (undocumented)
+    renderLoadingItem?: (props: IRenderListItemProps<T>) => JSX.Element;
+    // (undocumented)
     width?: number;
 }
 
@@ -903,6 +911,14 @@ export interface IAvailableSortsGroup {
     itemId: LocalIdRef;
     // (undocumented)
     metricSorts?: MeasureSortSuggestion[];
+}
+
+// @internal (undocumented)
+export interface IBackButtonProps {
+    // (undocumented)
+    className: string;
+    // (undocumented)
+    onClick: () => void;
 }
 
 // @internal
@@ -1134,6 +1150,8 @@ export interface IConfirmDialogBaseProps extends IDialogBaseProps {
     headerLeftButtonRenderer?: () => JSX.Element;
     // (undocumented)
     headline?: string;
+    // (undocumented)
+    isCancelDisabled?: boolean;
     // (undocumented)
     isPositive?: boolean;
     // (undocumented)
@@ -1448,6 +1466,8 @@ export interface IDropdownListProps<T> extends IListProps<T> {
     // (undocumented)
     isMobile?: boolean;
     // (undocumented)
+    maxHeight?: number;
+    // (undocumented)
     mobileItemHeight?: number;
     // (undocumented)
     onSearch?: (searchString: string) => void;
@@ -1471,6 +1491,10 @@ export interface IDropdownListProps<T> extends IListProps<T> {
     showTabs?: boolean;
     // (undocumented)
     tabs?: ITab[];
+    // (undocumented)
+    tabsClassName?: string;
+    // (undocumented)
+    title?: string;
     // (undocumented)
     width?: number;
 }
@@ -1508,6 +1532,8 @@ export interface IDropdownProps {
 
 // @internal (undocumented)
 export interface IDropdownTagsProps {
+    // (undocumented)
+    className?: string;
     // (undocumented)
     onTabSelect?: (tab: ITab) => void;
     // (undocumented)
@@ -2167,6 +2193,8 @@ export interface IInvertableSelectProps<T> {
     // (undocumented)
     nextPageItemPlaceholdersCount?: number;
     // (undocumented)
+    numberOfHiddenSelectedItems?: number;
+    // (undocumented)
     onLoadNextPage?: () => void;
     // (undocumented)
     onSearch?: (search: string) => void;
@@ -2586,6 +2614,8 @@ export interface IListProps<T> {
     // (undocumented)
     itemsCount?: number;
     // (undocumented)
+    maxHeight?: number;
+    // (undocumented)
     maxVisibleItemsCount?: number;
     // (undocumented)
     onScrollEnd?: ScrollCallback;
@@ -2911,7 +2941,7 @@ export class Input extends React_2.PureComponent<InputPureProps, InputState> {
     // (undocumented)
     onChange: (value: string | number) => void;
     // (undocumented)
-    render(): JSX.Element;
+    render(): React_2.JSX.Element;
     // (undocumented)
     UNSAFE_componentWillReceiveProps(nextProps: InputPureProps): void;
     // (undocumented)
@@ -2967,11 +2997,11 @@ export class InputPure extends React_2.PureComponent<InputPureProps> implements 
     // (undocumented)
     onKeyPress: (e: React_2.KeyboardEvent) => void;
     // (undocumented)
-    render(): JSX.Element;
+    render(): React_2.JSX.Element;
     // (undocumented)
     renderClearIcon(clearOnEsc: boolean): React_2.ReactNode;
     // (undocumented)
-    renderLabel(label: string): React_2.ReactNode;
+    renderLabel(label: React_2.ReactNode): React_2.ReactNode;
     // (undocumented)
     renderPrefix(prefix: string): React_2.ReactNode;
     // (undocumented)
@@ -2993,15 +3023,19 @@ export interface InputPureProps extends IDomNativeProps {
     // (undocumented)
     hasWarning: boolean;
     // (undocumented)
+    id?: string;
+    // (undocumented)
     isSearch: boolean;
     // (undocumented)
     isSmall: boolean;
     // (undocumented)
-    label: string;
+    label: React_2.ReactNode;
     // (undocumented)
     labelPositionTop: boolean;
     // (undocumented)
     maxlength: number;
+    // (undocumented)
+    name?: string;
     // (undocumented)
     onBlur: (e: React_2.FocusEvent<HTMLInputElement>) => void;
     // (undocumented)
@@ -3019,7 +3053,11 @@ export interface InputPureProps extends IDomNativeProps {
     // (undocumented)
     readonly: boolean;
     // (undocumented)
+    required?: boolean;
+    // (undocumented)
     suffix: string;
+    // (undocumented)
+    type?: string;
     // (undocumented)
     value: string | number;
 }
@@ -3070,7 +3108,7 @@ export class InputWithNumberFormat extends React_2.PureComponent<InputWithNumber
     // (undocumented)
     onFocus: (e: React_2.FocusEvent<HTMLInputElement>) => void;
     // (undocumented)
-    render(): JSX.Element;
+    render(): React_2.JSX.Element;
     // (undocumented)
     UNSAFE_componentWillReceiveProps({ value: newValue }: InputWithNumberFormatProps): void;
 }
@@ -3115,22 +3153,22 @@ export interface INumericInputProps {
 }
 
 // @internal (undocumented)
-export function InvertableSelect<T>(props: IInvertableSelectProps<T>): JSX.Element;
+export function InvertableSelect<T>(props: IInvertableSelectProps<T>): React_2.JSX.Element;
 
 // @internal (undocumented)
-export function InvertableSelectAllCheckbox(props: IInvertableSelectAllCheckboxProps): JSX.Element;
+export function InvertableSelectAllCheckbox(props: IInvertableSelectAllCheckboxProps): React_2.JSX.Element;
 
 // @internal (undocumented)
-export function InvertableSelectItem(props: IInvertableSelectItem): JSX.Element;
+export function InvertableSelectItem(props: IInvertableSelectItem): React_2.JSX.Element;
 
 // @internal (undocumented)
-export function InvertableSelectLimitWarning(props: IInvertableSelectLimitWarningProps): JSX.Element;
+export function InvertableSelectLimitWarning(props: IInvertableSelectLimitWarningProps): React_2.JSX.Element;
 
 // @internal (undocumented)
-export function InvertableSelectSearchBar(props: IInvertableSelectSearchBarProps): JSX.Element;
+export function InvertableSelectSearchBar(props: IInvertableSelectSearchBarProps): React_2.JSX.Element;
 
 // @internal (undocumented)
-export function InvertableSelectStatusBar<T>(props: IInvertableSelectStatusBarProps<T>): JSX.Element;
+export function InvertableSelectStatusBar<T>(props: IInvertableSelectStatusBarProps<T>): React_2.JSX.Element;
 
 // @internal (undocumented)
 export interface IOffset {
@@ -3619,9 +3657,13 @@ export interface ISingleSelectListItemProps {
     // (undocumented)
     className?: string;
     // (undocumented)
+    eventsOnBubble?: boolean;
+    // (undocumented)
+    hideDelayBubble?: number;
+    // (undocumented)
     icon?: string;
     // (undocumented)
-    info?: string;
+    info?: string | ReactNode;
     // (undocumented)
     isSelected?: boolean;
     // (undocumented)
@@ -3808,7 +3850,13 @@ export interface ISyntaxHighlightingInputProps {
 // @internal (undocumented)
 export interface ITab {
     // (undocumented)
+    icon?: string;
+    // (undocumented)
+    iconOnly?: boolean;
+    // (undocumented)
     id: string;
+    // (undocumented)
+    values?: Record<string, string | number | boolean | null | undefined | Date | FormatXMLElementFn<string, string>>;
 }
 
 // @internal (undocumented)
@@ -4096,7 +4144,7 @@ export const LocaleSetting: React_2.VFC<ILocaleSettingProps>;
 // @internal (undocumented)
 export class MeasureNumberFormat extends React_2.PureComponent<IMeasureNumberFormatOwnProps> {
     // (undocumented)
-    render(): JSX.Element;
+    render(): React_2.JSX.Element;
 }
 
 // @internal (undocumented)
@@ -4183,7 +4231,7 @@ export class Overlay<T = HTMLElement> extends React_2.Component<IOverlayProps<T>
     // (undocumented)
     onDocumentMouseDown(e: React_2.MouseEvent): void;
     // (undocumented)
-    render(): JSX.Element;
+    render(): React_2.JSX.Element;
     // (undocumented)
     shouldComponentUpdate(nextProps: IOverlayProps<T>, nextState: IOverlayState): boolean;
     // (undocumented)
@@ -4401,13 +4449,13 @@ export class Spinner extends PureComponent<ISpinnerProps> {
 export type SpinnerSize = "large" | "small";
 
 // @internal (undocumented)
-export const StylingEditorDialog: <T extends StylingPickerItemContent>(props: IStylingEditorDialogProps<T>) => JSX.Element;
+export const StylingEditorDialog: <T extends StylingPickerItemContent>(props: IStylingEditorDialogProps<T>) => React_2.JSX.Element;
 
 // @internal (undocumented)
-export const StylingEditorDialogFooter: (props: IStylingEditorDialogFooterProps) => JSX.Element;
+export const StylingEditorDialogFooter: (props: IStylingEditorDialogFooterProps) => React_2.JSX.Element;
 
 // @internal (undocumented)
-export const StylingExample: (props: IStylingExampleProps) => JSX.Element;
+export const StylingExample: (props: IStylingExampleProps) => React_2.JSX.Element;
 
 // @internal (undocumented)
 export type StylingPickerItemContent = ITheme | IColorPalette;
@@ -4499,7 +4547,7 @@ export class TextAreaWithSubmit extends Component<ITextAreaWithSubmitProps, ITex
 // @internal (undocumented)
 export class Timepicker extends React_2.PureComponent<ITimepickerOwnProps> {
     // (undocumented)
-    render(): JSX.Element;
+    render(): React_2.JSX.Element;
 }
 
 // @internal (undocumented)
@@ -4580,6 +4628,6 @@ export interface UseToastMessageType {
 export function withBubble<T>(WrappedComponent: React_2.ComponentType<T>): React_2.FC<T & IWithBubbleProps>;
 
 // @internal (undocumented)
-export const WorkspacePickerHomeFooter: React_2.ComponentType<Omit<IWorkspacePickerHomeFooterProps, "theme" | "themeIsLoading">>;
+export const WorkspacePickerHomeFooter: React_2.ComponentType<Omit<IWorkspacePickerHomeFooterProps, "theme" | "themeIsLoading" | "themeStatus">>;
 
 ```

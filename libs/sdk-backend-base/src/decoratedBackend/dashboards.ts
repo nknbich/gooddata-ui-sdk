@@ -1,4 +1,4 @@
-// (C) 2021-2023 GoodData Corporation
+// (C) 2021-2024 GoodData Corporation
 import {
     IWorkspaceDashboardsService,
     IGetDashboardOptions,
@@ -11,6 +11,7 @@ import {
     IWidgetReferences,
     IExportResult,
     IGetDashboardPluginOptions,
+    IDashboardsQuery,
 } from "@gooddata/sdk-backend-spi";
 import {
     IFilter,
@@ -29,6 +30,7 @@ import {
     IDashboardPluginDefinition,
     IDashboardPermissions,
     IExistingDashboard,
+    IDateFilter,
 } from "@gooddata/sdk-model";
 
 /**
@@ -39,6 +41,10 @@ export abstract class DecoratedWorkspaceDashboardsService implements IWorkspaceD
 
     getDashboards(options?: IGetDashboardOptions): Promise<IListedDashboard[]> {
         return this.decorated.getDashboards(options);
+    }
+
+    getDashboardsQuery(): IDashboardsQuery {
+        return this.decorated.getDashboardsQuery();
     }
 
     getDashboard(
@@ -148,6 +154,14 @@ export abstract class DecoratedWorkspaceDashboardsService implements IWorkspaceD
 
     getResolvedFiltersForWidget(widget: IWidget, filters: IFilter[]): Promise<IFilter[]> {
         return this.decorated.getResolvedFiltersForWidget(widget, filters);
+    }
+
+    getResolvedFiltersForWidgetWithMultipleDateFilters(
+        widget: IWidget,
+        commonDateFilters: IDateFilter[],
+        otherFilters: IFilter[],
+    ): Promise<IFilter[]> {
+        return this.decorated.getResolvedFiltersForWidget(widget, [...commonDateFilters, ...otherFilters]);
     }
 
     getDashboardPlugins(options?: IGetDashboardPluginOptions): Promise<IDashboardPlugin[]> {

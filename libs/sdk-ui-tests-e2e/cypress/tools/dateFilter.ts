@@ -1,6 +1,11 @@
-// (C) 2021-2023 GoodData Corporation
+// (C) 2021-2024 GoodData Corporation
+
+import { DashboardDateFilterConfigMode } from "@gooddata/sdk-model";
+
+import { getTestClassByTitle } from "./utils";
 
 const DATE_MESSAGE_SELECTOR = ".gd-extended-date-filter-edit-mode-message-text";
+const ATTRIBUTE_FILTER_BODY_SELECTOR = ".attributes-list";
 
 type ButtonType = "apply" | "cancel";
 
@@ -23,7 +28,8 @@ export type RelativePreset =
     | "relative-this-week"
     | "relative-last-week"
     | "relative-this-2-weeks"
-    | "this-week";
+    | "this-week"
+    | "this-year";
 
 export type AbsolutePreset =
     | "christmas-2011"
@@ -32,6 +38,15 @@ export type AbsolutePreset =
     | "hidden-absolute-preset-2";
 
 export class DateFilter {
+    constructor(private title = "Date range") {
+        this.title = title;
+    }
+
+    getDateFilterElement() {
+        const testClass = getTestClassByTitle(this.title, "date-filter-button-");
+        return cy.get(`.s-date-filter-button${testClass}`);
+    }
+
     open(): this {
         cy.get(".s-date-filter-button").click();
         return this;
@@ -144,6 +159,103 @@ export class DateFilter {
 
     waitDateFilterButtonVisible() {
         cy.get(".s-date-filter-button", { timeout: 60000 }).should("be.visible");
+        return this;
+    }
+
+    isVisible(expected = true) {
+        cy.get(".s-date-filter-button").should(expected ? "be.visible" : "not.exist");
+        return this;
+    }
+
+    openConfiguration() {
+        cy.get(".s-gd-date-filter-configuration-button").click();
+        return this;
+    }
+
+    getConfigurationMode(mode: DashboardDateFilterConfigMode) {
+        return cy.get(".s-configuration-item-mode").find(`.s-config-state-${mode}`);
+    }
+
+    selectConfigurationMode(mode: DashboardDateFilterConfigMode) {
+        this.getConfigurationMode(mode).click();
+        return this;
+    }
+
+    hoverOnConfigurationMode(mode: DashboardDateFilterConfigMode) {
+        this.getConfigurationMode(mode).trigger("mouseover");
+    }
+
+    saveConfiguration() {
+        cy.get(".s-gd-extended-date-filter-actions-right-content .s-date-filter-apply").click();
+        return this;
+    }
+
+    getHiddenIcon() {
+        return this.getDateFilterElement().find(".s-gd-icon-invisible");
+    }
+
+    isHiddenIconVisible() {
+        this.getHiddenIcon().should("be.visible");
+        return this;
+    }
+
+    hoverOnHiddenIcon() {
+        this.getHiddenIcon().trigger("mouseover");
+        return this;
+    }
+
+    getLockedIcon() {
+        return this.getDateFilterElement().find(".s-gd-icon-lock");
+    }
+
+    isLockedIconVisible() {
+        this.getLockedIcon().should("be.visible");
+        return this;
+    }
+
+    hoverOnLockedIcon() {
+        this.getLockedIcon().trigger("mouseover");
+        return this;
+    }
+
+    hasDropdownBodyOpen(expected = true) {
+        this.getDropdownElement().should(expected ? "be.visible" : "not.exist");
+        return this;
+    }
+
+    hasConfigurationModeCheckedAt(mode: DashboardDateFilterConfigMode) {
+        this.getConfigurationMode(mode).should("have.attr", "checked");
+        return this;
+    }
+
+    getOverlayDropdownElement() {
+        return cy.get(".overlay.dropdown-body");
+    }
+
+    search(dateValue: string) {
+        this.getOverlayDropdownElement().find(".gd-list-searchfield .gd-input-field").clear().type(dateValue);
+        return this;
+    }
+
+    select(name: string): DateFilter {
+        const testClass = getTestClassByTitle(name);
+        cy.get(`${ATTRIBUTE_FILTER_BODY_SELECTOR} ${testClass}`).click();
+        return this;
+    }
+
+    removeFilter(index: number) {
+        const dataTransfer = new DataTransfer();
+        cy.get(".s-date-filter-title").eq(index).trigger("dragstart", {
+            dataTransfer,
+        });
+
+        cy.wait(100); // Need to wait for animation to end (Delete drop zone visibility)
+
+        cy.get(".gd-dropzone-delete").trigger("drop", {
+            dataTransfer,
+            force: true,
+        });
+
         return this;
     }
 }

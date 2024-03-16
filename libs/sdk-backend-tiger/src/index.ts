@@ -1,4 +1,4 @@
-// (C) 2019-2023 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 /**
  * This package provides the Analytical Backend implementation for GoodData Cloud and GoodData.CN.
  *
@@ -54,9 +54,12 @@ export { AnonymousAuthProvider } from "@gooddata/sdk-backend-base";
 export {
     DeclarativeModel,
     GenerateLdmRequest,
-    DeclarativePdm,
     ApiEntitlement,
     ApiEntitlementNameEnum,
+    StagingUploadLocation,
+    AnalyzeCsvRequest,
+    AnalyzeCsvResponse,
+    ImportCsvRequest,
 } from "@gooddata/api-client-tiger";
 export {
     ContextDeferredAuthProvider,
@@ -73,10 +76,6 @@ export {
     TigerSpecificFunctions,
     IApiToken,
     IApiTokenExtended,
-    IDataSource,
-    ScanRequest,
-    ScanResult,
-    PublishPdmResult,
     Entitlement,
     IDataSourceApiResult,
     IDataSourceUpsertRequest,
@@ -90,8 +89,6 @@ export {
     GenerateLogicalModelRequest,
     DeclarativeLogicalModel,
     DeclarativeAnalyticsModel,
-    PhysicalDataModel,
-    SetPdmLayoutRequest,
     PutWorkspaceLayoutRequest,
     DataSourceDefinition,
     IDataSourceDeletedResponse,
@@ -108,6 +105,9 @@ export {
     ICustomApplicationSetting,
     ScanSqlResult,
     WorkspaceEntitiesDatasets,
+    ScanRequest,
+    ScanResult,
+    IDataSourceCacheStrategy,
 } from "./backend/tigerSpecificFunctions.js";
 
 export { TigerAfmType, TigerMetadataType, TigerObjectType } from "./types/index.js";

@@ -1,4 +1,4 @@
-// (C) 2021 GoodData Corporation
+// (C) 2021-2024 GoodData Corporation
 export const YAXIS_LABELS_SELECTOR =
     ".highcharts-yaxis-labels text[text-anchor = 'middle'], .highcharts-yaxis-labels text[text-anchor = 'end']";
 export const XAXIS_LABELS_SELECTOR =
@@ -45,8 +45,15 @@ export class Chart {
         this.getHighchartsContainer()
             .find(`.highcharts-series.highcharts-series-${seriesIndex} .highcharts-point`)
             .eq(pointIndex)
-            .click({ force: true });
+            .realClick();
         return this;
+    }
+
+    seriesPointHasClass(className: string, seriesIndex: number, pointIndex = 0) {
+        this.getHighchartsContainer()
+            .find(`.highcharts-series.highcharts-series-${seriesIndex} .highcharts-point`)
+            .eq(pointIndex)
+            .should("have.class", className);
     }
 
     hasCountOfDrillPoints(count: number) {
@@ -139,19 +146,60 @@ export class Chart {
             });
         return this;
     }
+    public hasTooltipTitleWidth(tooltipEl: string, width: number) {
+        cy.get(tooltipEl).should("have.attr", "style", `max-width: ${width}px;`);
+        return this;
+    }
 
-    getTooltipContents(index: number) {
-        cy.get(`.highcharts-series-${index}.highcharts-tracker rect`)
-            .first()
-            .trigger("mouseover", { force: true });
+    hoverOnHighChartSeries(index: number, pointIndex = 0) {
+        this.getElement()
+            .find(
+                `.highcharts-series-${index}.highcharts-tracker rect,
+             .highcharts-series-${index}.highcharts-tracker path, 
+             .highcharts-data-label text,
+             .highcharts-series rect
+             `,
+            )
+            .eq(pointIndex)
+            .realHover();
+        cy.wait(1000); //wait until the tooltip visible
+    }
 
-        cy.wait(500);
+    getTooltipContents(index: number, pointIndex = 0) {
+        this.hoverOnHighChartSeries(index, pointIndex);
         const result: string[] = [];
-        cy.get(".gd-viz-tooltip-content")
-            .find(".gd-viz-tooltip-title")
-            .each(($li) => {
-                return result.push($li.text());
-            });
+        const titles = ".gd-viz-tooltip-title:visible";
+        const values = ".gd-viz-tooltip-value:visible";
+        cy.get(".gd-viz-tooltip-item:visible").each(($li) => {
+            const titleText = $li.find(titles).text().trim();
+            const valueText = $li.find(values).text().trim();
+            result.push(titleText, valueText);
+        });
+
         return cy.wrap(result);
+    }
+
+    hasTooltipInteraction(index: number, pointIndex = 0) {
+        this.hoverOnHighChartSeries(index, pointIndex);
+        cy.get(".gd-viz-tooltip-interaction:visible").should("have.text", "Click chart to drill");
+    }
+
+    hasTooltipContents(index: number, pointIndex = 0, tooltip: string[]) {
+        this.getTooltipContents(index).should("deep.equal", tooltip);
+        this.hasTooltipInteraction(index, pointIndex);
+        return this;
+    }
+
+    clickCellHeatMap(index: number) {
+        this.getElement().find(".highcharts-data-label text").eq(index).click({ force: true });
+        return this;
+    }
+
+    isColumnHighlighted(value: string, isStroked = true) {
+        cy.get(`.highcharts-data-label text`)
+            .contains(value)
+            .trigger("mouseover")
+            .should(isStroked ? "have.attr" : "not.have.attr", "stroke");
+        return this;
     }
 }

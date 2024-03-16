@@ -1,4 +1,4 @@
-// (C) 2022 GoodData Corporation
+// (C) 2022-2024 GoodData Corporation
 import { useState, useEffect } from "react";
 import {
     IMultiSelectAttributeFilterHandler,
@@ -15,6 +15,8 @@ import { AttributeFilterControllerData } from "./types.js";
  */
 export function useAttributeFilterControllerData(
     handler: IMultiSelectAttributeFilterHandler,
+    supportsShowingFilteredElements: boolean,
+    shouldIncludeLimitingFilters: boolean,
 ): AttributeFilterControllerData {
     const handlerState = useAttributeFilterHandlerState(handler);
 
@@ -48,6 +50,7 @@ export function useAttributeFilterControllerData(
     const searchString = handlerState.elements.options.search;
     const limit = handlerState.elements.options.limit;
     const limitingAttributeFilters = handlerState.elements.options.limitingAttributeFilters;
+    const limitingValidationItems = handlerState.elements.options.limitingValidationItems;
 
     const hasNextElementsPage = elements.length < totalElementsCountWithCurrentSettings;
     const nextElementsPageSize = hasNextElementsPage
@@ -61,7 +64,8 @@ export function useAttributeFilterControllerData(
 
     const isParentFiltersEmpty = isLimitingAttributeFiltersEmpty(limitingAttributeFilters);
 
-    const isFilteredByParentFilters = initialElementsPageStatus === "success" && !isParentFiltersEmpty;
+    const isFilteredByParentFilters =
+        shouldIncludeLimitingFilters && initialElementsPageStatus === "success" && !isParentFiltersEmpty;
 
     const isFiltering = useIsFiltering(handler);
 
@@ -70,6 +74,10 @@ export function useAttributeFilterControllerData(
     const currentDisplayFormRef = filterObjRef(handlerState.attributeFilter);
 
     const offset = handlerState.elements.options.offset;
+
+    const irrelevantSelection = supportsShowingFilteredElements
+        ? handlerState.selection.working.irrelevantElements
+        : [];
 
     return {
         attribute,
@@ -104,11 +112,16 @@ export function useAttributeFilterControllerData(
         searchString,
 
         isFilteredByParentFilters,
-
         parentFilterAttributes,
 
         displayForms,
         currentDisplayFormRef,
+
+        enableShowingFilteredElements: supportsShowingFilteredElements,
+
+        irrelevantSelection,
+
+        limitingValidationItems,
     };
 }
 

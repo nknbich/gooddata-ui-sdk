@@ -1,4 +1,4 @@
-// (C) 2020-2023 GoodData Corporation
+// (C) 2020-2024 GoodData Corporation
 
 /**
  * Settings are obtained from backend and are effectively a collection of feature flags or settings with
@@ -107,6 +107,12 @@ export interface ISettings {
      * Indicates whether unavailable data items are visible
      */
     enableUnavailableItemsVisible?: boolean;
+
+    /**
+     * Indicates whether unavailable data items are visible in the settings API
+     * only available on Tiger/Panther
+     */
+    showHiddenCatalogItems?: boolean;
 
     /**
      * Indicates whether dashboard scheduled mails are enabled.
@@ -300,9 +306,50 @@ export interface ISettings {
     metadataTimeZone?: string;
 
     /**
-     * Enable attribute hierarchies.
+     * Enable new max bucket size items limit for Pivot Table
      */
-    enableAttributeHierarchies?: boolean;
+    enablePivotTableIncreaseBucketSize?: boolean;
+
+    /**
+     * Enable user management page in Home UI.
+     */
+    enableUserManagement?: boolean;
+
+    /**
+     * Enable cross filtering in KD
+     */
+    enableKDCrossFiltering?: boolean;
+
+    /**
+     * Enable multiple date filters.
+     */
+    enableMultipleDateFilters?: boolean;
+
+    /**
+     * Enable multiple date filters in AD.
+     */
+    enableADMultipleDateFilters?: boolean;
+
+    /**
+     * Enables rich text widgets on dashboards.
+     */
+    enableKDRichText?: boolean;
+
+    /**
+     * Enable attribute filter values validation by metric, attribute, fact.
+     * The configuration of filter values validation is merged with parent filters UI.
+     */
+    enableAttributeFilterValuesValidation?: boolean;
+
+    /**
+     * Enable creating users in user management.
+     */
+    enableCreateUser?: boolean;
+
+    /**
+     * Enable attribute filter values validation by date filters.
+     */
+    enableKDAttributeFilterDatesValidation?: boolean;
 
     [key: string]: number | boolean | string | object | undefined;
 }

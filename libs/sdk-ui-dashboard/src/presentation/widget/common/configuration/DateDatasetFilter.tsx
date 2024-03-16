@@ -1,13 +1,20 @@
-// (C) 2022-2023 GoodData Corporation
+// (C) 2022-2024 GoodData Corporation
 import React, { useCallback, useState } from "react";
 import { ICatalogDateDataset, IWidget } from "@gooddata/sdk-model";
 
 import { DateFilterCheckbox } from "./DateFilterCheckbox.js";
-import { useDashboardSelector, selectAllCatalogDateDatasetsMap } from "../../../../model/index.js";
+import {
+    useDashboardSelector,
+    selectAllCatalogDateDatasetsMap,
+    selectEnableUnavailableItemsVisibility,
+    selectCatalogDateDatasets,
+    selectFilterContextDateFilterByDataSet,
+} from "../../../../model/index.js";
 import { DateDatasetPicker } from "./DateDatasetPicker.js";
-import { getUnrelatedDateDataset } from "./utils.js";
+import { getUnrelatedDateDataset, getUnrelatedDateDatasets } from "./utils.js";
 import { useDateFilterConfigurationHandling } from "./useDateFilterConfigurationHandling.js";
 import { useIsSelectedDatasetHidden } from "./useIsSelectedDatasetHidden.js";
+import { DateDatasetDuplicityWarning } from "./DateDatasetDuplicityWarning.js";
 
 interface IDateDatasetFilterProps {
     widget: IWidget;
@@ -35,8 +42,14 @@ export const DateDatasetFilter: React.FC<IDateDatasetFilterProps> = (props) => {
         isLoadingAdditionalData,
     } = props;
 
+    const enableUnrelatedItemsVisibility = useDashboardSelector(selectEnableUnavailableItemsVisibility);
     const catalogDatasetsMap = useDashboardSelector(selectAllCatalogDateDatasetsMap);
     const selectedDateDataset = widget.dateDataSet && catalogDatasetsMap.get(widget.dateDataSet);
+    const dateDatasets = useDashboardSelector(selectCatalogDateDatasets);
+
+    const duplicatedDateDatasetFilter = useDashboardSelector(
+        selectFilterContextDateFilterByDataSet(widget.dateDataSet!),
+    );
 
     const { selectedDateDatasetHiddenByObjectAvailability, status: visibleDateDatasetsStatus } =
         useIsSelectedDatasetHidden(selectedDateDataset?.dataSet.ref);
@@ -65,7 +78,10 @@ export const DateDatasetFilter: React.FC<IDateDatasetFilterProps> = (props) => {
     const shouldRenderDateDataSetsDropdown =
         !dateFilterCheckboxDisabled &&
         !(!isDateFilterEnabled || isFilterLoading) &&
-        (relatedDateDatasets?.length || isDropdownLoading || selectedDateDatasetHiddenByObjectAvailability);
+        (relatedDateDatasets?.length ||
+            isDropdownLoading ||
+            selectedDateDatasetHiddenByObjectAvailability ||
+            (dateDatasets.length && enableUnrelatedItemsVisibility));
 
     const unrelatedDateDataset =
         relatedDateDatasets &&
@@ -74,6 +90,7 @@ export const DateDatasetFilter: React.FC<IDateDatasetFilterProps> = (props) => {
             selectedDateDataset,
             selectedDateDatasetHiddenByObjectAvailability,
         );
+    const unrelatedDateDatasets = getUnrelatedDateDatasets(dateDatasets, relatedDateDatasets);
 
     return (
         <div>
@@ -87,6 +104,7 @@ export const DateDatasetFilter: React.FC<IDateDatasetFilterProps> = (props) => {
                 selectedDateDataset={selectedDateDataset}
                 selectedDateDatasetHidden={selectedDateDatasetHiddenByObjectAvailability}
                 onDateDatasetFilterEnabled={handleDateFilterEnabled}
+                enableUnrelatedItemsVisibility={enableUnrelatedItemsVisibility}
             />
             {!!shouldRenderDateDataSetsDropdown && (
                 <DateDatasetPicker
@@ -99,8 +117,11 @@ export const DateDatasetFilter: React.FC<IDateDatasetFilterProps> = (props) => {
                     onDateDatasetChange={handleDateDatasetChanged}
                     autoOpen={shouldOpenDateDatasetPicker}
                     isLoading={isDropdownLoading}
+                    enableUnrelatedItemsVisibility={enableUnrelatedItemsVisibility}
+                    unrelatedDateDatasets={unrelatedDateDatasets}
                 />
             )}
+            {!isDropdownLoading && !!duplicatedDateDatasetFilter && <DateDatasetDuplicityWarning />}
         </div>
     );
 };

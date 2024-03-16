@@ -4,58 +4,60 @@ import { ObjRef, ObjRefInScope } from "../objRef/index.js";
 
 /**
  * Insight widget drill definition
- * @alpha
+ * @public
  */
 export type InsightDrillDefinition =
     | IDrillToInsight
     | IDrillToDashboard
     | IDrillToCustomUrl
-    | IDrillToAttributeUrl;
+    | IDrillToAttributeUrl
+    | ICrossFiltering;
 
 /**
  * Kpi widget drill definition
- * @alpha
+ * @public
  */
 export type KpiDrillDefinition = IDrillToLegacyDashboard;
 
 /**
  * Widget drill definition
- * @alpha
+ * @public
  */
 export type DrillDefinition = InsightDrillDefinition | KpiDrillDefinition;
 
 /**
  * Drill origin type
- * @alpha
+ * @public
  */
 export type DrillOriginType = "drillFromMeasure" | "drillFromAttribute";
 
 /**
  * Drill origin
- * @alpha
+ * @public
  */
 export type DrillOrigin = IDrillFromMeasure | IDrillFromAttribute;
 
 /**
  * Drill transition
- * @alpha
+ * @public
  */
 export type DrillTransition = "pop-up" | "in-place" | "new-window";
 
 /**
  * Drill type
- * @alpha
+ * @public
  */
 export type DrillType =
     | "drillToInsight"
     | "drillToDashboard"
     | "drillToLegacyDashboard"
     | "drillToCustomUrl"
-    | "drillToAttributeUrl";
+    | "drillToAttributeUrl"
+    | "crossFiltering";
 
 /**
  * Drill origin base type
- * @alpha
+ * @public
  */
 export interface IDrillOrigin {
     /**
@@ -66,7 +68,7 @@ export interface IDrillOrigin {
 
 /**
  * Drill to custom url target
- * @alpha
+ * @public
  */
 export interface IDrillToCustomUrlTarget {
     /**
@@ -77,7 +79,7 @@ export interface IDrillToCustomUrlTarget {
 
 /**
  * Drill to attribute url target
- * @alpha
+ * @public
  */
 export interface IDrillToAttributeUrlTarget {
     /**
@@ -99,7 +101,7 @@ export type IDrillTarget = ObjRef | IDrillToCustomUrlTarget | IDrillToAttributeU
 
 /**
  * Drill from measure
- * @alpha
+ * @public
  */
 export interface IDrillFromMeasure extends IDrillOrigin {
     /**
@@ -123,7 +125,7 @@ export function isDrillFromMeasure(obj: DrillOrigin): obj is IDrillFromMeasure {
 
 /**
  * Drill from attribute
- * @alpha
+ * @public
  */
 export interface IDrillFromAttribute extends IDrillOrigin {
     /**
@@ -147,9 +149,14 @@ export function isDrillFromAttribute(obj: DrillOrigin): obj is IDrillFromAttribu
 
 /**
  * Drill base type
- * @alpha
+ * @public
  */
 export interface IDrill {
+    /**
+     * The identifier of the drill
+     */
+    localIdentifier?: string;
+
     /**
      * Drill type
      */
@@ -168,7 +175,7 @@ export interface IDrill {
 
 /**
  * Drill to PP dashboard
- * @alpha
+ * @public
  */
 export interface IDrillToLegacyDashboard extends IDrill {
     /**
@@ -202,7 +209,7 @@ export function isDrillToLegacyDashboard(obj: unknown): obj is IDrillToLegacyDas
 
 /**
  * Drill to dashboard
- * @alpha
+ * @public
  */
 export interface IDrillToDashboard extends IDrill {
     /**
@@ -239,7 +246,7 @@ export function isDrillToDashboard(obj: unknown): obj is IDrillToDashboard {
 
 /**
  * Drill to insight
- * @alpha
+ * @public
  */
 export interface IDrillToInsight extends IDrill {
     /**
@@ -268,7 +275,7 @@ export function isDrillToInsight(obj: unknown): obj is IDrillToInsight {
 
 /**
  * Drill to custom url
- * @alpha
+ * @public
  */
 export interface IDrillToCustomUrl extends IDrill {
     /**
@@ -297,7 +304,7 @@ export function isDrillToCustomUrl(obj: unknown): obj is IDrillToCustomUrl {
 
 /**
  * Drill to attribute url
- * @alpha
+ * @public
  */
 export interface IDrillToAttributeUrl extends IDrill {
     /**
@@ -322,4 +329,57 @@ export interface IDrillToAttributeUrl extends IDrill {
  */
 export function isDrillToAttributeUrl(obj: unknown): obj is IDrillToAttributeUrl {
     return !isEmpty(obj) && (obj as IDrillToAttributeUrl).type === "drillToAttributeUrl";
+}
+
+/**
+ *
+ * @alpha
+ */
+export interface IAttributeHierarchyReference {
+    type: "attributeHierarchyReference";
+    attributeHierarchy: ObjRef;
+    attribute: ObjRef;
+}
+
+/**
+ *
+ * @alpha
+ */
+export interface IDateHierarchyReference {
+    type: "dateHierarchyReference";
+    dateHierarchyTemplate: ObjRef;
+    dateDatasetAttribute: ObjRef;
+}
+
+/**
+ * Type-guard testing whether the provided object is an instance of {@link IAttributeHierarchyReference}.
+ * @alpha
+ */
+export function isAttributeHierarchyReference(obj: unknown): obj is IAttributeHierarchyReference {
+    return !isEmpty(obj) && (obj as IAttributeHierarchyReference).type === "attributeHierarchyReference";
+}
+
+/**
+ *
+ * @alpha
+ */
+export type IDrillDownReference = IAttributeHierarchyReference | IDateHierarchyReference;
+
+/**
+ * Cross-filtering
+ * @public
+ */
+export interface ICrossFiltering extends IDrill {
+    /**
+     * Drill type
+     */
+    type: "crossFiltering";
+}
+
+/**
+ * Type-guard testing whether the provided object is an instance of {@link ICrossFiltering}.
+ * @alpha
+ */
+export function isCrossFiltering(obj: unknown): obj is ICrossFiltering {
+    return !isEmpty(obj) && (obj as ICrossFiltering).type === "crossFiltering";
 }

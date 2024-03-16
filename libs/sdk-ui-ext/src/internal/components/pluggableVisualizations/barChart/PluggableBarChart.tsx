@@ -5,7 +5,7 @@ import isEmpty from "lodash/isEmpty.js";
 import { BucketNames, VisualizationTypes } from "@gooddata/sdk-ui";
 import { IInsightDefinition, newAttributeAreaSort, newMeasureSort } from "@gooddata/sdk-model";
 import { PluggableColumnBarCharts } from "../PluggableColumnBarCharts.js";
-import { IReferencePoint, IVisConstruct } from "../../../interfaces/Visualization.js";
+import { IReferencePoint, IVisConstruct, IVisProps } from "../../../interfaces/Visualization.js";
 import { BAR_CHART_SUPPORTED_PROPERTIES } from "../../../constants/supportedProperties.js";
 import BarChartConfigurationPanel from "../../configurationPanels/BarChartConfigurationPanel.js";
 import { AXIS, AXIS_NAME } from "../../../constants/axis.js";
@@ -63,7 +63,6 @@ export class PluggableBarChart extends PluggableColumnBarCharts {
         this.defaultControlsProperties = {
             stackMeasures: false,
         };
-
         this.initializeProperties(props.visualizationProperties);
     }
 
@@ -71,10 +70,14 @@ export class PluggableBarChart extends PluggableColumnBarCharts {
         return BAR_CHART_SUPPORTED_PROPERTIES[this.axis || AXIS.DUAL] || [];
     }
 
-    protected renderConfigurationPanel(insight: IInsightDefinition): void {
+    protected renderConfigurationPanel(insight: IInsightDefinition, options: IVisProps): void {
         const configPanelElement = this.getConfigPanelElement();
 
         if (configPanelElement) {
+            const panelConfig = {
+                supportsAttributeHierarchies: this.backendCapabilities.supportsAttributeHierarchies,
+            };
+
             this.renderFun(
                 <BarChartConfigurationPanel
                     locale={this.locale}
@@ -89,6 +92,8 @@ export class PluggableBarChart extends PluggableColumnBarCharts {
                     isLoading={this.isLoading}
                     featureFlags={this.featureFlags}
                     axis={this.axis}
+                    panelConfig={panelConfig}
+                    configurationPanelRenderers={options.custom?.configurationPanelRenderers}
                 />,
                 configPanelElement,
             );

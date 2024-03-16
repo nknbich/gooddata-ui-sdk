@@ -1,4 +1,4 @@
-// (C) 2023 GoodData Corporation
+// (C) 2023-2024 GoodData Corporation
 import * as Navigation from "../../tools/navigation";
 import { AttributeFilter } from "../../tools/filterBar";
 import { Widget } from "../../tools/widget";
@@ -10,7 +10,7 @@ const salesRepFilter = new AttributeFilter("Sales Rep");
 const productFilter = new AttributeFilter("Product");
 const statusFilter = new AttributeFilter("Status");
 
-const getKPI = () => new Widget(0).waitChartLoaded().getKPI();
+const getKPI = () => new Widget(0).waitKpiLoaded().getKPI();
 const getTable = () => new Widget(1).waitTableLoaded().getTable();
 const getChart = () => new Widget(2).waitChartLoaded().getChart();
 
@@ -177,7 +177,7 @@ describe("Single selection filters", () => {
                 .hasSelectionMode("multi", true)
                 .hasSelectionMode("single", false)
                 .hasSingleSelectionModeEnabled(true)
-                .hasDependencyEnabled(true)
+                .hasBearFilterDependencyEnabled(true)
 
                 .clickSelectionMode("single")
 
@@ -185,7 +185,7 @@ describe("Single selection filters", () => {
                 .hasSelectionMode("multi", false)
                 .hasSelectionMode("single", true)
                 .hasSingleSelectionModeEnabled(true)
-                .hasDependencyEnabled(false)
+                .hasBearFilterDependencyEnabled(false)
 
                 .clickSelectionMode("multi")
 
@@ -193,15 +193,15 @@ describe("Single selection filters", () => {
                 .hasSelectionMode("multi", true)
                 .hasSelectionMode("single", false)
                 .hasSingleSelectionModeEnabled(true)
-                .hasDependencyEnabled(true)
+                .hasBearFilterDependencyEnabled(true)
 
-                .checkDependency("Region")
+                .checkBearFilterDependency("Region")
 
                 .toggleSelectionModeDropdown()
                 .hasSelectionMode("multi", true)
                 .hasSelectionMode("single", false)
                 .hasSingleSelectionModeEnabled(false)
-                .hasDependencyEnabled(true)
+                .hasBearFilterDependencyEnabled(true)
 
                 .saveConfiguration()
                 .close();
@@ -226,7 +226,7 @@ describe("Single selection filters", () => {
                 .toggleSelectionModeDropdown()
                 .hasSelectionMode("multi", true)
                 .hasSelectionMode("single", false)
-                .checkDependency("Region")
+                .checkBearFilterDependency("Region")
                 .saveConfiguration()
                 .hasSubtitle("Alejandro Vabiano, Alexsandr Fyodr, John Jovi")
                 .hasFilterListSize(11)

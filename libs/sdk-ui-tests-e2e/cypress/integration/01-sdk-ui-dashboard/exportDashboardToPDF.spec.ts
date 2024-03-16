@@ -55,7 +55,7 @@ describe("Export dashboard to pdf", { tags: ["checklist_integrated_tiger"] }, ()
 
     it.skip(
         "is able to export dashboard with temporary filter to pdf",
-        { tags: ["checklist_integrated_tiger"] },
+        { tags: ["checklist_integrated_tiger_export"] },
         () => {
             cy.fixture("dashboardInfosForExport").then((data) => {
                 data["insightsAfterChangingFilterForPDFExport"].forEach(

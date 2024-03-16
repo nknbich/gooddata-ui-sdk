@@ -1,4 +1,4 @@
-// (C) 2019-2023 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 import { IAvailableDrillTargetMeasure, IAvailableDrillTargets } from "@gooddata/sdk-ui";
 import isEmpty from "lodash/isEmpty.js";
 import {
@@ -29,6 +29,8 @@ import {
     DrillToCustomUrl,
     DashboardDrillToLegacyDashboardResolved,
     DashboardDrillCommand,
+    DashboardCrossFilteringResolved,
+    CrossFiltering,
 } from "../../model/index.js";
 
 /**
@@ -120,6 +122,21 @@ export interface DrillStep {
     insight: IInsight;
 }
 
+/**
+ * @internal
+ */
+export type OnCrossFiltering = (cmd: CrossFiltering) => void;
+
+/**
+ * @internal
+ */
+export type OnCrossFilteringSuccess = (event: DashboardCrossFilteringResolved) => void;
+
+/**
+ * @internal
+ */
+export type OnCrossFilteringError = OnDashboardDrillError;
+
 /////
 
 export type IDrillToUrl = IDrillToCustomUrl | IDrillToAttributeUrl;
@@ -131,24 +148,32 @@ export function isDrillToUrl(drillDefinition: unknown): drillDefinition is IDril
 export enum DRILL_TARGET_TYPE {
     DRILL_TO_DASHBOARD = "DrillToDashboard",
     DRILL_TO_INSIGHT = "DrillToInsight",
+    DRILL_DOWN = "DrillDown",
     DRILL_TO_URL = "DrillToUrl",
 }
 
 export interface IDrillConfigItemBase {
     type: "measure" | "attribute";
     title: string;
+    originLocalIdentifier: string;
     localIdentifier: string;
     drillTargetType?: DRILL_TARGET_TYPE;
     complete: boolean;
     warning?: string;
     attributes: IAvailableDrillTargetMeasure["attributes"];
+    widgetRef: ObjRef;
 }
 
-export type IDrillConfigItem = IDrillToDashboardConfig | IDrillToInsightConfig | IDrillToUrlConfig;
+export type IDrillConfigItem =
+    | IDrillToDashboardConfig
+    | IDrillToInsightConfig
+    | IDrillToUrlConfig
+    | IDrillDownAttributeHierarchyConfig;
 export type IDrillConfigItemTarget =
     | IDrillToDashboardConfigTarget
     | IDrillToInsightConfigTarget
-    | IDrillToUrlConfigTarget;
+    | IDrillToUrlConfigTarget
+    | IDrillDownAttributeHierarchyTarget;
 
 export interface IDrillToDashboardConfigTarget {
     dashboard?: ObjRef;
@@ -199,9 +224,26 @@ export function isDrillToUrlConfig(item: unknown): item is IDrillToUrlConfig {
     return !isEmpty(item) && (item as IDrillToUrlConfig).urlDrillTarget !== undefined;
 }
 
+/**
+ * @internal
+ */
+export interface IDrillDownAttributeHierarchyTarget {
+    type: "attribute";
+    attributeHierarchyRef: ObjRef;
+}
+
+export type IDrillDownAttributeHierarchyConfig = IDrillConfigItemBase & IDrillDownAttributeHierarchyTarget;
+
+export function isDrillDownToAttributeHierarchyConfig(
+    item: unknown,
+): item is IDrillDownAttributeHierarchyConfig {
+    return !isEmpty(item) && (item as IDrillDownAttributeHierarchyConfig).attributeHierarchyRef !== undefined;
+}
+
 // check type AttributeDisplayFormType from @gooddata/sdk-model to keep it in sync
 export enum AttributeDisplayFormType {
     HYPERLINK = "GDC.link",
+    IMAGE = "GDC.image",
     GEO_PUSHPIN = "GDC.geo.pin",
     GEO_PUSHPIN_LATITUDE = "GDC.geo.pin_latitude",
     GEO_PUSHPIN_LONGITUDE = "GDC.geo.pin_longitude",
@@ -225,4 +267,19 @@ export interface IDefinitionValidationData {
 
 export function isAvailableDrillTargetMeasure(obj: unknown): obj is IAvailableDrillTargetMeasure {
     return !isEmpty(obj) && (obj as IAvailableDrillTargetMeasure).measure !== undefined;
+}
+
+export interface IDrillDownAttributeHierarchyDefinition {
+    type: "drillDownAttributeHierarchy";
+    attributeHierarchyRef: ObjRef;
+    originLocalIdentifier?: string;
+    attributes: IAvailableDrillTargetMeasure["attributes"];
+}
+
+export function isDrillDownToAttributeHierarchyDefinition(
+    item: unknown,
+): item is IDrillDownAttributeHierarchyDefinition {
+    return (
+        !isEmpty(item) && (item as IDrillDownAttributeHierarchyDefinition).attributeHierarchyRef !== undefined
+    );
 }

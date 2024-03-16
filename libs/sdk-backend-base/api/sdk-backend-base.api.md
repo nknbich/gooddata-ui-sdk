@@ -38,9 +38,11 @@ import { IDashboardPermissions } from '@gooddata/sdk-model';
 import { IDashboardPlugin } from '@gooddata/sdk-model';
 import { IDashboardPluginDefinition } from '@gooddata/sdk-model';
 import { IDashboardReferences } from '@gooddata/sdk-backend-spi';
+import { IDashboardsQuery } from '@gooddata/sdk-backend-spi';
 import { IDashboardWithReferences } from '@gooddata/sdk-backend-spi';
 import { IDataSetMetadataObject } from '@gooddata/sdk-model';
 import { IDataView } from '@gooddata/sdk-backend-spi';
+import { IDateFilter } from '@gooddata/sdk-model';
 import { IDimension } from '@gooddata/sdk-model';
 import { IDimensionDescriptor } from '@gooddata/sdk-model';
 import { IExecutionConfig } from '@gooddata/sdk-model';
@@ -527,11 +529,15 @@ export abstract class DecoratedWorkspaceDashboardsService implements IWorkspaceD
     // (undocumented)
     getDashboards(options?: IGetDashboardOptions): Promise<IListedDashboard[]>;
     // (undocumented)
+    getDashboardsQuery(): IDashboardsQuery;
+    // (undocumented)
     getDashboardWidgetAlertsForCurrentUser(ref: ObjRef): Promise<IWidgetAlert[]>;
     // (undocumented)
     getDashboardWithReferences(ref: ObjRef, filterContextRef?: ObjRef, options?: IGetDashboardOptions, types?: SupportedDashboardReferenceTypes[]): Promise<IDashboardWithReferences>;
     // (undocumented)
     getResolvedFiltersForWidget(widget: IWidget, filters: IFilter[]): Promise<IFilter[]>;
+    // (undocumented)
+    getResolvedFiltersForWidgetWithMultipleDateFilters(widget: IWidget, commonDateFilters: IDateFilter[], otherFilters: IFilter[]): Promise<IFilter[]>;
     // (undocumented)
     getScheduledMailsCountForDashboard(ref: ObjRef): Promise<number>;
     // (undocumented)
@@ -747,10 +753,13 @@ export class InsightWidgetBuilder extends WidgetBaseBuilder<IInsightWidget> impl
 export type IServerPagingParams = {
     offset: number;
     limit: number;
+    cacheId?: string;
 };
 
 // @internal (undocumented)
 export interface IServerPagingResult<T> {
+    // (undocumented)
+    cacheId?: string;
     // (undocumented)
     items: T[];
     // (undocumented)
@@ -815,6 +824,8 @@ export class MeasureMetadataObjectBuilder<T extends IMeasureMetadataObject = IMe
     format(format: string): this;
     // (undocumented)
     isLocked(isLocked: boolean): this;
+    // (undocumented)
+    tags(tags: string[]): this;
     // (undocumented)
     updated(updatedAt?: string): this;
     // (undocumented)
@@ -953,13 +964,15 @@ export type SecuritySettingsDecoratorFactory = (securitySettings: ISecuritySetti
 
 // @internal
 export class ServerPaging<T> implements IPagedResource<T> {
-    constructor(getData: (pagingParams: IServerPagingParams) => Promise<IServerPagingResult<T>>, limit: number, offset: number, totalCount: number, items: T[]);
+    constructor(getData: (pagingParams: IServerPagingParams) => Promise<IServerPagingResult<T>>, limit: number, offset: number, totalCount: number, items: T[], cacheId?: string | undefined);
     // (undocumented)
     all: () => Promise<T[]>;
     // (undocumented)
     allSorted: (compareFn: (a: T, b: T) => number) => Promise<T[]>;
     // (undocumented)
-    static for<TItem>(getData: (pagingParams: IServerPagingParams) => Promise<IServerPagingResult<TItem>>, limit?: number, offset?: number): Promise<IPagedResource<TItem>>;
+    readonly cacheId?: string | undefined;
+    // (undocumented)
+    static for<TItem>(getData: (pagingParams: IServerPagingParams) => Promise<IServerPagingResult<TItem>>, limit?: number, offset?: number, cacheId?: string): Promise<IPagedResource<TItem>>;
     // (undocumented)
     protected readonly getData: (pagingParams: IServerPagingParams) => Promise<IServerPagingResult<T>>;
     // (undocumented)

@@ -1,4 +1,4 @@
-// (C) 2019-2023 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 import {
     IReferencePoint,
     IBucketItem,
@@ -267,6 +267,50 @@ export const samePeriodPrevYearFiltersBucket: IFilters = {
     items: [
         {
             localIdentifier: "f1",
+            type: "date",
+            attribute: "attr.datedataset",
+            filters: [
+                {
+                    overTimeComparisonType: "same_period_previous_year",
+                    attribute: "attr.datedataset",
+                    interval: {
+                        name: "last_year",
+                        granularity: "GDC.time.year",
+                        interval: ["-1", "-1"],
+                        type: "absolute",
+                    },
+                },
+            ],
+            aggregation: null,
+            dateDatasetRef,
+        },
+    ],
+};
+
+export const twoDateFiltersBucket: IFilters = {
+    localIdentifier: "filters",
+    items: [
+        {
+            localIdentifier: "f1",
+            type: "date",
+            attribute: "attr.datedataset",
+            filters: [
+                {
+                    overTimeComparisonType: "same_period_previous_year",
+                    attribute: "attr.datedataset",
+                    interval: {
+                        name: "all_time",
+                        granularity: "GDC.time.year",
+                        interval: [0, 0],
+                        type: "relative",
+                    },
+                },
+            ],
+            aggregation: null,
+            dateDatasetRef,
+        },
+        {
+            localIdentifier: "f2",
             type: "date",
             attribute: "attr.datedataset",
             filters: [
@@ -1638,6 +1682,57 @@ export const attributeAndDateInViewByAndDateInStackByReferencePoint: IReferenceP
     filters: {
         localIdentifier: "filters",
         items: [],
+    },
+};
+
+export const attributeAndColumnsReferencePoint: IReferencePoint = {
+    buckets: [
+        {
+            localIdentifier: "attribute",
+            items: [attributeItems[1]],
+        },
+        {
+            localIdentifier: "columns",
+            items: [attributeItems[1], ...masterMeasureItems.slice(0, 2)],
+        },
+    ],
+    filters: {
+        localIdentifier: "filters",
+        items: attributeFilters.slice(0, 1),
+    },
+};
+
+export const attributesAndColumnsReferencePoint: IReferencePoint = {
+    buckets: [
+        {
+            localIdentifier: "attribute",
+            items: [...attributeItems.slice(0, 2)],
+        },
+        {
+            localIdentifier: "columns",
+            items: [...masterMeasureItems.slice(0, 2)],
+        },
+    ],
+    filters: {
+        localIdentifier: "filters",
+        items: attributeFilters.slice(0, 1),
+    },
+};
+
+export const attributesAndColumnsWithDatesReferencePoint: IReferencePoint = {
+    buckets: [
+        {
+            localIdentifier: "attribute",
+            items: [dateItem, attributeItems[1]],
+        },
+        {
+            localIdentifier: "columns",
+            items: [dateItem, ...attributeItems.slice(0, 2), ...masterMeasureItems.slice(0, 2)],
+        },
+    ],
+    filters: {
+        localIdentifier: "filters",
+        items: attributeFilters.slice(0, 1),
     },
 };
 
@@ -3924,6 +4019,189 @@ export const metricAndAttributeFromAndTo: IReferencePoint = {
     filters: {
         localIdentifier: "filters",
         items: [],
+    },
+    properties: {
+        sortItems: [],
+    },
+};
+
+export const tableWithMultipleMeasuresRowsAndColumns: IReferencePoint = {
+    buckets: [
+        {
+            localIdentifier: "measures",
+            items: masterMeasureItems.slice(0, 2),
+        },
+        {
+            localIdentifier: "attribute",
+            items: attributeItems.slice(0, 2),
+        },
+        {
+            localIdentifier: "attribute",
+            items: attributeItems.slice(0, 1),
+        },
+    ],
+    filters: {
+        localIdentifier: "filters",
+        items: [],
+    },
+    properties: {
+        sortItems: [],
+    },
+};
+
+const generateMeasuresItems = (count: number): IBucketItem[] => {
+    const result: IBucketItem[] = [];
+    for (let i = 1; i <= count; i++) {
+        const item: IBucketItem = {
+            ...masterMeasureItems[0],
+            localIdentifier: `m${i}`,
+            attribute: `attributeIdentifer-${i}`,
+        };
+
+        result.push(item);
+    }
+
+    return result;
+};
+
+const generateDerivedMeasuresItems = (count: number): IBucketItem[] => {
+    const result: IBucketItem[] = [];
+    for (let i = 1; i <= count; i++) {
+        const item: IBucketItem = {
+            ...derivedMeasureItems[0],
+            masterLocalIdentifier: `m${i}`,
+            localIdentifier: `m${i}_pop`,
+            attribute: `attributeIdentifier-${i}`,
+        };
+
+        result.push(item);
+    }
+
+    return result;
+};
+
+const generateAttributeItems = (count: number): IBucketItem[] => {
+    const result: IBucketItem[] = [];
+    for (let i = 1; i <= count; i++) {
+        const item: IBucketItem = {
+            ...attributeItems[0],
+            localIdentifier: `a${i}`,
+            attribute: `attributeIdentifer-${i}`,
+            dfRef: uriRef(`a${i}/df`),
+        };
+
+        result.push(item);
+    }
+
+    return result;
+};
+
+export const tableWith20MeasuresAndAttributesAndNoColumn: IReferencePoint = {
+    buckets: [
+        {
+            localIdentifier: "measures",
+            items: generateMeasuresItems(21),
+        },
+        {
+            localIdentifier: "attribute",
+            items: generateAttributeItems(21),
+        },
+        {
+            localIdentifier: "columns",
+            items: [],
+        },
+    ],
+    filters: {
+        localIdentifier: "filters",
+        items: [],
+    },
+    properties: {
+        sortItems: [],
+    },
+};
+
+export const tableWith20MeasuresAndAttributesAnd1Column: IReferencePoint = {
+    buckets: [
+        {
+            localIdentifier: "measures",
+            items: generateMeasuresItems(20),
+        },
+        {
+            localIdentifier: "attribute",
+            items: generateAttributeItems(20),
+        },
+        {
+            localIdentifier: "columns",
+            items: [
+                {
+                    localIdentifier: "c1",
+                    type: "attribute",
+                    aggregation: null,
+                    attribute: "column.attribute",
+                    dfRef: uriRef("c1/df"),
+                },
+            ],
+        },
+    ],
+    filters: {
+        localIdentifier: "filters",
+        items: [],
+    },
+    properties: {
+        sortItems: [],
+    },
+};
+
+export const tableWith20MeasuresAndDerivedMeasuresNoRowsAnd1Column: IReferencePoint = {
+    buckets: [
+        {
+            localIdentifier: "measures",
+            items: [...generateMeasuresItems(20), ...generateDerivedMeasuresItems(20)],
+        },
+        {
+            localIdentifier: "attribute",
+            items: [],
+        },
+        {
+            localIdentifier: "columns",
+            items: [
+                {
+                    localIdentifier: "c1",
+                    type: "attribute",
+                    aggregation: null,
+                    attribute: "column.attribute",
+                    dfRef: uriRef("c1/df"),
+                },
+            ],
+        },
+    ],
+    filters: {
+        localIdentifier: "filters",
+        items: [],
+    },
+    properties: {
+        sortItems: [],
+    },
+};
+
+export const tableWith50MeasuresAndDerivedMeasuresNoRowsNoColumns: IReferencePoint = {
+    buckets: [
+        {
+            localIdentifier: "measures",
+            items: [...generateMeasuresItems(50), ...generateDerivedMeasuresItems(50)],
+        },
+        {
+            localIdentifier: "attribute",
+            items: [],
+        },
+        {
+            localIdentifier: "columns",
+            items: [],
+        },
+    ],
+    filters: {
+        localIdentifier: "filters",
+        items: [overTimeComparisonDateItem],
     },
     properties: {
         sortItems: [],

@@ -271,6 +271,7 @@ export class PluggableHeadline extends AbstractPluggableVisualization {
                     propertiesMeta={this.propertiesMeta}
                     isError={this.getIsError()}
                     isLoading={this.isLoading}
+                    configurationPanelRenderers={options.custom?.configurationPanelRenderers}
                 />,
                 configPanelElement,
             );
@@ -334,8 +335,9 @@ export class PluggableHeadline extends AbstractPluggableVisualization {
         insight: IInsightDefinition,
     ): HeadlineControlProperties {
         const isInsightOpened = isInsight(insight) && insightId(insight);
+        const hasSourceInsightId = !!options.custom?.sourceInsightId;
         const hasVisClassChanged = options.custom?.lastSavedVisClassUrl !== "local:headline";
-        const useDefaultMigrationProperties = isInsightOpened && !hasVisClassChanged;
+        const useDefaultMigrationProperties = (isInsightOpened && !hasVisClassChanged) || hasSourceInsightId;
         return useDefaultMigrationProperties
             ? this.buildDefaultMigrationProperties()
             : HEADLINE_DEFAULT_CONTROL_PROPERTIES;

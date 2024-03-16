@@ -1,4 +1,4 @@
-// (C) 2019-2023 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 import {
     isAttributeHeader,
     IExecutionResult as IBearExecutionResult,
@@ -40,6 +40,8 @@ import {
     ExplainType,
     IExplainProvider,
     IEntitlements,
+    IAttributeHierarchiesService,
+    IDataSourcesService,
 } from "@gooddata/sdk-backend-spi";
 import {
     defFingerprint,
@@ -153,6 +155,9 @@ export function legacyRecordedBackend(
         entitlements(): IEntitlements {
             throw new NotSupported("not yet supported");
         },
+        dataSources(): IDataSourcesService {
+            throw new NotSupported("not yet supported");
+        },
     };
 
     return noopBackend;
@@ -236,6 +241,10 @@ function recordedWorkspace(
         },
 
         accessControl(): IWorkspaceAccessControlService {
+            throw new NotSupported("not supported");
+        },
+
+        attributeHierarchies(): IAttributeHierarchiesService {
             throw new NotSupported("not supported");
         },
     };

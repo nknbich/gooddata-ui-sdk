@@ -1,4 +1,4 @@
-// (C) 2021-2023 GoodData Corporation
+// (C) 2021-2024 GoodData Corporation
 import { DashboardCommands, IDashboardCommand } from "../commands/index.js";
 import { SagaIterator } from "redux-saga";
 import { initializeDashboardHandler } from "./dashboard/initializeDashboardHandler/index.js";
@@ -39,6 +39,7 @@ import { changeInsightWidgetFilterSettingsHandler } from "./widgets/changeInsigh
 import { changeInsightWidgetVisPropertiesHandler } from "./widgets/changeInsightWidgetVisPropertiesHandler.js";
 import { modifyDrillsForInsightWidgetHandler } from "./widgets/modifyDrillsForInsightWidgetHandler.js";
 import { removeDrillsForInsightWidgetHandler } from "./widgets/removeDrillsForInsightWidgetHandler.js";
+import { changeRichTextWidgetContentHandler } from "./widgets/changeRichTextWidgetContentHandler.js";
 import { exportInsightWidgetHandler } from "./widgets/exportInsightWidgetHandler.js";
 import { createAlertHandler } from "./alerts/createAlertHandler.js";
 import { updateAlertHandler } from "./alerts/updateAlertHandler.js";
@@ -72,6 +73,19 @@ import { moveSectionItemToNewSectionHandler } from "./layout/moveSectionItemToNe
 import { changeKpiWidgetDescriptionHandler } from "./widgets/changeKpiWidgetDescriptionHandler.js";
 import { changeKpiWidgetConfigurationHandler } from "./widgets/changeKpiWidgetConfigurationHandler.js";
 import { changeInsightWidgetInsightHandler } from "./widgets/changeInsightWidgetInsightHandler.js";
+import { setDashboardDateFilterConfigModeHandler } from "./dashboard/dateFilterConfigHandler.js";
+import { changeAttributeFilterModeHandler } from "./dashboard/changeAttributeFilterModeHandler.js";
+import { removeDrillDownForInsightWidgetHandler } from "./widgets/removeDrillDownForInsightWidgetHandler.js";
+import { addDrillDownForInsightWidgetHandler } from "./widgets/addDrillDownForInsightWidgetHandler.js";
+import { modifyDrillDownForInsightWidgetHandler } from "./widgets/modifyDrillDownForInsightWidgetHandler.js";
+import { crossFilteringHandler } from "./drill/crossFilteringHandler.js";
+import { attributeHierarchyModifiedHandler } from "./widgets/attributeHierarchyModifiedHandler.js";
+import { addDateFilterHandler } from "./filterContext/dateFilter/addDateFilterHandler.js";
+import { removeDateFiltersHandler } from "./filterContext/dateFilter/removeDateFiltersHandler.js";
+import { moveDateFilterHandler } from "./filterContext/dateFilter/moveDateFilterHandler.js";
+import { changeDateFilterWithDimensionModeHandler } from "./dashboard/changeDateFilterWithDimensionModeHandler.js";
+import { changeDateFilterTitleHandler } from "./dashboard/changeDateFilterTitleHandler.js";
+import { changeAttributeFilterLimitingItemsHandler } from "./dashboard/changeAttributeFilterLimitingItemsHandler.js";
 
 function* notImplementedCommand(ctx: DashboardContext, cmd: IDashboardCommand): SagaIterator<void> {
     yield dispatchDashboardEvent(commandRejected(ctx, cmd.correlationId));
@@ -101,6 +115,14 @@ export const DefaultCommandHandlers: {
     "GDC.DASH/CMD.FILTER_CONTEXT.ATTRIBUTE_FILTER.SET_DISPLAY_FORM": changeAttributeDisplayFormHandler,
     "GDC.DASH/CMD.FILTER_CONTEXT.ATTRIBUTE_FILTER.SET_TITLE": changeAttributeTitleHandler,
     "GDC.DASH/CMD.FILTER_CONTEXT.ATTRIBUTE_FILTER.SET_SELECTION_MODE": changeAttributeSelectionModeHandler,
+    "GDC.DASH/CMD.FILTER_CONTEXT.DATE_FILTER.ADD": addDateFilterHandler,
+    "GDC.DASH/CMD.FILTER_CONTEXT.DATE_FILTER.REMOVE": removeDateFiltersHandler,
+    "GDC.DASH/CMD.FILTER_CONTEXT.DATE_FILTER.MOVE": moveDateFilterHandler,
+    "GDC.DASH/CMD.ATTRIBUTE_FILTER_CONFIG.SET_MODE": changeAttributeFilterModeHandler,
+    "GDC.DASH/CMD.ATTRIBUTE_FILTER_CONFIG.SET_LIMITING_ITEMS": changeAttributeFilterLimitingItemsHandler,
+    "GDC.DASH/CMD.DATE_FILTER_CONFIG.SET_MODE": setDashboardDateFilterConfigModeHandler,
+    "GDC.DASH/CMD.DATE_FILTER_WITH_DIMENSION_CONFIG.SET_MODE": changeDateFilterWithDimensionModeHandler,
+    "GDC.DASH/CMD.DATE_FILTER_CONFIG.SET_TITLE": changeDateFilterTitleHandler,
     "GDC.DASH/CMD.FLUID_LAYOUT.ADD_SECTION": addLayoutSectionHandler,
     "GDC.DASH/CMD.FLUID_LAYOUT.MOVE_SECTION": moveLayoutSectionHandler,
     "GDC.DASH/CMD.FLUID_LAYOUT.REMOVE_SECTION": removeLayoutSectionHandler,
@@ -130,9 +152,14 @@ export const DefaultCommandHandlers: {
     "GDC.DASH/CMD.INSIGHT_WIDGET.CHANGE_CONFIGURATION": changeInsightWidgetVisConfigurationHandler,
     "GDC.DASH/CMD.INSIGHT_WIDGET.CHANGE_INSIGHT": changeInsightWidgetInsightHandler,
     "GDC.DASH/CMD.INSIGHT_WIDGET.MODIFY_DRILLS": modifyDrillsForInsightWidgetHandler,
+    "GDC.DASH/CMD.ATTRIBUTE_HIERARCHY_MODIFIED": attributeHierarchyModifiedHandler,
     "GDC.DASH/CMD.INSIGHT_WIDGET.REMOVE_DRILLS": removeDrillsForInsightWidgetHandler,
+    "GDC.DASH/CMD.INSIGHT_WIDGET.REMOVE_DRILL_DOWN": removeDrillDownForInsightWidgetHandler,
+    "GDC.DASH/CMD.INSIGHT_WIDGET.ADD_DRILL_DOWN": addDrillDownForInsightWidgetHandler,
+    "GDC.DASH/CMD.INSIGHT_WIDGET.MODIFY_DRILL_DOWN": modifyDrillDownForInsightWidgetHandler,
     "GDC.DASH/CMD.INSIGHT_WIDGET.REFRESH": refreshInsightWidgetHandler,
     "GDC.DASH/CMD.INSIGHT_WIDGET.EXPORT": exportInsightWidgetHandler,
+    "GDC.DASH/CMD.RICH_TEXT_WIDGET.CHANGE_CONTENT": changeRichTextWidgetContentHandler,
     "GDC.DASH/CMD.ALERT.CREATE": createAlertHandler,
     "GDC.DASH/CMD.ALERT.UPDATE": updateAlertHandler,
     "GDC.DASH/CMD.ALERTS.REMOVE": removeAlertsHandler,
@@ -145,6 +172,7 @@ export const DefaultCommandHandlers: {
     "GDC.DASH/CMD.DRILL.DRILL_TO_ATTRIBUTE_URL": drillToAttributeUrlHandler,
     "GDC.DASH/CMD.DRILL.DRILL_TO_CUSTOM_URL": drillToCustomUrlHandler,
     "GDC.DASH/CMD.DRILL.DRILL_TO_LEGACY_DASHBOARD": drillToLegacyDashboardHandler,
+    "GDC.DASH/CMD.DRILL.CROSS_FILTERING": crossFilteringHandler,
     "GDC.DASH/CMD.DRILL.DRILLABLE_ITEMS.CHANGE": changeDrillableItemsHandler,
     "GDC.DASH/CMD.DRILL_TARGETS.ADD": addDrillTargetsHandler,
     "GDC.DASH/CMD.RENDER.ASYNC.REQUEST": requestAsyncRenderHandler,

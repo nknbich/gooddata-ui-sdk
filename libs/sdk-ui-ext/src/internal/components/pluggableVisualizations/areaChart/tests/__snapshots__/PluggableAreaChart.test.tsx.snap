@@ -6,7 +6,7 @@ exports[`PluggableAreaChart > Sort config > should return expected sort config f
   "availableSorts": [],
   "defaultSort": [],
   "disabled": true,
-  "disabledExplanation": "Sorting is not possible for this insight configuration.",
+  "disabledExplanation": "Sorting is not possible for this visualization configuration.",
   "supported": true,
 }
 `;
@@ -27,7 +27,7 @@ exports[`PluggableAreaChart > Sort config > should return expected sort config f
   "availableSorts": [],
   "defaultSort": [],
   "disabled": true,
-  "disabledExplanation": "Sorting is not possible for this insight configuration.",
+  "disabledExplanation": "Sorting is not possible for this visualization configuration.",
   "supported": true,
 }
 `;
@@ -349,9 +349,9 @@ exports[`PluggableAreaChart > optional stacking > should return reference point 
         "icon": "local:area/bucket-title-measures.svg",
         "isShowInPercentEnabled": true,
         "isShowInPercentVisible": true,
-        "itemsLimit": 20,
+        "itemsLimit": 40,
         "title": "Measures",
-        "warningMessage": "To add additional measure, remove <span class=\\"attr-field-icon\\" /> or <span class=\\"date-field-icon\\" /> from <span class=\\"stack-by\\">view by</span>",
+        "warningMessage": "To add additional measure, remove <span class="attr-field-icon" /> or <span class="date-field-icon" /> from <span class="stack-by">view by</span>",
       },
       "stack": {
         "accepts": [
@@ -365,7 +365,7 @@ exports[`PluggableAreaChart > optional stacking > should return reference point 
         "isShowInPercentEnabled": false,
         "itemsLimit": 1,
         "title": "Stack by",
-        "warningMessage": "To stack by, an insight can have only one attribute in view by",
+        "warningMessage": "To stack by, an visualization can have only one attribute in view by",
       },
       "view": {
         "accepts": [
@@ -517,7 +517,7 @@ exports[`PluggableAreaChart > optional stacking > should reuse all measures, onl
         "icon": "local:area/bucket-title-measures.svg",
         "isShowInPercentEnabled": false,
         "isShowInPercentVisible": true,
-        "itemsLimit": 20,
+        "itemsLimit": 40,
         "title": "Measures",
       },
       "stack": {
@@ -532,7 +532,7 @@ exports[`PluggableAreaChart > optional stacking > should reuse all measures, onl
         "isShowInPercentEnabled": false,
         "itemsLimit": 1,
         "title": "Stack by",
-        "warningMessage": "To stack by an attribute, an insight can have only one measure",
+        "warningMessage": "To stack by an attribute, an visualization can have only one measure",
       },
       "view": {
         "accepts": [
@@ -550,7 +550,7 @@ exports[`PluggableAreaChart > optional stacking > should reuse all measures, onl
           "date": 1,
         },
         "title": "View by",
-        "warningMessage": "To view by another attribute, an insight can have only one measure",
+        "warningMessage": "To view by another attribute, an visualization can have only one measure",
       },
     },
     "exportConfig": {
@@ -686,9 +686,9 @@ exports[`PluggableAreaChart > optional stacking > should reuse one measure, only
         "icon": "local:area/bucket-title-measures.svg",
         "isShowInPercentEnabled": false,
         "isShowInPercentVisible": true,
-        "itemsLimit": 20,
+        "itemsLimit": 40,
         "title": "Measures",
-        "warningMessage": "To add additional measure, remove <span class=\\"attr-field-icon\\" /> from <span class=\\"stack-by\\">stack by</span>",
+        "warningMessage": "To add additional measure, remove <span class="attr-field-icon" /> from <span class="stack-by">stack by</span>",
       },
       "stack": {
         "accepts": [
@@ -719,7 +719,7 @@ exports[`PluggableAreaChart > optional stacking > should reuse one measure, only
           "date": 1,
         },
         "title": "View by",
-        "warningMessage": "To add additional attribute, remove <span class=\\"attr-field-icon\\" /> from <span class=\\"stack-by\\">stack by</span>",
+        "warningMessage": "To add additional attribute, remove <span class="attr-field-icon" /> from <span class="stack-by">stack by</span>",
       },
     },
     "exportConfig": {
@@ -861,9 +861,9 @@ exports[`PluggableAreaChart > optional stacking > should reuse one measure, two 
         "icon": "local:area/bucket-title-measures.svg",
         "isShowInPercentEnabled": true,
         "isShowInPercentVisible": true,
-        "itemsLimit": 20,
+        "itemsLimit": 40,
         "title": "Measures",
-        "warningMessage": "To add additional measure, remove <span class=\\"attr-field-icon\\" /> from <span class=\\"stack-by\\">view by</span>",
+        "warningMessage": "To add additional measure, remove <span class="attr-field-icon" /> from <span class="stack-by">view by</span>",
       },
       "stack": {
         "accepts": [
@@ -877,7 +877,7 @@ exports[`PluggableAreaChart > optional stacking > should reuse one measure, two 
         "isShowInPercentEnabled": false,
         "itemsLimit": 1,
         "title": "Stack by",
-        "warningMessage": "To stack by, an insight can have only one attribute in view by",
+        "warningMessage": "To stack by, an visualization can have only one attribute in view by",
       },
       "view": {
         "accepts": [
@@ -982,9 +982,9 @@ exports[`PluggableAreaChart > should cut out measures tail when getting nM 0Vb 1
         "icon": "local:area/bucket-title-measures.svg",
         "isShowInPercentEnabled": false,
         "isShowInPercentVisible": true,
-        "itemsLimit": 20,
+        "itemsLimit": 40,
         "title": "Measures",
-        "warningMessage": "To add additional measure, remove <span class=\\"attr-field-icon\\" /> from <span class=\\"stack-by\\">stack by</span>",
+        "warningMessage": "To add additional measure, remove <span class="attr-field-icon" /> from <span class="stack-by">stack by</span>",
       },
       "stack": {
         "accepts": [
@@ -1102,9 +1102,9 @@ exports[`PluggableAreaChart > should return reference point when no categories a
         "icon": "local:area/bucket-title-measures.svg",
         "isShowInPercentEnabled": false,
         "isShowInPercentVisible": true,
-        "itemsLimit": 20,
+        "itemsLimit": 40,
         "title": "Measures",
-        "warningMessage": "To add additional measure, remove <span class=\\"attr-field-icon\\" /> from <span class=\\"stack-by\\">stack by</span>",
+        "warningMessage": "To add additional measure, remove <span class="attr-field-icon" /> from <span class="stack-by">stack by</span>",
       },
       "stack": {
         "accepts": [

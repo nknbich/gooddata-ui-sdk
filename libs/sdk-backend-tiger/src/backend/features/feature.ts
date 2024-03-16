@@ -1,4 +1,4 @@
-// (C) 2020-2023 GoodData Corporation
+// (C) 2020-2024 GoodData Corporation
 
 import { FeatureFlagsValues, ITigerFeatureFlags, TigerFeaturesNames } from "../uiFeatures.js";
 import { convertState } from "./state.js";
@@ -151,20 +151,6 @@ export function mapFeatures(features: FeaturesMap): Partial<ITigerFeatureFlags> 
         ),
         ...loadFeature(
             features,
-            TigerFeaturesNames.EnablePivotTableTransposition,
-            "enablePivotTableTransposition",
-            "BOOLEAN",
-            FeatureFlagsValues.enablePivotTableTransposition,
-        ),
-        ...loadFeature(
-            features,
-            TigerFeaturesNames.EnableColumnHeadersPosition,
-            "enableColumnHeadersPosition",
-            "BOOLEAN",
-            FeatureFlagsValues.enableColumnHeadersPosition,
-        ),
-        ...loadFeature(
-            features,
             TigerFeaturesNames.EnableNewHeadline,
             "enableNewHeadline",
             "BOOLEAN",
@@ -172,17 +158,115 @@ export function mapFeatures(features: FeaturesMap): Partial<ITigerFeatureFlags> 
         ),
         ...loadFeature(
             features,
-            TigerFeaturesNames.EnableAttributeHierarchies,
-            "enableAttributeHierarchies",
-            "BOOLEAN",
-            FeatureFlagsValues.enableAttributeHierarchies,
-        ),
-        ...loadFeature(
-            features,
             TigerFeaturesNames.EnableUnavailableItemsVisible,
             "enableUnavailableItemsVisible",
             "BOOLEAN",
             FeatureFlagsValues.enableUnavailableItemsVisible,
+        ),
+        ...loadFeature(
+            features,
+            TigerFeaturesNames.EnablePivotTableIncreaseBucketSize,
+            "enablePivotTableIncreaseBucketSize",
+            "BOOLEAN",
+            FeatureFlagsValues.enablePivotTableIncreaseBucketSize,
+        ),
+        ...loadFeature(
+            features,
+            TigerFeaturesNames.EnableUserManagement,
+            "enableUserManagement",
+            "BOOLEAN",
+            FeatureFlagsValues.enableUserManagement,
+        ),
+        ...loadFeature(
+            features,
+            TigerFeaturesNames.EnableKDSavedFilters,
+            "enableKDSavedFilters",
+            "BOOLEAN",
+            FeatureFlagsValues.enableKDSavedFilters,
+        ),
+        ...loadFeature(
+            features,
+            TigerFeaturesNames.EnableClickHouseDataSource,
+            "enableClickHouseDataSource",
+            "BOOLEAN",
+            FeatureFlagsValues.enableClickHouseDataSource,
+        ),
+        ...loadFeature(
+            features,
+            TigerFeaturesNames.EnableKDCrossFiltering,
+            "enableKDCrossFiltering",
+            "BOOLEAN",
+            FeatureFlagsValues.enableKDCrossFiltering,
+        ),
+        ...loadFeature(
+            features,
+            TigerFeaturesNames.EnableMultipleDateFilters,
+            "enableMultipleDateFilters",
+            "BOOLEAN",
+            FeatureFlagsValues.enableMultipleDateFilters,
+        ),
+        ...loadFeature(
+            features,
+            TigerFeaturesNames.EnableADMultipleDateFilters,
+            "enableADMultipleDateFilters",
+            "BOOLEAN",
+            FeatureFlagsValues.enableADMultipleDateFilters,
+        ),
+        ...loadFeature(
+            features,
+            TigerFeaturesNames.EnableKDRichText,
+            "enableKDRichText",
+            "BOOLEAN",
+            FeatureFlagsValues.enableKDRichText,
+        ),
+        ...loadFeature(
+            features,
+            TigerFeaturesNames.EnableAttributeFilterValuesValidation,
+            "enableAttributeFilterValuesValidation",
+            "BOOLEAN",
+            FeatureFlagsValues.enableAttributeFilterValuesValidation,
+        ),
+        ...loadFeature(
+            features,
+            TigerFeaturesNames.EnableMySqlDataSource,
+            "enableMySqlDataSource",
+            "BOOLEAN",
+            FeatureFlagsValues.enableMySqlDataSource,
+        ),
+        ...loadFeature(
+            features,
+            TigerFeaturesNames.EnableCreateUser,
+            "enableCreateUser",
+            "BOOLEAN",
+            FeatureFlagsValues.enableCreateUser,
+        ),
+        ...loadFeature(
+            features,
+            TigerFeaturesNames.EnableDirectQuery,
+            "enableDirectQuery",
+            "BOOLEAN",
+            FeatureFlagsValues.enableDirectQuery,
+        ),
+        ...loadFeature(
+            features,
+            TigerFeaturesNames.EnableMariaDbDataSource,
+            "enableMariaDbDataSource",
+            "BOOLEAN",
+            FeatureFlagsValues.enableMariaDbDataSource,
+        ),
+        ...loadFeature(
+            features,
+            TigerFeaturesNames.EnableRepeaterChart,
+            "enableRepeaterChart",
+            "BOOLEAN",
+            FeatureFlagsValues.enableRepeaterChart,
+        ),
+        ...loadFeature(
+            features,
+            TigerFeaturesNames.EnableKDAttributeFilterDatesValidation,
+            "enableKDAttributeFilterDatesValidation",
+            "BOOLEAN",
+            FeatureFlagsValues.enableKDAttributeFilterDatesValidation,
         ),
     };
 }

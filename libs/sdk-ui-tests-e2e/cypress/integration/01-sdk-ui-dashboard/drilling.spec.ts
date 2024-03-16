@@ -1,4 +1,4 @@
-// (C) 2021 GoodData Corporation
+// (C) 2021-2024 GoodData Corporation
 
 import * as Navigation from "../../tools/navigation";
 
@@ -7,6 +7,7 @@ import { EditMode } from "../../tools/editMode";
 import { CustomURLDialog, WidgetConfiguration } from "../../tools/widgetConfiguration";
 import { Messages } from "../../tools/messages";
 import { DrillToModal } from "../../tools/drillToModal";
+import { getBackend } from "../../support/constants";
 
 const drillModal = new DrillToModal();
 const editMode = new EditMode();
@@ -21,6 +22,7 @@ describe("Interaction", () => {
         editMode.edit();
         widget.waitChartLoaded().focus();
         widgetConfig.openInteractions().getDrillConfigItem("Sum of Velocity").remove();
+        widgetConfig.getDrillConfigItem("Created - Year").remove();
         editMode.save(true).edit();
         widget.waitChartLoaded().focus();
         widgetConfig.openInteractions().hasInteractionItems(false);
@@ -34,7 +36,12 @@ describe("Interaction", () => {
             Navigation.visit("dashboard/drill-to-insight");
             editMode.edit();
             widget.waitChartLoaded().focus();
-            widgetConfig.openInteractions().addInteraction("Sum of Probability", "measure");
+
+            getBackend() === "TIGER"
+                ? widgetConfig.openInteractions().getDrillConfigItem("Created - Year").remove()
+                : widgetConfig.openInteractions();
+
+            widgetConfig.addInteraction("Sum of Probability", "measure");
             widgetConfig
                 .getDrillConfigItem("Sum of Probability")
                 .chooseAction("Drill into URL")
@@ -72,11 +79,11 @@ describe("Interaction", () => {
                 .waitChartLoaded()
                 .scrollIntoView()
                 .focus()
-                .setTitle("Insight has invalid interaction rename");
+                .setTitle("Visualization has invalid interaction rename");
             message
                 .hasWarningMessage(true)
                 .clickShowMore()
-                .hasInsightNameIsBolder(true, "Insight has invalid interaction rename");
+                .hasInsightNameIsBolder(true, "Visualization has invalid interaction rename");
             widget1.waitChartLoaded().scrollIntoView().focus();
             new WidgetConfiguration(1).removeFromDashboard();
             message.hasWarningMessage(false);
@@ -92,7 +99,7 @@ describe("Drilling on Table with Metrics in Rows", { tags: ["post-merge_integrat
     it("should drill on insight from table with no rows and metrics in rows", () => {
         new Widget(0).getTable().click(0, 1, false);
 
-        drillModal.getTitleElement().should("have.text", "Insight has invalid interaction");
+        drillModal.getTitleElement().should("have.text", "Visualization has invalid interaction");
     });
 
     it("should drill on insight from table with no columns and metrics in rows", () => {
@@ -105,5 +112,10 @@ describe("Drilling on Table with Metrics in Rows", { tags: ["post-merge_integrat
         new Widget(2).scrollIntoView().getTable().click(0, 3, false);
 
         drillModal.getTitleElement().should("have.text", "With own description");
+        drillModal.close();
+
+        new Widget(2).scrollIntoView().getTable().click(1, 3, false);
+
+        drillModal.getTitleElement().should("have.text", "Sales Rep chart");
     });
 });

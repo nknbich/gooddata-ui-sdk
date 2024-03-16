@@ -6,17 +6,23 @@
 # - "url"       - url for link in version menu. May be absolute URL.
 # - "latestTag" - docker image tag for the latest patch version. Must be changed
 #                 on every patch release of respective branch
+
 [[versions]]
-    version = "9.1"
+    version = "9.8"
     dirpath = "latest"
     url = "/latest/"
 [[versions]]
-    version = "9.0"
-    dirpath = "9.0"
-    url = "/9.0/"
+    version = "9.7"
+    dirpath = "9.7"
+    url = "/9.7/"
 [[versions]]
-    version = "8.12"
-    url = "https://sdk.gooddata.com/gooddata-ui/"
+    version = "9.6"
+    dirpath = "9.6"
+    url = "/9.6/"
+[[versions]]
+    version = "9.5"
+    dirpath = "9.5"
+    url = "/9.5/"
 [[versions]]
     version = "Older"
     url = "https://sdk.gooddata.com/gooddata-ui/versions.html"

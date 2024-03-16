@@ -1,6 +1,7 @@
-// (C) 2020-2023 GoodData Corporation
+// (C) 2020-2024 GoodData Corporation
 import React, { useCallback, useEffect, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
+// eslint-disable-next-line react/no-deprecated
 import { render } from "react-dom";
 import noop from "lodash/noop.js";
 import isEqual from "lodash/isEqual.js";
@@ -150,8 +151,6 @@ class InsightRendererCore extends React.PureComponent<IInsightRendererProps & Wr
             return;
         }
 
-        this.props.onLoadingChanged?.({ isLoading: true });
-
         // the visualization we may have from earlier is no longer valid -> get rid of it
         this.unmountVisualization();
 
@@ -203,6 +202,7 @@ class InsightRendererCore extends React.PureComponent<IInsightRendererProps & Wr
                 this.reactRootsMap.get(element).render(children);
             };
         } else {
+            // eslint-disable-next-line react/no-deprecated
             return render;
         }
     };

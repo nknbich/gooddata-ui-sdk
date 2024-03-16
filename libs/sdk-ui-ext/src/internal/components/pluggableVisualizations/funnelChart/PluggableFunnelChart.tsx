@@ -4,6 +4,7 @@ import {
     IVisConstruct,
     IReferencePoint,
     IExtendedReferencePoint,
+    IVisProps,
 } from "../../../interfaces/Visualization.js";
 
 import { PluggablePieChart } from "../pieChart/PluggablePieChart.js";
@@ -53,10 +54,14 @@ export class PluggableFunnelChart extends PluggablePieChart {
         return super.getExtendedReferencePoint(referencePoint).then(setFunnelChartUiConfig);
     }
 
-    protected renderConfigurationPanel(insight: IInsightDefinition): void {
+    protected renderConfigurationPanel(insight: IInsightDefinition, options: IVisProps): void {
         const configPanelElement = this.getConfigPanelElement();
 
         if (configPanelElement) {
+            const panelConfig = {
+                supportsAttributeHierarchies: this.backendCapabilities.supportsAttributeHierarchies,
+            };
+
             this.renderFun(
                 <FunnelChartConfigurationPanel
                     locale={this.locale}
@@ -70,6 +75,8 @@ export class PluggableFunnelChart extends PluggablePieChart {
                     isLoading={this.isLoading}
                     featureFlags={this.featureFlags}
                     references={this.references}
+                    panelConfig={panelConfig}
+                    configurationPanelRenderers={options.custom?.configurationPanelRenderers}
                 />,
                 configPanelElement,
             );

@@ -1,4 +1,4 @@
-// (C) 2019-2023 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 import { MessageDescriptor, defineMessages } from "react-intl";
 
 //NOTE: Follow up ticket for move all messages: https://gooddata.atlassian.net/browse/FET-1050
@@ -62,6 +62,8 @@ export const titles: Record<string, MessageDescriptor> = defineMessages({
     segment_pushpin: { id: "dashboard.bucket.segment_title.pushpin" },
     trend_line: { id: "dashboard.bucket.trend_title.line" },
     columns_table: { id: "dashboard.bucket.columns_title.table" },
+    attribute_repeater: { id: "dashboard.bucket.attribute_title.repeater" },
+    columns_repeater: { id: "dashboard.bucket.columns_title.repeater" },
 });
 
 export const subtitles: Record<string, MessageDescriptor> = defineMessages({
@@ -106,6 +108,8 @@ export const messages: Record<string, MessageDescriptor> = defineMessages({
     metricSegment: { id: "dashboard.bucket.metric_segment_by_warning" },
     categorySegment: { id: "dashboard.bucket.category_segment_by_warning" },
     category: { id: "dashboard.bucket.category_category_by_warning" },
+    columns: { id: "dashboard.bucket.category_columns_warning" },
+    measuresAttributes: { id: "dashboard.bucket.category_measures_rows_warning" },
     autoDefault: { id: "properties.auto_default" },
     extraSmall: { id: "properties.points.size.extra_small" },
     small: { id: "properties.points.size.small" },
@@ -206,6 +210,8 @@ export const messages: Record<string, MessageDescriptor> = defineMessages({
     columnHeaderPositionLabel: { id: "properties.column.headers.position" },
     columnHeaderPositionTop: { id: "properties.column.headers.position.top" },
     columnHeaderPositionLeft: { id: "properties.column.headers.position.left" },
+    interactions: { id: "properties.interactions.title" },
+    interactionsDrillDown: { id: "properties.interactions.drillDown" },
 });
 
 export const comparisonMessages: Record<string, MessageDescriptor> = defineMessages({

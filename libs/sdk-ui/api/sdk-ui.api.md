@@ -158,7 +158,7 @@ export class CancelledSdkError extends GoodDataSdkError {
 export type ChartElementType = "slice" | "bar" | "point" | "label" | "cell" | "target" | "primary" | "comparative";
 
 // @public (undocumented)
-export type ChartType = "bar" | "column" | "pie" | "line" | "area" | "donut" | "scatter" | "bubble" | "heatmap" | "geo" | "pushpin" | "combo" | "combo2" | "histogram" | "bullet" | "treemap" | "waterfall" | "funnel" | "pyramid" | "pareto" | "alluvial" | "sankey" | "dependencywheel";
+export type ChartType = "bar" | "column" | "pie" | "line" | "area" | "donut" | "scatter" | "bubble" | "heatmap" | "geo" | "pushpin" | "combo" | "combo2" | "histogram" | "bullet" | "treemap" | "waterfall" | "funnel" | "pyramid" | "pareto" | "alluvial" | "sankey" | "dependencywheel" | "repeater";
 
 // @alpha
 export const ClientWorkspaceProvider: React_2.FC<IClientWorkspaceProviderProps>;
@@ -172,7 +172,7 @@ export function composedFromUri(uri: string): IHeaderPredicate;
 // @public
 export type ComposedPlaceholderResolutionContext<T> = T extends IComposedPlaceholder<any, any, infer TContext> ? TContext : any;
 
-// @internal (undocumented)
+// @public (undocumented)
 export function convertDrillableItemsToPredicates(drillableItems: ExplicitDrill[]): IHeaderPredicate[];
 
 // @public
@@ -364,11 +364,11 @@ export class ErrorComponent extends React_2.Component<IErrorProps> {
     // (undocumented)
     static defaultProps: Partial<IErrorProps>;
     // (undocumented)
-    render(): JSX.Element;
+    render(): React_2.JSX.Element;
 }
 
 // @public
-export const Execute: (props: IExecuteProps) => JSX.Element;
+export const Execute: (props: IExecuteProps) => React_2.JSX.Element;
 
 // @public
 export const ExecuteInsight: React_2.ComponentType<IExecuteInsightProps>;
@@ -1018,7 +1018,7 @@ export interface ILoadingState {
 }
 
 // @public
-export type ILocale = "en-US" | "de-DE" | "es-ES" | "fr-FR" | "ja-JP" | "nl-NL" | "pt-BR" | "pt-PT" | "zh-Hans" | "ru-RU";
+export type ILocale = "en-US" | "de-DE" | "es-ES" | "fr-FR" | "ja-JP" | "nl-NL" | "pt-BR" | "pt-PT" | "zh-Hans" | "ru-RU" | "it-IT";
 
 // @public (undocumented)
 export type IMappingHeader = IAttributeDescriptor | IResultAttributeHeader | IMeasureDescriptor | ITotalDescriptor | IColorDescriptor;
@@ -1390,7 +1390,7 @@ export class LoadingComponent extends React_2.Component<ILoadingProps> {
     // (undocumented)
     static defaultProps: Partial<ILoadingProps>;
     // (undocumented)
-    render(): JSX.Element;
+    render(): React_2.JSX.Element;
 }
 
 // @internal
@@ -1410,6 +1410,9 @@ export type MeasureOrPlaceholder = ValueOrPlaceholder<AnyMeasure>;
 
 // @public
 export type MeasuresOrPlaceholders = ValuesOrPlaceholders<AnyMeasure>;
+
+// @internal (undocumented)
+export const messages: Record<string, MessageDescriptor>;
 
 // @internal (undocumented)
 export const messagesMap: {
@@ -1765,6 +1768,7 @@ export const VisualizationTypes: {
     SANKEY: "sankey";
     DEPENDENCY_WHEEL: "dependencywheel";
     XIRR: "xirr";
+    REPEATER: "repeater";
 };
 
 // @internal

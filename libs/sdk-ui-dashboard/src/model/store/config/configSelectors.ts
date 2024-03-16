@@ -1,4 +1,4 @@
-// (C) 2021-2023 GoodData Corporation
+// (C) 2021-2024 GoodData Corporation
 import {
     IColorPalette,
     IDateFilterConfig,
@@ -12,6 +12,7 @@ import { DashboardSelector, DashboardState } from "../types.js";
 import { invariant } from "ts-invariant";
 import { ObjectAvailabilityConfig, ResolvedDashboardConfig } from "../../types/commonTypes.js";
 import { ILocale } from "@gooddata/sdk-ui";
+import { selectSupportsAttributeHierarchies } from "../backendCapabilities/backendCapabilitiesSelectors.js";
 
 const selectSelf = createSelector(
     (state: DashboardState) => state,
@@ -512,9 +513,26 @@ export const selectIsDeleteFilterButtonEnabled: DashboardSelector<boolean> = cre
  *
  * @internal
  */
-export const selectIsKPIDashboardDependentFiltersEnabled: DashboardSelector<boolean> = createSelector(
-    selectConfig,
-    (state) => !!(state.settings?.enableKPIDashboardDependentFilters || false),
+export const selectIsKPIDashboardDependentFiltersEnabled: DashboardSelector<boolean> = () => true;
+
+/**
+ * Returns whether new KD dependent filters are enabled.
+ *
+ * @internal
+ */
+export const selectEnableKDDependentFilters: DashboardSelector<boolean> = () => true;
+
+/**
+ * Returns whether KD dependent filters are enabled.
+ *
+ * @internal
+ */
+export const selectIsKDDependentFiltersEnabled: DashboardSelector<boolean> = createSelector(
+    selectEnableKDDependentFilters,
+    selectIsKPIDashboardDependentFiltersEnabled,
+    (enableKDDependentFilters, isKPIDashboardDependentFiltersEnabled) => {
+        return enableKDDependentFilters || isKPIDashboardDependentFiltersEnabled;
+    },
 );
 
 /**
@@ -537,18 +555,6 @@ export const selectIsShareButtonHidden: DashboardSelector<boolean> = createSelec
 });
 
 /**
- * Returns whether attribute hierarchies are enabled.
- *
- * @internal
- */
-export const selectEnableAttributeHierarchies: DashboardSelector<boolean> = createSelector(
-    selectConfig,
-    (state) => {
-        return state.settings?.enableAttributeHierarchies ?? false;
-    },
-);
-
-/**
  * Returns whether drill down is enabled.
  *
  * On Bear, drill down is driven by isKPIDashboardImplicitDrillDown.
@@ -558,8 +564,79 @@ export const selectEnableAttributeHierarchies: DashboardSelector<boolean> = crea
  */
 export const selectIsDrillDownEnabled: DashboardSelector<boolean> = createSelector(
     selectEnableKPIDashboardImplicitDrillDown,
-    selectEnableAttributeHierarchies,
-    (isKPIDashboardImplicitDrillDownEnabled, isAttribueHierarchiesEnabled) => {
-        return isKPIDashboardImplicitDrillDownEnabled || isAttribueHierarchiesEnabled;
+    selectSupportsAttributeHierarchies,
+    (isKPIDashboardImplicitDrillDownEnabled, isAttributeHierarchiesEnabled) => {
+        return isKPIDashboardImplicitDrillDownEnabled || isAttributeHierarchiesEnabled;
+    },
+);
+
+/**
+ * Returns whether the unrelated data datasets are shown.
+ *
+ * @internal
+ */
+export const selectEnableUnavailableItemsVisibility: DashboardSelector<boolean> = createSelector(
+    selectConfig,
+    (state) => {
+        return (
+            state.settings?.showHiddenCatalogItems ?? state.settings?.enableUnavailableItemsVisible ?? false
+        );
+    },
+);
+
+/**
+ * Returns whether multiple date filters are enabled.
+ *
+ * @internal
+ */
+export const selectEnableMultipleDateFilters: DashboardSelector<boolean> = createSelector(
+    selectConfig,
+    (state) => {
+        return state.settings?.enableMultipleDateFilters ?? true;
+    },
+);
+
+/**
+ * Returns whether rich text widgets are enabled.
+ *
+ * @internal
+ */
+export const selectEnableKDRichText: DashboardSelector<boolean> = createSelector(selectConfig, (state) => {
+    return state.settings?.enableKDRichText ?? true;
+});
+
+/**
+ * Returns whether KD cross filtering is enabled.
+ *
+ * @internal
+ */
+export const selectEnableKDCrossFiltering: DashboardSelector<boolean> = createSelector(
+    selectConfig,
+    (state) => {
+        return state.settings?.enableKDCrossFiltering ?? false;
+    },
+);
+
+/**
+ * Returns whether KD attribute filter values validation/filtering is enabled.
+ *
+ * @internal
+ */
+export const selectEnableAttributeFilterValuesValidation: DashboardSelector<boolean> = createSelector(
+    selectConfig,
+    (state) => {
+        return state.settings?.enableAttributeFilterValuesValidation ?? true;
+    },
+);
+
+/**
+ * Returns whether KD attribute filter by dates validation/filtering is enabled.
+ *
+ * @internal
+ */
+export const selectEnableKDAttributeFilterDatesValidation: DashboardSelector<boolean> = createSelector(
+    selectConfig,
+    (state) => {
+        return state.settings?.enableKDAttributeFilterDatesValidation ?? false;
     },
 );

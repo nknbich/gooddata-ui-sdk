@@ -1,9 +1,12 @@
 // (C) 2020-2023 GoodData Corporation
 import { useCallback } from "react";
 import {
+    AttributeFilterInteractionType,
     DescriptionTooltipOpenedData,
     ShareDialogInteractionData,
     userInteractionTriggered,
+    AttributeHierarchiesInteractionType,
+    DateFilterInteractionType,
 } from "../events/index.js";
 
 import { useDashboardEventDispatch } from "./useDashboardEventDispatch.js";
@@ -53,9 +56,38 @@ export const useDashboardUserInteraction = () => {
         [eventDispatch],
     );
 
-    const attributeFilterTitleResetClicked = useCallback(() => {
-        eventDispatch(userInteractionTriggered("attributeFilterTitleResetClicked"));
-    }, []);
+    const attributeFilterInteraction = useCallback(
+        (eventType: AttributeFilterInteractionType) => {
+            eventDispatch(userInteractionTriggered(eventType));
+        },
+        [eventDispatch],
+    );
+
+    const attributeHierarchiesInteraction = useCallback(
+        (eventType: AttributeHierarchiesInteractionType) => {
+            eventDispatch(userInteractionTriggered(eventType));
+        },
+        [eventDispatch],
+    );
+
+    const filterContextStateReset = useCallback(() => {
+        eventDispatch(userInteractionTriggered("filterContextStateReset"));
+    }, [eventDispatch]);
+
+    const interactionPanelOpened = useCallback(() => {
+        eventDispatch(userInteractionTriggered("interactionPanelOpened"));
+    }, [eventDispatch]);
+
+    const addInteractionClicked = useCallback(() => {
+        eventDispatch(userInteractionTriggered("addInteractionClicked"));
+    }, [eventDispatch]);
+
+    const dateFilterInteraction = useCallback(
+        (eventType: DateFilterInteractionType) => {
+            eventDispatch(userInteractionTriggered(eventType));
+        },
+        [eventDispatch],
+    );
 
     return {
         poweredByGDLogoClicked,
@@ -63,6 +95,11 @@ export const useDashboardUserInteraction = () => {
         kpiAlertDialogOpened,
         descriptionTooltipOpened,
         shareDialogInteraction,
-        attributeFilterTitleResetClicked,
+        attributeFilterInteraction,
+        filterContextStateReset,
+        interactionPanelOpened,
+        addInteractionClicked,
+        attributeHierarchiesInteraction,
+        dateFilterInteraction,
     };
 };

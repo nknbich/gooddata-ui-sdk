@@ -1,4 +1,4 @@
-// (C) 2019-2023 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 
 import {
     DashboardAttributeFilterSelectionMode,
@@ -24,6 +24,7 @@ import { IAttributeFilterElementsSelectLoadingProps } from "./Components/Element
 import { IAttributeFilterElementsSelectErrorProps } from "./Components/ElementsSelect/AttributeFilterElementsSelectError.js";
 import { IAttributeFilterEmptyResultProps } from "./Components/ElementsSelect/EmptyResult/AttributeFilterEmptyResult.js";
 import { IAttributeFilterStatusBarProps } from "./Components/ElementsSelect/StatusBar/AttributeFilterStatusBar.js";
+import { IFilterButtonCustomIcon } from "../shared/index.js";
 
 /**
  * @public
@@ -58,7 +59,7 @@ export interface IAttributeFilterCoreProps {
      * @remarks
      * Internal purpose that is used for marking if filter reset children filters after changed
      * Default value is "true"
-"     */
+     */
     resetOnParentFilterChange?: boolean;
 
     /**
@@ -114,6 +115,16 @@ export interface IAttributeFilterCoreProps {
      * or you can provide a pure function that will be called for each parent filter to determine the respective over attribute.
      */
     parentFilterOverAttribute?: ParentFilterOverAttributeType;
+
+    /**
+     * Specify the items that are used for elements availability validation (metrics or attributes, labels,
+     * or facts that the backend will use to build validation metrics from). Only the elements that are
+     * compatible with the provided elements will be shown in the filter.
+     *
+     * @remarks
+     * The property is supported only by some backend. The backends that do not support it will ignore it.
+     */
+    validateElementsBy?: ObjRef[];
 
     /**
      * Specify title for the attribute filter.
@@ -183,6 +194,20 @@ export interface IAttributeFilterCoreProps {
      * By default, the value is "false". Works only for `selectionMode` "single" and if current selection is empty.
      */
     selectFirst?: boolean;
+
+    /**
+     * Specifies the visibility mode of the filter.
+     *
+     * @alpha
+     */
+    disabled?: boolean;
+
+    /**
+     * Represents a custom icon along with a tooltip.
+     *
+     * @alpha
+     */
+    customIcon?: IFilterButtonCustomIcon;
 
     /**
      * Specify function which will be called when user clicks 'Apply' button.

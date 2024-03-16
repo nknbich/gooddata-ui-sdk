@@ -1,6 +1,6 @@
 {
     "name": "@gooddata/util",
-    "version": "9.3.0-alpha.5",
+    "version": "9.10.0-alpha.13",
     "author": "GoodData",
     "description": "GoodData Utility Functions",
     "repository": {
@@ -21,10 +21,8 @@
         "esm/**/*.map"
     ],
     "scripts": {
-        "clean": "rm -rf ci dist esm coverage *.log",
-        "dev": "tsc -p tsconfig.dev.json --watch",
-        "build": "npm run build-esm && npm run api-extractor",
-        "build-esm": "tsc -p tsconfig.build.json",
+        "clean": "rm -rf ci dist esm coverage *.log tsconfig.tsbuildinfo",
+        "build": "tsc -p tsconfig.json && npm run api-extractor",
         "api-extractor": "mkdir -p api && [ -z \"${CI}\" ] && (api-extractor run -l) || (api-extractor run)",
         "test": "vitest watch",
         "test-once": "vitest run",
@@ -41,14 +39,14 @@
     },
     "dependencies": {
         "lodash": "^4.17.19",
-        "ts-invariant": "^0.7.3",
+        "ts-invariant": "^0.7.5",
         "tslib": "^2.5.0"
     },
     "devDependencies": {
         "@gooddata/eslint-config": "^4.1.0",
         "@microsoft/api-documenter": "^7.17.0",
         "@microsoft/api-extractor": "^7.36.0",
-        "@types/lodash": "^4.14.158",
+        "@types/lodash": "^4.14.202",
         "@typescript-eslint/eslint-plugin": "^5.57.1",
         "@typescript-eslint/parser": "^5.57.1",
         "concurrently": "^6.0.2",
@@ -64,7 +62,7 @@
         "eslint-plugin-sonarjs": "^0.16.0",
         "eslint-plugin-tsdoc": "^0.2.14",
         "prettier": "~2.5.0",
-        "typescript": "5.0.2",
-        "vitest": "0.31.4"
+        "typescript": "5.3.3",
+        "vitest": "1.0.4"
     }
 }

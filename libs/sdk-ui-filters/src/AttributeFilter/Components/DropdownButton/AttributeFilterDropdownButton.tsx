@@ -1,10 +1,11 @@
-// (C) 2022-2023 GoodData Corporation
+// (C) 2022-2024 GoodData Corporation
 import React, { ReactNode, useEffect, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 import { stringUtils } from "@gooddata/util";
 import cx from "classnames";
 import { ShortenedText } from "@gooddata/sdk-ui-kit";
-import { AttributeFilterButtonToolip } from "./AttributeFilterButtonTooltip.js";
+import { AttributeFilterButtonTooltip } from "./AttributeFilterButtonTooltip.js";
+import { FilterButtonCustomIcon, IFilterButtonCustomIcon } from "../../../shared/index.js";
 
 export const ALIGN_POINT = [
     { align: "tc bc", offset: { x: 0, y: -2 } },
@@ -52,6 +53,20 @@ export interface IAttributeFilterDropdownButtonProps {
      * @beta
      */
     showSelectionCount?: boolean;
+
+    /**
+     * Specifies the visibility mode of the filter.
+     *
+     * @alpha
+     */
+    disabled?: boolean;
+
+    /**
+     * Represents a custom icon along with a tooltip.
+     *
+     * @alpha
+     */
+    customIcon?: IFilterButtonCustomIcon;
 
     /**
      * If true, the AttributeFilter dropdown is open.
@@ -103,6 +118,13 @@ export interface IAttributeFilterDropdownButtonProps {
     TooltipContentComponent?: React.ComponentType;
 
     /**
+     * Allows adding content to the button after the title.
+     *
+     * @alpha
+     */
+    titleExtension?: ReactNode;
+
+    /**
      * Callback to open or close AttributeFilter dropdown.
      *
      * @beta
@@ -110,6 +132,13 @@ export interface IAttributeFilterDropdownButtonProps {
     onClick?: () => void;
 
     isError?: boolean;
+
+    /**
+     * Classnames to add to the dropdown button component.
+     *
+     * @beta
+     */
+    className?: string;
 }
 
 /**
@@ -131,6 +160,8 @@ export const AttributeFilterDropdownButton: React.VFC<IAttributeFilterDropdownBu
         selectedItemsCount,
         showSelectionCount = true,
         subtitle,
+        disabled,
+        customIcon,
         isFiltering,
         isLoading,
         isLoaded,
@@ -138,7 +169,9 @@ export const AttributeFilterDropdownButton: React.VFC<IAttributeFilterDropdownBu
         isDraggable,
         icon,
         TooltipContentComponent,
+        titleExtension,
         onClick,
+        className,
     } = props;
 
     const intl = useIntl();
@@ -179,7 +212,9 @@ export const AttributeFilterDropdownButton: React.VFC<IAttributeFilterDropdownBu
                     "gd-is-active": isOpen,
                     "gd-is-loaded": isLoaded,
                     "gd-is-draggable": isDraggable,
+                    disabled: disabled,
                 },
+                className,
             )}
             onClick={onClick}
         >
@@ -193,13 +228,15 @@ export const AttributeFilterDropdownButton: React.VFC<IAttributeFilterDropdownBu
                             tooltipAlignPoints={ALIGN_POINT}
                             className={"s-attribute-filter-button-title"}
                         >
-                            {`${buttonTitle}${!isLoading && !isFiltering ? ":" : ""}`}
+                            {`${buttonTitle}`}
                         </ShortenedText>
                     </div>
+                    {titleExtension}
+                    <FilterButtonCustomIcon customIcon={customIcon} disabled={disabled} />
                     {TooltipContentComponent && isLoaded ? (
-                        <AttributeFilterButtonToolip>
+                        <AttributeFilterButtonTooltip>
                             <TooltipContentComponent />
-                        </AttributeFilterButtonToolip>
+                        </AttributeFilterButtonTooltip>
                     ) : null}
                 </div>
                 <div className="gd-attribute-filter-dropdown-button-subtitle__next">

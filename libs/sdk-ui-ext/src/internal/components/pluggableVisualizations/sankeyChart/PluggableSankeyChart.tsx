@@ -8,6 +8,7 @@ import {
     IExtendedReferencePoint,
     IReferencePoint,
     IVisConstruct,
+    IVisProps,
 } from "../../../interfaces/Visualization.js";
 import { DEFAULT_SANKEY_UI_CONFIG } from "../../../constants/uiConfig.js";
 import {
@@ -77,10 +78,14 @@ export class PluggableSankeyChart extends PluggableBaseChart {
         return SANKEY_CHART_SUPPORTED_PROPERTIES;
     }
 
-    protected renderConfigurationPanel(insight: IInsightDefinition): React.ReactNode {
+    protected renderConfigurationPanel(insight: IInsightDefinition, options: IVisProps): React.ReactNode {
         const configPanelElement = this.getConfigPanelElement();
 
         if (configPanelElement) {
+            const panelConfig = {
+                supportsAttributeHierarchies: this.backendCapabilities.supportsAttributeHierarchies,
+            };
+
             this.renderFun(
                 <SankeyChartConfigurationPanel
                     locale={this.locale}
@@ -94,6 +99,8 @@ export class PluggableSankeyChart extends PluggableBaseChart {
                     isError={this.getIsError()}
                     isLoading={this.isLoading}
                     featureFlags={this.featureFlags}
+                    panelConfig={panelConfig}
+                    configurationPanelRenderers={options.custom?.configurationPanelRenderers}
                 />,
                 configPanelElement,
             );

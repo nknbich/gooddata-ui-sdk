@@ -1,4 +1,4 @@
-// (C) 2019-2023 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 import { AxiosInstance, AxiosResponse } from "axios";
 import { invariant } from "ts-invariant";
 import {
@@ -18,6 +18,7 @@ import {
     IOrganizations,
     IEntitlements,
     isContractExpired,
+    IDataSourcesService,
 } from "@gooddata/sdk-backend-spi";
 import { newAxios, tigerClientFactory, ITigerClient } from "@gooddata/api-client-tiger";
 import isEmpty from "lodash/isEmpty.js";
@@ -46,6 +47,7 @@ import { TigerOrganization, TigerOrganizations } from "./organization/index.js";
 import { LIB_VERSION, LIB_NAME } from "../__version.js";
 import { TigerSpecificFunctions, buildTigerSpecificFunctions } from "./tigerSpecificFunctions.js";
 import { TigerEntitlements } from "./entitlements/index.js";
+import { TigerDataSourcesService } from "./dataSources/index.js";
 
 const CAPABILITIES: IBackendCapabilities = {
     hasTypeScopedIdentifiers: true,
@@ -64,7 +66,7 @@ const CAPABILITIES: IBackendCapabilities = {
     supportsCsvUploader: false,
     supportsRankingFilter: true,
     supportsRankingFilterWithMeasureValueFilter: false,
-    supportsElementsQueryParentFiltering: false,
+    supportsElementsQueryParentFiltering: true,
     supportsKpiWidget: false,
     supportsWidgetEntity: false,
     supportsHyperlinkAttributeLabels: true,
@@ -87,6 +89,18 @@ const CAPABILITIES: IBackendCapabilities = {
     supportsShowAllAttributeValues: true,
     supportsSeparateLatitudeLongitudeLabels: true,
     supportsEnumeratingDatetimeAttributes: false,
+    supportsHiddenAndLockedFiltersOnUI: true,
+    supportsAttributeHierarchies: true,
+    supportsSettingConnectingAttributes: false,
+    supportsKeepingDependentFiltersSelection: true,
+    supportsCircularDependencyInFilters: true,
+    allowMultipleInteractionsPerAttributeAndMeasure: true,
+    supportsShowingFilteredElements: true,
+    supportsSingleSelectDependentFilters: true,
+    supportsCrossFiltering: true,
+    supportsMultipleDateFilters: true,
+    supportsAttributeFilterElementsLimiting: true,
+    supportsRichTextWidgets: true,
 };
 
 /**
@@ -194,6 +208,10 @@ export class TigerBackend implements IAnalyticalBackend {
 
     public entitlements(): IEntitlements {
         return new TigerEntitlements(this.authApiCall);
+    }
+
+    public dataSources(): IDataSourcesService {
+        return new TigerDataSourcesService(this.authApiCall);
     }
 
     public currentUser(): IUserService {

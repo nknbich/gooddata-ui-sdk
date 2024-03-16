@@ -1,3 +1,5 @@
+// (C) 2024 GoodData Corporation
+
 /* eslint-disable */
 /**
  * OpenAPI definition
@@ -22,6 +24,31 @@ import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObj
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, RequestArgs, BaseAPI, RequiredError } from './base.js';
 
+/**
+ * Defines entitlements for given organization.
+ * @export
+ * @interface ApiEntitlement
+ */
+export interface ApiEntitlement {
+    /**
+     *
+     * @type {string}
+     * @memberof ApiEntitlement
+     */
+    name: string;
+    /**
+     *
+     * @type {string}
+     * @memberof ApiEntitlement
+     */
+    value?: string;
+    /**
+     *
+     * @type {string}
+     * @memberof ApiEntitlement
+     */
+    expiry?: string;
+}
 /**
  * Entity representing user in authentication system.
  * @export
@@ -119,29 +146,10 @@ export interface LiveFeatureFlagConfiguration {
 export interface LiveFeatures {
     /**
      *
-     * @type {FeatureFlagsContext}
+     * @type {Features & object}
      * @memberof LiveFeatures
      */
-    context: FeatureFlagsContext;
-    /**
-     *
-     * @type {LiveFeatureFlagConfiguration}
-     * @memberof LiveFeatures
-     */
-    configuration: LiveFeatureFlagConfiguration;
-}
-/**
- *
- * @export
- * @interface LiveFeaturesAllOf
- */
-export interface LiveFeaturesAllOf {
-    /**
-     *
-     * @type {LiveFeatureFlagConfiguration}
-     * @memberof LiveFeaturesAllOf
-     */
-    configuration?: LiveFeatureFlagConfiguration;
+    live: Features & object;
 }
 /**
  * Matomo service.
@@ -236,6 +244,12 @@ export interface Profile {
      * @memberof Profile
      */
     features: LiveFeatures | StaticFeatures;
+    /**
+     * Defines entitlements for given organization.
+     * @type {Array<ApiEntitlement>}
+     * @memberof Profile
+     */
+    entitlements: Array<ApiEntitlement>;
 }
 
 export const ProfilePermissionsEnum = {
@@ -278,29 +292,10 @@ export interface ProfileLinks {
 export interface StaticFeatures {
     /**
      *
-     * @type {FeatureFlagsContext}
+     * @type {Features & object}
      * @memberof StaticFeatures
      */
-    context: FeatureFlagsContext;
-    /**
-     *
-     * @type {{ [key: string]: string; }}
-     * @memberof StaticFeatures
-     */
-    items: { [key: string]: string };
-}
-/**
- *
- * @export
- * @interface StaticFeaturesAllOf
- */
-export interface StaticFeaturesAllOf {
-    /**
-     *
-     * @type {{ [key: string]: string; }}
-     * @memberof StaticFeaturesAllOf
-     */
-    items?: { [key: string]: string };
+    static: Features & object;
 }
 /**
  * Telemetry configuration to be used by client.

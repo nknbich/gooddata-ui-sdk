@@ -1,4 +1,4 @@
-// (C) 2020-2022 GoodData Corporation
+// (C) 2020-2024 GoodData Corporation
 import React, { useMemo } from "react";
 import { useDashboardComponentsContext } from "../../dashboardContexts/index.js";
 import { extendedWidgetDebugStr } from "../../../model/index.js";
@@ -57,11 +57,11 @@ export const DashboardWidget = (props: IDashboardWidgetProps): JSX.Element => {
         }
 
         if (isKpiPlaceholderWidget(widget) && KpiWidgetComponentSet.creating) {
-            return KpiWidgetComponentSet.creating.CreatingPlaceholderComponent;
+            return KpiWidgetComponentSet.creating.CreatingPlaceholderComponent!;
         }
 
         if (isInsightPlaceholderWidget(widget) && InsightWidgetComponentSet.creating) {
-            return InsightWidgetComponentSet.creating.CreatingPlaceholderComponent;
+            return InsightWidgetComponentSet.creating.CreatingPlaceholderComponent!;
         }
 
         if (isDashboardWidget(widget)) {

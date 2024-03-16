@@ -1,5 +1,5 @@
-// (C) 2020-2022 GoodData Corporation
-import React, { useState, useMemo } from "react";
+// (C) 2020-2024 GoodData Corporation
+import React, { useState, useMemo, useCallback } from "react";
 import { IntlShape, FormattedMessage, useIntl } from "react-intl";
 import {
     SyntaxHighlightingInput,
@@ -13,8 +13,30 @@ import {
 import { ParametersPanel } from "./CustomUrlEditorParameters.js";
 import { isDrillToCustomUrlConfig, UrlDrillTarget } from "../../types.js";
 import { IAttributeWithDisplayForm } from "./types.js";
-import { selectIsWhiteLabeled, useDashboardSelector } from "../../../../model/index.js";
+import {
+    selectAllCatalogDisplayFormsMap,
+    selectIsWhiteLabeled,
+    selectWidgetByRef,
+    useDashboardSelector,
+    selectFilterContextAttributeFilters,
+} from "../../../../model/index.js";
 import { DASHBOARD_HEADER_OVERLAYS_Z_INDEX } from "../../../constants/index.js";
+import {
+    IAttributeFilter,
+    ObjRef,
+    filterObjRef,
+    idRef,
+    isAttributeFilter,
+    isNegativeAttributeFilter,
+    isUriRef,
+    serializeObjRef,
+} from "@gooddata/sdk-model";
+import { useWidgetFilters } from "../../../widget/common/useWidgetFilters.js";
+import compact from "lodash/compact.js";
+import uniqBy from "lodash/uniqBy.js";
+import { dashboardAttributeFilterToAttributeFilter } from "../../../../converters/index.js";
+import { useInvalidFilteringParametersIdentifiers } from "../../../widget/insight/configuration/DrillTargets/useInvalidFilteringParametersIdentifiers.js";
+
 export interface IUrlInputProps {
     currentUrlValue: string;
     onChange: (value: string) => void;
@@ -28,7 +50,8 @@ export const UrlInput: React.FC<IUrlInputProps> = (props) => {
     const placeholder = intl.formatMessage({
         id: "configurationPanel.drillIntoUrl.editor.textAreaPlaceholder",
     });
-    return (
+
+    return syntaxHighlightingRules ? (
         <SyntaxHighlightingInput
             onChange={onChange}
             onCursor={onCursor}
@@ -37,7 +60,7 @@ export const UrlInput: React.FC<IUrlInputProps> = (props) => {
             className={"gd-input-syntax-highlighting-input"}
             formatting={syntaxHighlightingRules}
         />
-    );
+    ) : null;
 };
 const HelpLink: React.FC<{ link: string }> = ({ link }) => {
     return (
@@ -60,6 +83,8 @@ interface IUrlInputPanelProps {
     onChange: (value: string) => void;
     onCursor: (from: number, to: number) => void;
     attributeDisplayForms?: IAttributeWithDisplayForm[];
+    insightFilters?: IAttributeFilter[];
+    dashboardFilters?: IAttributeFilter[];
     documentationLink?: string;
     intl: IntlShape;
 }
@@ -74,6 +99,36 @@ const buildValidDisplayFormsFormattingRule = (attributeDisplayForms: IAttributeW
     return { regex: new RegExp(validAttributePlaceholders), token: "attribute" };
 };
 
+const buildValidInsightFiltersFormattingRule = (attributeFilters: IAttributeFilter[]) => {
+    if (attributeFilters.length === 0) {
+        return undefined;
+    }
+
+    const validInsightAttributeFilterPlaceholders = attributeFilters
+        .map((filter) => {
+            const ref = filterObjRef(filter);
+            const id = isUriRef(ref) ? ref.uri : ref.identifier;
+            return `{attribute_filter_selection\\(${id}\\)}`;
+        })
+        .join("|");
+    return { regex: new RegExp(validInsightAttributeFilterPlaceholders), token: "filter" };
+};
+
+const buildValidDashboardFiltersFormattingRule = (attributeFilters: IAttributeFilter[]) => {
+    if (attributeFilters.length === 0) {
+        return undefined;
+    }
+
+    const validDashboardAttributeFilterPlaceholders = attributeFilters
+        .map((filter) => {
+            const ref = filterObjRef(filter);
+            const id = isUriRef(ref) ? ref.uri : ref.identifier;
+            return `{dash_attribute_filter_selection\\(${id}\\)}`;
+        })
+        .join("|");
+    return { regex: new RegExp(validDashboardAttributeFilterPlaceholders), token: "filter" };
+};
+
 interface IFormattingRule {
     regex: RegExp;
     token: string;
@@ -84,7 +139,7 @@ interface IFormattingRules {
 }
 
 const IDENTIFIER_RULE: IFormattingRule = {
-    regex: /\{workspace_id\}|\{project_id\}|\{insight_id\}|\{widget_id\}|\{dashboard_id\}|\{client_id\}|\{data_product_id\}/,
+    regex: /\{workspace_id\}|\{project_id\}|\{visualization_id\}|\{widget_id\}|\{dashboard_id\}|\{client_id\}|\{data_product_id\}/,
     token: "identifier",
 };
 const INVALID_IDENTIFIER_RULE: IFormattingRule = { regex: /\{[^}{]*\}/, token: "invalid-identifier" };
@@ -92,26 +147,60 @@ const INVALID_DISPLAY_FORMS_RULE: IFormattingRule = {
     regex: /\{attribute_title\(.*?\)\}/,
     token: "invalid-attribute",
 };
+const INVALID_DASHBOARD_ATTRIBUTE_FILTER_RULE: IFormattingRule = {
+    regex: /\{dash_attribute_filter_selection\(.*?\)\}/,
+    token: "invalid-filter",
+};
+const INVALID_INSIGHT_ATTRIBUTE_FILTER_RULE: IFormattingRule = {
+    regex: /\{attribute_filter_selection\(.*?\)\}/,
+    token: "invalid-filter",
+};
 const DEFAULT_RULES: IFormattingRule[] = [
     INVALID_DISPLAY_FORMS_RULE,
+    INVALID_DASHBOARD_ATTRIBUTE_FILTER_RULE,
+    INVALID_INSIGHT_ATTRIBUTE_FILTER_RULE,
     IDENTIFIER_RULE,
     INVALID_IDENTIFIER_RULE,
 ];
 
-const buildFormattingRules = (attributeDisplayForms: IAttributeWithDisplayForm[]): IFormattingRules => {
+const buildFormattingRules = (
+    attributeDisplayForms: IAttributeWithDisplayForm[],
+    dashboardFilters: IAttributeFilter[],
+    insightFilters: IAttributeFilter[],
+): IFormattingRules => {
     const validDisplayFormsRule = buildValidDisplayFormsFormattingRule(attributeDisplayForms);
+    const validInsightFiltersRule = buildValidInsightFiltersFormattingRule(insightFilters);
+    const validDashboardFiltersRule = buildValidDashboardFiltersFormattingRule(dashboardFilters);
     return {
-        start: validDisplayFormsRule ? [validDisplayFormsRule, ...DEFAULT_RULES] : DEFAULT_RULES,
+        start: compact([
+            validDisplayFormsRule,
+            validDashboardFiltersRule,
+            validInsightFiltersRule,
+            ...DEFAULT_RULES,
+        ]),
     };
 };
 
 const UrlInputPanel: React.FC<IUrlInputPanelProps> = (props) => {
-    const { currentUrlValue, onChange, onCursor, documentationLink, attributeDisplayForms, intl } = props;
+    const {
+        currentUrlValue,
+        onChange,
+        onCursor,
+        documentationLink,
+        attributeDisplayForms,
+        intl,
+        insightFilters,
+        dashboardFilters,
+    } = props;
     const isWhiteLabeled = useDashboardSelector(selectIsWhiteLabeled);
 
     const syntaxHighlightingRules = useMemo(
-        () => attributeDisplayForms && buildFormattingRules(attributeDisplayForms),
-        [attributeDisplayForms],
+        () =>
+            attributeDisplayForms &&
+            insightFilters &&
+            dashboardFilters &&
+            buildFormattingRules(attributeDisplayForms, dashboardFilters, insightFilters),
+        [attributeDisplayForms, insightFilters, dashboardFilters],
     );
     return (
         <div>
@@ -144,7 +233,11 @@ const insertPlaceholderAtCursor = (text: string, placeholder: string, cursor: IC
     `${text.substring(0, cursor.from)}${placeholder}${text.substring(cursor.to)}`;
 
 const assertValidUrl = (url: string) =>
-    /^[A-Za-z0-9.\-+]+:|^\{attribute_title\(/.test(url) ? url : `https://${url}`;
+    /^[A-Za-z0-9.\-+]+:|^\{attribute_title\(|^\{attribute_filter_selection\(|^\{dash_attribute_filter_selection\(/.test(
+        url,
+    )
+        ? url
+        : `https://${url}`;
 
 const getWarningTextForInvalidParameters = (parameters: string[]): React.ReactElement => {
     const invalidParameters = parameters.map((parameter) => `"${parameter}"`).join(", ");
@@ -167,6 +260,7 @@ export interface CustomUrlEditorProps {
     enableWidgetIdParameter: boolean;
     onClose: () => void;
     onSelect: (customUrl: string) => void;
+    widgetRef: ObjRef;
 }
 
 const CustomUrlEditorDialog: React.FunctionComponent<CustomUrlEditorProps> = (props) => {
@@ -181,9 +275,22 @@ const CustomUrlEditorDialog: React.FunctionComponent<CustomUrlEditorProps> = (pr
         enableClientIdParameter,
         enableDataProductIdParameter,
         enableWidgetIdParameter,
+        widgetRef,
     } = props;
 
     const intl = useIntl();
+
+    const insightFilters = useSanitizedInsightFilters(widgetRef);
+    const dashboardFilters = useSanitizedDashboardFilters();
+    const invalidFilteringParametersIdentifiers = useInvalidFilteringParametersIdentifiers(
+        urlDrillTarget,
+        insightFilters,
+        dashboardFilters,
+    );
+
+    const invalidParameters = useMemo(() => {
+        return [...invalidAttributeDisplayFormIdentifiers, ...invalidFilteringParametersIdentifiers];
+    }, [invalidAttributeDisplayFormIdentifiers, invalidFilteringParametersIdentifiers]);
 
     const previousValue = urlDrillTarget
         ? (isDrillToCustomUrlConfig(urlDrillTarget) && urlDrillTarget.customUrl) || ""
@@ -202,9 +309,7 @@ const CustomUrlEditorDialog: React.FunctionComponent<CustomUrlEditorProps> = (pr
         setCurrentValue(insertPlaceholderAtCursor(currentValue, parameterPlaceholder, cursorPosition));
 
     const editorWarningText =
-        invalidAttributeDisplayFormIdentifiers.length > 0
-            ? getWarningTextForInvalidParameters(invalidAttributeDisplayFormIdentifiers)
-            : undefined;
+        invalidParameters.length > 0 ? getWarningTextForInvalidParameters(invalidParameters) : undefined;
 
     return (
         <ConfirmDialogBase
@@ -233,9 +338,13 @@ const CustomUrlEditorDialog: React.FunctionComponent<CustomUrlEditorProps> = (pr
                 documentationLink={documentationLink}
                 currentUrlValue={currentValue}
                 attributeDisplayForms={attributeDisplayForms}
+                insightFilters={insightFilters}
+                dashboardFilters={dashboardFilters}
                 intl={intl}
             />
             <ParametersPanel
+                insightFilters={insightFilters}
+                dashboardFilters={dashboardFilters}
                 attributeDisplayForms={attributeDisplayForms}
                 loadingAttributeDisplayForms={loadingAttributeDisplayForms}
                 enableClientIdParameter={enableClientIdParameter}
@@ -269,3 +378,68 @@ export const CustomUrlEditor: React.FC<CustomUrlEditorProps> = (props) => {
         </OverlayControllerProvider>
     );
 };
+
+function useSanitizedInsightFilters(widgetRef: ObjRef) {
+    const widget = useDashboardSelector(selectWidgetByRef(widgetRef));
+    const widgetFiltersResult = useWidgetFilters(widget);
+    const sanitizeAttributeFilter = useSanitizeAttributeFilter();
+
+    return useMemo(() => {
+        return widgetFiltersResult.status === "success"
+            ? // Date filters are currently not supported, so filter them out
+              uniqBy(
+                  widgetFiltersResult.result
+                      ?.filter(isAttributeFilter)
+                      .map(sanitizeAttributeFilter)
+                      .filter(isAttributeFilter), // filter out undefined values (eg. filters with removed display forms)
+                  (f) => serializeObjRef(filterObjRef(f)),
+              )
+            : undefined;
+    }, [widgetFiltersResult.status, widgetFiltersResult.result, sanitizeAttributeFilter]);
+}
+
+function useSanitizedDashboardFilters() {
+    // Date filters are currently not supported, so select only attribute filters
+    const dashboardFilters = useDashboardSelector(selectFilterContextAttributeFilters);
+    const sanitizeAttributeFilter = useSanitizeAttributeFilter();
+
+    return useMemo(() => {
+        return dashboardFilters
+            ?.map(dashboardAttributeFilterToAttributeFilter)
+            .map(sanitizeAttributeFilter)
+            .filter(isAttributeFilter); // filter out undefined values (eg. filters with removed display forms)
+    }, [dashboardFilters, sanitizeAttributeFilter]);
+}
+
+function useSanitizeAttributeFilter() {
+    const catalogDisplayFormsMap = useDashboardSelector(selectAllCatalogDisplayFormsMap);
+
+    return useCallback(
+        (filter: IAttributeFilter): IAttributeFilter | undefined => {
+            const displayForm = catalogDisplayFormsMap.get(filterObjRef(filter));
+            if (displayForm) {
+                if (isNegativeAttributeFilter(filter)) {
+                    return {
+                        ...filter,
+                        negativeAttributeFilter: {
+                            ...filter.negativeAttributeFilter,
+                            displayForm: idRef(displayForm.id, "displayForm"),
+                        },
+                    };
+                } else {
+                    return {
+                        ...filter,
+                        positiveAttributeFilter: {
+                            ...filter.positiveAttributeFilter,
+                            displayForm: idRef(displayForm.id, "displayForm"),
+                        },
+                    };
+                }
+            }
+
+            // display form no longer exists -> filter is invalid
+            return undefined;
+        },
+        [catalogDisplayFormsMap],
+    );
+}

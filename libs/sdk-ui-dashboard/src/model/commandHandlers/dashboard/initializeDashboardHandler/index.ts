@@ -1,4 +1,4 @@
-// (C) 2021-2023 GoodData Corporation
+// (C) 2021-2024 GoodData Corporation
 import { SagaIterator } from "redux-saga";
 import { all, call, put, SagaReturnType } from "redux-saga/effects";
 import { InitializeDashboard } from "../../../commands/dashboard.js";
@@ -50,6 +50,9 @@ import uniqBy from "lodash/uniqBy.js";
 import { loadDashboardPermissions } from "./loadDashboardPermissions.js";
 import { dashboardPermissionsActions } from "../../../store/dashboardPermissions/index.js";
 import { resolveEntitlements } from "./resolveEntitlements.js";
+import { attributeFilterConfigsActions } from "../../../store/attributeFilterConfigs/index.js";
+import { dateFilterConfigsActions } from "../../../store/dateFilterConfigs/index.js";
+import { loadDateHierarchyTemplates } from "./loadDateHierarchyTemplates.js";
 
 async function loadDashboardFromBackend(
     ctx: DashboardContext,
@@ -133,6 +136,25 @@ function* loadExistingDashboard(
 ): SagaIterator<DashboardLoadResult> {
     const { backend } = ctx;
     const privateCtx: PrivateDashboardContext = yield call(getPrivateContext);
+    const { usesStrictAccessControl } = backend.capabilities;
+
+    const calls = [
+        call(loadDashboardFromBackend, ctx, privateCtx, dashboardRef, !!cmd.payload.persistedDashboard),
+        call(resolveDashboardConfig, ctx, cmd),
+        call(resolvePermissions, ctx, cmd),
+        call(resolveEntitlements, ctx),
+        call(loadCatalog, ctx, cmd),
+        call(loadDashboardAlerts, ctx),
+        call(loadUser, ctx),
+        call(loadDashboardList, ctx),
+        call(loadLegacyDashboards, ctx),
+        call(loadDashboardPermissions, ctx),
+        call(loadDateHierarchyTemplates, ctx),
+    ];
+
+    if (!usesStrictAccessControl) {
+        calls.push(call(loadAccessibleDashboardList, ctx));
+    }
 
     const [
         dashboardWithReferences,
@@ -143,9 +165,10 @@ function* loadExistingDashboard(
         alerts,
         user,
         listedDashboards,
-        accessibleDashboards,
         legacyDashboards,
         dashboardPermissions,
+        dateHierarchyTemplates,
+        accessibleDashboards,
     ]: [
         PromiseFnReturnType<typeof loadDashboardFromBackend>,
         SagaReturnType<typeof resolveDashboardConfig>,
@@ -155,22 +178,11 @@ function* loadExistingDashboard(
         PromiseFnReturnType<typeof loadDashboardAlerts>,
         PromiseFnReturnType<typeof loadUser>,
         PromiseFnReturnType<typeof loadDashboardList>,
-        PromiseFnReturnType<typeof loadAccessibleDashboardList>,
         PromiseFnReturnType<typeof loadLegacyDashboards>,
         PromiseFnReturnType<typeof loadDashboardPermissions>,
-    ] = yield all([
-        call(loadDashboardFromBackend, ctx, privateCtx, dashboardRef, !!cmd.payload.persistedDashboard),
-        call(resolveDashboardConfig, ctx, cmd),
-        call(resolvePermissions, ctx, cmd),
-        call(resolveEntitlements, ctx),
-        call(loadCatalog, ctx, cmd),
-        call(loadDashboardAlerts, ctx),
-        call(loadUser, ctx),
-        call(loadDashboardList, ctx),
-        call(loadAccessibleDashboardList, ctx),
-        call(loadLegacyDashboards, ctx),
-        call(loadDashboardPermissions, ctx),
-    ]);
+        PromiseFnReturnType<typeof loadDateHierarchyTemplates>,
+        PromiseFnReturnType<typeof loadAccessibleDashboardList>,
+    ] = yield all(calls);
 
     const {
         dashboard,
@@ -192,6 +204,7 @@ function* loadExistingDashboard(
         insights,
         config.settings,
         effectiveDateFilterConfig.config,
+        catalog.dateDatasets(),
         createDisplayFormMapFromCatalog(catalog),
         cmd.payload.persistedDashboard,
     );
@@ -209,6 +222,7 @@ function* loadExistingDashboard(
                 facts: catalog.facts(),
                 measures: catalog.measures(),
                 attributeHierarchies: catalog.attributeHierarchies(),
+                dateHierarchyTemplates: dateHierarchyTemplates,
             }),
             ...initActions,
             alertsActions.setAlerts(alerts),
@@ -217,8 +231,14 @@ function* loadExistingDashboard(
                 effectiveDateFilterConfig: effectiveDateFilterConfig.config,
                 isUsingDashboardOverrides: effectiveDateFilterConfig.source === "dashboard",
             }),
+            attributeFilterConfigsActions.setAttributeFilterConfigs({
+                attributeFilterConfigs: dashboard.attributeFilterConfigs,
+            }),
+            dateFilterConfigsActions.setDateFilterConfigs({
+                dateFilterConfigs: dashboard.dateFilterConfigs,
+            }),
             listedDashboardsActions.setListedDashboards(listedDashboards),
-            accessibleDashboardsActions.setAccessibleDashboards(accessibleDashboards),
+            accessibleDashboardsActions.setAccessibleDashboards(accessibleDashboards || listedDashboards),
             legacyDashboardsActions.setLegacyDashboards(legacyDashboards),
             uiActions.setMenuButtonItemsVisibility(config.menuButtonItemsVisibility),
             renderModeActions.setRenderMode(config.initialRenderMode),
@@ -249,6 +269,7 @@ function* initializeNewDashboard(
         listedDashboards,
         accessibleDashboards,
         legacyDashboards,
+        dateHierarchyTemplates,
     ]: [
         SagaReturnType<typeof resolveDashboardConfig>,
         SagaReturnType<typeof resolvePermissions>,
@@ -258,6 +279,7 @@ function* initializeNewDashboard(
         PromiseFnReturnType<typeof loadDashboardList>,
         PromiseFnReturnType<typeof loadAccessibleDashboardList>,
         PromiseFnReturnType<typeof loadLegacyDashboards>,
+        PromiseFnReturnType<typeof loadDateHierarchyTemplates>,
     ] = yield all([
         call(resolveDashboardConfig, ctx, cmd),
         call(resolvePermissions, ctx, cmd),
@@ -267,6 +289,7 @@ function* initializeNewDashboard(
         call(loadDashboardList, ctx),
         call(loadAccessibleDashboardList, ctx),
         call(loadLegacyDashboards, ctx),
+        call(loadDateHierarchyTemplates, ctx),
     ]);
 
     const batch: BatchAction = batchActions(
@@ -282,6 +305,7 @@ function* initializeNewDashboard(
                 facts: catalog.facts(),
                 measures: catalog.measures(),
                 attributeHierarchies: catalog.attributeHierarchies(),
+                dateHierarchyTemplates: dateHierarchyTemplates,
             }),
             listedDashboardsActions.setListedDashboards(listedDashboards),
             accessibleDashboardsActions.setAccessibleDashboards(accessibleDashboards),

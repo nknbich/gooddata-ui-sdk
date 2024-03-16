@@ -247,6 +247,23 @@
                     }
                 }
             },
+            "ApiEntitlement": {
+                "required": ["name"],
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "string"
+                    },
+                    "expiry": {
+                        "type": "string",
+                        "format": "date"
+                    }
+                },
+                "description": "Defines entitlements for given organization."
+            },
             "FeatureFlagsContext": {
                 "required": ["earlyAccess"],
                 "type": "object",
@@ -279,22 +296,28 @@
                 }
             },
             "LiveFeatures": {
-                "required": ["configuration", "context"],
+                "required": ["live"],
                 "type": "object",
-                "description": "Structure for featureHub",
-                "allOf": [
-                    {
-                        "$ref": "#/components/schemas/Features"
-                    },
-                    {
+                "properties": {
+                    "live": {
+                        "required": ["configuration", "context"],
                         "type": "object",
-                        "properties": {
-                            "configuration": {
-                                "$ref": "#/components/schemas/LiveFeatureFlagConfiguration"
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Features"
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "configuration": {
+                                        "$ref": "#/components/schemas/LiveFeatureFlagConfiguration"
+                                    }
+                                }
                             }
-                        }
+                        ]
                     }
-                ]
+                },
+                "description": "Structure for featureHub"
             },
             "MatomoService": {
                 "required": ["host", "siteId"],
@@ -325,6 +348,7 @@
             },
             "Profile": {
                 "required": [
+                    "entitlements",
                     "features",
                     "links",
                     "organizationId",
@@ -372,6 +396,13 @@
                                 "$ref": "#/components/schemas/StaticFeatures"
                             }
                         ]
+                    },
+                    "entitlements": {
+                        "type": "array",
+                        "description": "Defines entitlements for given organization.",
+                        "items": {
+                            "$ref": "#/components/schemas/ApiEntitlement"
+                        }
                     }
                 }
             },
@@ -391,25 +422,31 @@
                 }
             },
             "StaticFeatures": {
-                "required": ["context", "items"],
+                "required": ["static"],
                 "type": "object",
-                "description": "Structure for offline feature flag",
-                "allOf": [
-                    {
-                        "$ref": "#/components/schemas/Features"
-                    },
-                    {
+                "properties": {
+                    "static": {
+                        "required": ["context", "items"],
                         "type": "object",
-                        "properties": {
-                            "items": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Features"
+                            },
+                            {
                                 "type": "object",
-                                "additionalProperties": {
-                                    "type": "string"
+                                "properties": {
+                                    "items": {
+                                        "type": "object",
+                                        "additionalProperties": {
+                                            "type": "string"
+                                        }
+                                    }
                                 }
                             }
-                        }
+                        ]
                     }
-                ]
+                },
+                "description": "Structure for offline feature flag"
             },
             "Telemetry": {
                 "required": ["deploymentId", "host", "organizationHash", "siteId", "userHash"],

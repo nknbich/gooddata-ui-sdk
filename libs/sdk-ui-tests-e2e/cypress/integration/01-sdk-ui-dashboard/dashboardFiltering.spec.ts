@@ -1,4 +1,4 @@
-// (C) 2022 GoodData Corporation
+// (C) 2022-2024 GoodData Corporation
 
 import * as Navigation from "../../tools/navigation";
 import { AttributeFilterButtonParentChild } from "../../tools/attributeFilterButtonParentChild";
@@ -207,7 +207,7 @@ describe("Dashboard Filtering", { tags: ["pre-merge_isolated_bear"] }, () => {
         Navigation.visit("dashboard/stage-name");
         editMode.edit();
 
-        widget.waitChartLoaded();
+        widget.waitTableLoaded();
 
         new WidgetConfiguration(0).open().openConfiguration().toggleAttributeFilter("Stage Name").close();
 
@@ -240,7 +240,7 @@ describe("Dashboard Filtering", { tags: ["pre-merge_isolated_bear"] }, () => {
         filterBar.addAttribute("Region").selectAttributeWithoutSearch("East Coast");
         filterBar.addAttribute("Product").selectAttributeWithoutSearch("CompuSci");
 
-        widget.waitChartLoaded();
+        widget.waitTableLoaded();
 
         new WidgetConfiguration(0)
             .open()
@@ -267,21 +267,21 @@ describe("Dashboard Filtering", { tags: ["pre-merge_isolated_bear"] }, () => {
         filterBar
             .moveAttributeFilter(0, 1, DropZone.NEXT)
             .getAttributeList()
-            .should("deep.equal", ["Region:", "Stage Name:", "Product:"]);
+            .should("deep.equal", ["Region", "Stage Name", "Product"]);
 
         filterBar
             .moveAttributeFilter(0, 2, DropZone.NEXT)
             .getAttributeList()
-            .should("deep.equal", ["Stage Name:", "Product:", "Region:"]);
+            .should("deep.equal", ["Stage Name", "Product", "Region"]);
 
         filterBar
             .moveAttributeFilter(2, 0, DropZone.PREV)
             .getAttributeList()
-            .should("deep.equal", ["Region:", "Stage Name:", "Product:"]);
+            .should("deep.equal", ["Region", "Stage Name", "Product"]);
 
         filterBar
             .moveAttributeFilter(2, 1, DropZone.PREV)
             .getAttributeList()
-            .should("deep.equal", ["Region:", "Product:", "Stage Name:"]);
+            .should("deep.equal", ["Region", "Product", "Stage Name"]);
     });
 });

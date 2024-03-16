@@ -63,6 +63,7 @@ options = {
             "src/presentation/topBar/types.ts",
             "src/presentation/toolbar/types.ts",
             "src/presentation/widget/types.ts",
+            "src/presentation/dashboard/types.ts",
             "src/types.ts",
         ]),
         depCruiser.moduleWithDependencies("dialogs", "src/presentation/dialogs", [
@@ -94,6 +95,9 @@ options = {
             "src/presentation/types.ts",
             "src/presentation/localization",
             "src/types.ts",
+            "src/converters",
+            "src/presentation/widget/common/useWidgetFilters.ts",
+            "src/presentation/widget/insight/configuration/DrillTargets/useInvalidFilteringParametersIdentifiers.ts",
         ]),
         depCruiser.moduleWithDependencies("filterBar", "src/presentation/filterBar", [
             "src/_staging/*",
@@ -103,6 +107,8 @@ options = {
             "src/presentation/dashboardContexts",
             "src/presentation/dragAndDrop",
             "src/presentation/localization",
+            "src/presentation/widget/common/configuration/ConfigurationBubble.tsx",
+            "src/model/store/meta/index.ts",
         ]),
         depCruiser.moduleWithDependencies("layout", "src/presentation/layout", [
             "src/_staging/*",
@@ -135,6 +141,7 @@ options = {
             "src/model/types/layoutTypes.ts",
             "src/types.ts",
             "src/widgets",
+            "src/model/store/meta/index.ts",
         ]),
         depCruiser.moduleWithDependencies("scheduledEmail", "src/presentation/scheduledEmail", [
             "src/_staging/*",

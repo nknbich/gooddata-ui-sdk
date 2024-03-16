@@ -1,4 +1,4 @@
-// (C) 2019-2023 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 import { MessageDescriptor, defineMessages } from "react-intl";
 
 export const messages: Record<string, MessageDescriptor> = defineMessages({
@@ -55,4 +55,44 @@ export const messages: Record<string, MessageDescriptor> = defineMessages({
     scheduleDialogEmailRepeatsFrequencies_day: { id: "dialogs.schedule.email.repeats.frequencies.day" },
     scheduleDialogEmailRepeatsFrequencies_month: { id: "dialogs.schedule.email.repeats.frequencies.month" },
     scheduleDialogEmailRepeatsFrequencies_week: { id: "dialogs.schedule.email.repeats.frequencies.week" },
+
+    filterHiddenTooltip: { id: "filter.visibilityMode.tooltip.hidden" },
+    filterReadonlyInEditModeTooltip: { id: "filter.visibilityMode.tooltip.readonly.editMode" },
+    filterReadonlyInViewModeTooltip: { id: "filter.visibilityMode.tooltip.readonly.viewMode" },
+    filterConfigurationModeActiveTitle: { id: "filter.configuration.mode.interactive.title" },
+    filterConfigurationModeHiddenTitle: { id: "filter.configuration.mode.hidden.title" },
+    filterConfigurationModeReadOnlyTitle: { id: "filter.configuration.mode.locked.title" },
+    filterConfigurationModeActiveTooltip: { id: "filter.configuration.mode.interactive.tooltip" },
+    filterConfigurationModeHiddenTooltip: { id: "filter.configuration.mode.hidden.tooltip" },
+    filterConfigurationModeReadOnlyTooltip: { id: "filter.configuration.mode.locked.tooltip" },
+    filterConfigurationModeTitle: { id: "filter.configuration.mode.title" },
+    filterConfigurationTitleTitle: { id: "attributesDropdown.title" },
+    filterConfigurationTitleReset: { id: "attributesDropdown.title.reset" },
+    dateFilterDropdownConfigurationHeader: { id: "dateFilterDropdown.configuration" },
+    dateFilterDropdownConfigurationSaveText: { id: "dateFilterDropdown.save" },
+    dateFilterDropdownConfigurationCancelText: { id: "gs.list.cancel" },
+    filterResetButtonTooltip: { id: "filter.resetButton.tooltip" },
+    filterAddValuesLimit: { id: "attributesDropdown.valuesLimiting.addLink" },
+    filterAddValuesLimitPopupSearchPlaceholder: { id: "attributesDropdown.valuesLimiting.searchPlaceholder" },
+    filterAddValuesLimitPopupSearchNoMatch: { id: "attributesDropdown.valuesLimiting.searchNoMatch" },
+    filterAddValuesLimitPopupNoMetrics: { id: "attributesDropdown.valuesLimiting.metricsEmpty" },
+    filterAddValuesLimitPopupNoFilters: { id: "attributesDropdown.valuesLimiting.filtersEmpty" },
+    filterAddValuesLimitNoData: { id: "attributesDropdown.valuesLimiting.empty" },
+    filterAddMetricTitle: { id: "attributesDropdown.valuesLimiting.addMetricTitle" },
+    filterAddFilterTitle: { id: "attributesDropdown.valuesLimiting.addFilterTitle" },
+    filterAddDateTitle: { id: "attributesDropdown.valuesLimiting.addDateTitle" },
+    filterAddItemTitle: { id: "attributesDropdown.valuesLimiting.addItemTitle" },
+    filterCountMetricTitle: { id: "attributesDropdown.valuesLimiting.countAttribute" },
+    filterSumMetricTitle: { id: "attributesDropdown.valuesLimiting.sumFact" },
+    filterUnknownItemTitle: { id: "attributesDropdown.valuesLimiting.unknownItem" },
+    filterDependentDateFilterTitle: { id: "attributesDropdown.valuesLimiting.depedentDateFilterTitle" },
+
+    drillToDashboardConfig: { id: "configurationPanel.drillConfig.drillIntoDashboard" },
+    drillIntoInsight: { id: "configurationPanel.drillConfig.drillIntoInsight" },
+    drillDownConfig: { id: "configurationPanel.drillConfig.drillDown" },
+    drillToUrlConfig: { id: "configurationPanel.drillConfig.drillIntoUrl" },
+    disableDrillDownToolTip: { id: "configurationPanel.drillConfig.disableDrillDownTooltip" },
+    disableUsedDrillDownTooltip: { id: "configurationPanel.drillConfig.alreadyUsedTooltip" },
+    filterDropzoneTooltip: { id: "filterBar.filter.dropzone.tooltip" },
+    filterDropzoneTooltipGeneric: { id: "filterBar.filter.dropzone.tooltip.generic" },
 });

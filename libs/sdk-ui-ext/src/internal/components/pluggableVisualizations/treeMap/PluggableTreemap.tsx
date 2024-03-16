@@ -8,13 +8,15 @@ import { BucketNames, IDrillEvent, VisualizationTypes } from "@gooddata/sdk-ui";
 import { BUCKETS, DATE, ATTRIBUTE } from "../../../constants/bucket.js";
 import { TREEMAP_SUPPORTED_PROPERTIES } from "../../../constants/supportedProperties.js";
 
-import { getTreemapUiConfig } from "../../../constants/uiConfig.js";
+import { MAX_METRICS_COUNT, getTreemapUiConfig } from "../../../constants/uiConfig.js";
 import {
     IDrillDownContext,
     IExtendedReferencePoint,
     IReferencePoint,
     IVisConstruct,
     IDrillDownDefinition,
+    IBucketOfFun,
+    IVisProps,
 } from "../../../interfaces/Visualization.js";
 import { configureOverTimeComparison, configurePercent } from "../../../utils/bucketConfig.js";
 
@@ -82,9 +84,14 @@ export class PluggableTreemap extends PluggableBaseChart {
         this.initializeProperties(props.visualizationProperties);
     }
 
-    private getBucketItemsWithMultipleDates(newReferencePoint: IReferencePoint): any {
+    private getBucketMeasures(buckets: IBucketOfFun[] = []) {
+        const limitedBuckets = limitNumberOfMeasuresInBuckets(buckets, MAX_METRICS_COUNT, true);
+        return getMeasureItems(limitedBuckets);
+    }
+
+    private getBucketItemsWithMultipleDates(newReferencePoint: IExtendedReferencePoint): any {
         const buckets = newReferencePoint?.buckets ?? [];
-        let measures = getMeasureItems(buckets);
+        let measures = this.getBucketMeasures(buckets);
         let stacks = getStackItems(buckets, [ATTRIBUTE, DATE]);
         const nonStackAttributes = getAttributeItemsWithoutStacks(buckets, [ATTRIBUTE, DATE]);
         const view = nonStackAttributes.slice(0, 1);
@@ -102,9 +109,9 @@ export class PluggableTreemap extends PluggableBaseChart {
         return { measures, view, stacks };
     }
 
-    private getBucketItems(newReferencePoint: IReferencePoint) {
+    private getBucketItems(newReferencePoint: IExtendedReferencePoint) {
         const buckets = newReferencePoint?.buckets ?? [];
-        let measures = getMeasureItems(buckets);
+        let measures = this.getBucketMeasures(buckets);
         let stacks = getStackItems(buckets);
         const nonStackAttributes = getAttributeItemsWithoutStacks(buckets);
         const view = nonStackAttributes.slice(0, 1);
@@ -206,10 +213,14 @@ export class PluggableTreemap extends PluggableBaseChart {
         return modifyBucketsAttributesForDrillDown(withFilters, drillDownContext.drillDefinition);
     }
 
-    protected renderConfigurationPanel(insight: IInsightDefinition): void {
+    protected renderConfigurationPanel(insight: IInsightDefinition, options: IVisProps): void {
         const configPanelElement = this.getConfigPanelElement();
 
         if (configPanelElement) {
+            const panelConfig = {
+                supportsAttributeHierarchies: this.backendCapabilities.supportsAttributeHierarchies,
+            };
+
             this.renderFun(
                 <TreeMapConfigurationPanel
                     locale={this.locale}
@@ -223,6 +234,8 @@ export class PluggableTreemap extends PluggableBaseChart {
                     isError={this.getIsError()}
                     isLoading={this.isLoading}
                     featureFlags={this.featureFlags}
+                    panelConfig={panelConfig}
+                    configurationPanelRenderers={options.custom?.configurationPanelRenderers}
                 />,
                 configPanelElement,
             );

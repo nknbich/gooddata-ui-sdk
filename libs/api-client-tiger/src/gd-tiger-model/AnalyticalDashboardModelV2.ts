@@ -1,11 +1,20 @@
-// (C) 2020-2022 GoodData Corporation
+// (C) 2020-2024 GoodData Corporation
 import isEmpty from "lodash/isEmpty.js";
 import {
     ObjRef,
     IFilterContext as IFilterContextModel,
     IDashboardLayout,
     IDashboardDateFilterConfig,
+    IDashboardAttributeFilterConfig,
 } from "@gooddata/sdk-model";
+
+/**
+ * @public
+ */
+export interface IDashboardDateFilterConfigItem {
+    dateDataSet: ObjRef;
+    config: IDashboardDateFilterConfig;
+}
 
 /**
  * @public
@@ -15,7 +24,10 @@ export interface IAnalyticalDashboard {
     layout?: IDashboardLayout;
     filterContextRef?: ObjRef;
     dateFilterConfig?: IDashboardDateFilterConfig;
+    dateFilterConfigs?: IDashboardDateFilterConfigItem[];
+    attributeFilterConfigs?: IDashboardAttributeFilterConfig[];
     plugins?: IDashboardPluginLink[];
+    disableCrossFiltering?: boolean;
 }
 
 /**

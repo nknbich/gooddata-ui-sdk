@@ -1,4 +1,4 @@
-// (C) 2019-2023 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 
 import {
     IAnalyticalWorkspace,
@@ -19,6 +19,7 @@ import {
     IWorkspaceDescriptor,
     IWorkspaceUserGroupsQuery,
     IWorkspaceAccessControlService,
+    IAttributeHierarchiesService,
 } from "@gooddata/sdk-backend-spi";
 import { TigerExecution } from "./execution/executionFactory.js";
 import { TigerWorkspaceCatalogFactory } from "./catalog/factory.js";
@@ -36,6 +37,8 @@ import { TigerWorkspaceMeasures } from "./measures/index.js";
 import { TigerWorkspaceFacts } from "./facts/index.js";
 import { TigerWorkspaceDateFilterConfigsQuery } from "./dateFilterConfigs/index.js";
 import { TigerWorkspaceAccessControlService } from "./accessControl/index.js";
+import { TigerAttributeHierarchiesService } from "./attributeHierarchies/index.js";
+import { GET_OPTIMIZED_WORKSPACE_PARAMS } from "./constants.js";
 
 export class TigerWorkspace implements IAnalyticalWorkspace {
     constructor(
@@ -45,24 +48,26 @@ export class TigerWorkspace implements IAnalyticalWorkspace {
         private readonly descriptor?: IWorkspaceDescriptor,
     ) {}
 
-    public async getDescriptor(): Promise<IWorkspaceDescriptor> {
+    public async getDescriptor(includeParentPrefixes: boolean = false): Promise<IWorkspaceDescriptor> {
         if (!this.descriptor) {
             return workspaceConverter(
                 (
                     await this.authCall(async (client) => {
                         return client.entities.getEntityWorkspaces({
                             id: this.workspace,
-                            include: ["workspaces"],
+                            ...GET_OPTIMIZED_WORKSPACE_PARAMS,
                         });
                     })
                 ).data.data,
-                (
-                    await this.authCall(async (client) => {
-                        return client.actions.inheritedEntityPrefixes({
-                            workspaceId: this.workspace,
-                        });
-                    })
-                ).data,
+                includeParentPrefixes
+                    ? (
+                          await this.authCall(async (client) => {
+                              return client.actions.inheritedEntityPrefixes({
+                                  workspaceId: this.workspace,
+                              });
+                          })
+                      ).data
+                    : [],
             );
         }
         return this.descriptor;
@@ -134,5 +139,9 @@ export class TigerWorkspace implements IAnalyticalWorkspace {
 
     public dateFilterConfigs(): IDateFilterConfigsQuery {
         return new TigerWorkspaceDateFilterConfigsQuery();
+    }
+
+    public attributeHierarchies(): IAttributeHierarchiesService {
+        return new TigerAttributeHierarchiesService(this.authCall, this.workspace);
     }
 }

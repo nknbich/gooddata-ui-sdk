@@ -1,4 +1,4 @@
-// (C) 2019-2023 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 /**
  * This package provides low-level functions for communication with GoodData Cloud and GoodData.CN.
  *
@@ -168,6 +168,15 @@ export {
     ActionsApiComputeValidDescendantsRequest,
     AfmValidDescendantsQuery,
     AfmValidDescendantsResponse,
+    DependsOn,
+    DependsOnDateFilter,
+    ValidateByItem,
+    ForecastRequest,
+    ActionsApiForecastRequest,
+    SmartFunctionResponse,
+    ActionsApiForecastResultRequest,
+    ForecastResult,
+    AttributeHeaderOutAttributeHeaderValueTypeEnum,
 } from "./generated/afm-rest-api/api.js";
 export {
     ActionsApiFactory as AuthActionsApiFactory,
@@ -188,6 +197,8 @@ export {
     CustomLabel,
     CustomMetric,
     PdfExportRequest,
+    PdfTableStyle,
+    PdfTableStyleProperty,
 } from "./generated/export-json-api/api.js";
 
 export {
@@ -217,6 +228,35 @@ export {
     ScanSqlRequest,
 } from "./generated/scan-json-api/api.js";
 
+export {
+    ActionsApiAnalyzeCsvRequest,
+    ActionsApiGetStagingUploadLocationRequest,
+    ActionsApiImportCsvRequest,
+    AnalyzeCsvRequest,
+    AnalyzeCsvRequestItem,
+    AnalyzeCsvRequestItemConfig,
+    AnalyzeCsvResponse,
+    AnalyzeCsvResponseColumn,
+    AnalyzeCsvResponseConfig,
+    CacheRemovalInterval,
+    CacheUsageData,
+    CsvConvertOptions,
+    CsvConvertOptionsColumnType,
+    CsvParseOptions,
+    CsvReadOptions,
+    ImportCsvRequest,
+    ImportCsvRequestTable,
+    ImportCsvRequestTableSource,
+    ImportCsvRequestTableSourceConfig,
+    OrganizationCacheSettings,
+    OrganizationCacheUsage,
+    OrganizationCurrentCacheUsage,
+    StagingUploadLocation,
+    WorkspaceCacheSettings,
+    WorkspaceCacheUsage,
+    WorkspaceCurrentCacheUsage,
+} from "./generated/result-json-api/api.js";
+
 export * from "./client.js";
 
 export { jsonApiHeaders, JSON_API_HEADER_VALUE, ValidateRelationsHeader } from "./constants.js";
@@ -240,6 +280,8 @@ export {
     OrganizationGetEntitiesFn,
     OrganizationGetEntitiesParams,
 } from "./organizationUtilities.js";
+
+export { ActionsUtilities } from "./actionsUtilities.js";
 
 const defaultTigerClient: ITigerClient = tigerClientFactory(defaultAxios);
 

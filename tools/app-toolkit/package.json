@@ -1,6 +1,6 @@
 {
     "name": "@gooddata/app-toolkit",
-    "version": "9.3.0-alpha.5",
+    "version": "9.10.0-alpha.13",
     "author": "GoodData",
     "description": "CLI with useful tools for creating and maintaining GoodData web applications.",
     "repository": {
@@ -8,7 +8,7 @@
         "url": "https://github.com/gooddata/gooddata-ui-sdk.git",
         "directory": "tools/app-toolkit"
     },
-    "license": "MIT",
+    "license": "LicenseRef-LICENSE",
     "type": "module",
     "exports": "./esm/index.js",
     "types": "./esm/index.d.ts",
@@ -21,14 +21,14 @@
         "esm/**/*.json",
         "esm/**/*.d.ts",
         "esm/**/*.map",
-        "esm/**/*.tgz"
+        "esm/**/*.tgz",
+        "NOTICE"
     ],
     "scripts": {
-        "clean": "rm -rf ci dist esm build coverage *.log",
-        "dev": "tsc -p tsconfig.dev.json --watch",
+        "clean": "rm -rf ci dist esm build coverage *.log tsconfig.tsbuildinfo",
         "prepublishOnly": "npm run build",
         "build": "bash scripts/build.sh",
-        "build-esm": "tsc -p tsconfig.build.json",
+        "prepack": "cp -f ../../NOTICE ./NOTICE",
         "test": "vitest watch --passWithNoTests",
         "test-once": "vitest run --passWithNoTests",
         "test-ci": "vitest run --reporter=junit --outputFile=./ci/results/test-results.xml --passWithNoTests",
@@ -43,10 +43,10 @@
         "validate-ci": "npm run dep-cruiser-ci && npm run eslint-ci && npm run prettier-check"
     },
     "dependencies": {
-        "@babel/cli": "^7.7.2",
-        "@babel/core": "^7.7.2",
-        "@babel/preset-env": "^7.7.2",
-        "@babel/preset-typescript": "^7.7.2",
+        "@babel/cli": "^7.23.4",
+        "@babel/core": "^7.23.5",
+        "@babel/preset-env": "^7.23.5",
+        "@babel/preset-typescript": "^7.23.3",
         "@gooddata/sdk-backend-spi": "workspace:*",
         "@gooddata/sdk-backend-tiger": "workspace:*",
         "@gooddata/sdk-model": "workspace:*",
@@ -72,7 +72,7 @@
         "@types/cross-spawn": "^6.0.2",
         "@types/fs-extra": "^9.0.13",
         "@types/inquirer": "^8.2.6",
-        "@types/lodash": "^4.14.158",
+        "@types/lodash": "^4.14.202",
         "@types/node": "^18.17.6",
         "@types/tar": "^6.1.0",
         "@typescript-eslint/eslint-plugin": "^5.57.1",
@@ -91,7 +91,7 @@
         "eslint-plugin-tsdoc": "^0.2.14",
         "prettier": "~2.5.0",
         "ts-node": "^10.4.0",
-        "typescript": "5.0.2",
-        "vitest": "0.31.4"
+        "typescript": "5.3.3",
+        "vitest": "1.0.4"
     }
 }

@@ -1,13 +1,9 @@
-// (C) 2021-2022 GoodData Corporation
-
+// (C) 2021-2024 GoodData Corporation
+import { SagaIterator } from "redux-saga";
+import { call } from "redux-saga/effects";
+import update from "lodash/fp/update.js";
+import isEmpty from "lodash/isEmpty.js";
 import { PayloadAction } from "@reduxjs/toolkit";
-import { alertsActions } from "../../../store/alerts/index.js";
-import { filterContextActions } from "../../../store/filterContext/index.js";
-import { createDefaultFilterContext } from "../../../../_staging/dashboard/defaultFilterContext.js";
-import { layoutActions } from "../../../store/layout/index.js";
-import { insightsActions } from "../../../store/insights/index.js";
-import { metaActions } from "../../../store/meta/index.js";
-import { uiActions } from "../../../store/ui/index.js";
 import {
     areObjRefsEqual,
     IInsight,
@@ -19,23 +15,34 @@ import {
     IDashboardLayout,
     IDashboard,
     ISettings,
+    ICatalogDateDataset,
+    isDashboardDateFilterWithDimension,
+    ObjRef,
 } from "@gooddata/sdk-model";
+
+import { alertsActions } from "../../../store/alerts/index.js";
+import { filterContextActions } from "../../../store/filterContext/index.js";
+import { createDefaultFilterContext } from "../../../../_staging/dashboard/defaultFilterContext.js";
+import { layoutActions } from "../../../store/layout/index.js";
+import { insightsActions } from "../../../store/insights/index.js";
+import { metaActions } from "../../../store/meta/index.js";
+import { uiActions } from "../../../store/ui/index.js";
 import {
     dashboardFilterContextDefinition,
     dashboardFilterContextIdentity,
 } from "../../../../_staging/dashboard/dashboardFilterContext.js";
 import { dashboardLayoutSanitize } from "../../../../_staging/dashboard/dashboardLayout.js";
-import { SagaIterator } from "redux-saga";
 import { resolveFilterDisplayForms } from "../../../utils/filterResolver.js";
-import { call } from "redux-saga/effects";
 import { DashboardContext, PrivateDashboardContext } from "../../../types/commonTypes.js";
 import { ObjRefMap } from "../../../../_staging/metadata/objRefMap.js";
 import { ExtendedDashboardWidget } from "../../../types/layoutTypes.js";
 import { getPrivateContext } from "../../../store/_infra/contexts.js";
 import { loadAvailableDisplayFormRefs } from "./loadAvailableDisplayFormRefs.js";
 import { PromiseFnReturnType } from "../../../types/sagas.js";
-import update from "lodash/fp/update.js";
-import isEmpty from "lodash/isEmpty.js";
+import { attributeFilterConfigsActions } from "../../../store/attributeFilterConfigs/index.js";
+import { dateFilterConfigActions } from "../../../store/dateFilterConfig/index.js";
+import { dateFilterConfigsActions } from "../../../store/dateFilterConfigs/index.js";
+import { drillActions } from "../../../store/drill/index.js";
 
 export const EmptyDashboardLayout: IDashboardLayout<IWidget> = {
     type: "IDashboardLayout",
@@ -60,12 +67,31 @@ export function actionsToInitializeNewDashboard(
         layoutActions.setLayout(EmptyDashboardLayout),
         insightsActions.setInsights([]),
         metaActions.setMeta({}),
+        drillActions.resetCrossFiltering(),
     ];
 }
+
+const keepOnlyFiltersWithValidRef = (
+    filter: FilterContextItem,
+    availableDfRefs: ObjRef[],
+    availableDateDatasets: ICatalogDateDataset[],
+) => {
+    if (!isDashboardAttributeFilter(filter)) {
+        if (isDashboardDateFilterWithDimension(filter)) {
+            return availableDateDatasets.some((dateDataSet) =>
+                areObjRefsEqual(dateDataSet.dataSet.ref, filter.dateFilter.dataSet!),
+            );
+        }
+        return true; // common date filter is kept always
+    }
+
+    return availableDfRefs.some((ref) => areObjRefsEqual(ref, filter.attributeFilter.displayForm));
+};
 
 function* sanitizeFilterContext(
     ctx: DashboardContext,
     filterContext: IDashboard["filterContext"],
+    dateDataSets: ICatalogDateDataset[] = [],
 ): SagaIterator<IDashboard["filterContext"]> {
     // we don't need sanitize filter references, if backend guarantees consistent references
     if (!ctx.backend.capabilities.allowsInconsistentRelations) {
@@ -90,11 +116,7 @@ function* sanitizeFilterContext(
         "filters",
         (filters: FilterContextItem[]) =>
             filters.filter((filter) => {
-                if (!isDashboardAttributeFilter(filter)) {
-                    return true;
-                }
-
-                return availableRefs.some((ref) => areObjRefsEqual(ref, filter.attributeFilter.displayForm));
+                return keepOnlyFiltersWithValidRef(filter, availableRefs, dateDataSets);
             }),
         filterContext,
     );
@@ -129,10 +151,16 @@ export function* actionsToInitializeExistingDashboard(
     insights: IInsight[],
     settings: ISettings,
     dateFilterConfig: IDateFilterConfig,
+    dateDataSets: ICatalogDateDataset[],
     displayForms?: ObjRefMap<IAttributeDisplayFormMetadataObject>,
     persistedDashboard?: IDashboard,
 ): SagaIterator<Array<PayloadAction<any>>> {
-    const sanitizedFilterContext = yield call(sanitizeFilterContext, ctx, dashboard.filterContext);
+    const sanitizedFilterContext = yield call(
+        sanitizeFilterContext,
+        ctx,
+        dashboard.filterContext,
+        dateDataSets,
+    );
 
     const sanitizedDashboard: IDashboard<ExtendedDashboardWidget> = {
         ...dashboard,
@@ -178,9 +206,17 @@ export function* actionsToInitializeExistingDashboard(
         metaActions.setMeta({
             dashboard: persistedDashboard ?? dashboard,
         }),
+        attributeFilterConfigsActions.setAttributeFilterConfigs({
+            attributeFilterConfigs: dashboard.attributeFilterConfigs,
+        }),
+        dateFilterConfigActions.updateDateFilterConfig(dashboard.dateFilterConfig!),
+        dateFilterConfigsActions.setDateFilterConfigs({
+            dateFilterConfigs: dashboard.dateFilterConfigs,
+        }),
         insightsActions.setInsights(insights),
         metaActions.setDashboardTitle(dashboard.title), // even when using persistedDashboard, use the working title of the dashboard
         uiActions.clearWidgetSelection(),
         uiActions.setWidgetsOverlay(modifiedWidgets),
+        drillActions.resetCrossFiltering(),
     ];
 }

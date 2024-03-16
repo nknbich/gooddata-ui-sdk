@@ -1,8 +1,13 @@
-// (C) 2021-2022 GoodData Corporation
+// (C) 2021-2024 GoodData Corporation
 
+import isEmpty from "lodash/isEmpty.js";
 import { Action, CaseReducer, PayloadAction } from "@reduxjs/toolkit";
 import { DateFilterConfigState } from "./dateFilterConfigState.js";
-import { IDateFilterConfig, IDashboardDateFilterConfig } from "@gooddata/sdk-model";
+import {
+    IDateFilterConfig,
+    IDashboardDateFilterConfig,
+    DashboardDateFilterConfigMode,
+} from "@gooddata/sdk-model";
 import { DateFilterValidationResult } from "../../../types.js";
 
 type DateFilterConfigReducer<A extends Action> = CaseReducer<DateFilterConfigState, A>;
@@ -38,6 +43,42 @@ const setDateFilterConfig: DateFilterConfigReducer<PayloadAction<SetDateFilterCo
     state.isUsingDashboardOverrides = isUsingDashboardOverrides;
 };
 
+const setDateFilterConfigMode: DateFilterConfigReducer<PayloadAction<DashboardDateFilterConfigMode>> = (
+    state,
+    action,
+) => {
+    const mode = action.payload;
+    const newDateFilterConfig = isEmpty(state.dateFilterConfig)
+        ? {
+              mode,
+              filterName: "", // will fallback to default name
+          }
+        : {
+              ...state.dateFilterConfig,
+              mode,
+          };
+
+    state.dateFilterConfig = newDateFilterConfig;
+};
+
+const setDateFilterConfigTitle: DateFilterConfigReducer<PayloadAction<string | undefined>> = (
+    state,
+    action,
+) => {
+    const title = action.payload ?? "";
+    const newDateFilterConfig: IDashboardDateFilterConfig = isEmpty(state.dateFilterConfig)
+        ? {
+              mode: "active",
+              filterName: title,
+          }
+        : {
+              ...state.dateFilterConfig,
+              filterName: title,
+          };
+
+    state.dateFilterConfig = newDateFilterConfig;
+};
+
 const addDateFilterConfigValidationWarning: DateFilterConfigReducer<
     PayloadAction<DateFilterValidationResult>
 > = (state, action) => {
@@ -51,8 +92,18 @@ const clearDateFilterConfigValidationWarning: DateFilterConfigReducer<PayloadAct
     state.dateFilterConfigValidationWarnings = [];
 };
 
+const updateDateFilterConfig: DateFilterConfigReducer<PayloadAction<IDashboardDateFilterConfig>> = (
+    state,
+    action,
+) => {
+    state.dateFilterConfig = action.payload;
+};
+
 export const dateFilterConfigReducers = {
     setDateFilterConfig,
+    setDateFilterConfigMode,
+    setDateFilterConfigTitle,
+    updateDateFilterConfig,
     addDateFilterConfigValidationWarning,
     clearDateFilterConfigValidationWarning,
 };

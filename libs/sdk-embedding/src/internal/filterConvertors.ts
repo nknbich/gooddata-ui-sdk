@@ -1,4 +1,4 @@
-// (C) 2020-2023 GoodData Corporation
+// (C) 2020-2024 GoodData Corporation
 import isEmpty from "lodash/isEmpty.js";
 import isNumber from "lodash/isNumber.js";
 import isString from "lodash/isString.js";
@@ -44,6 +44,7 @@ export interface ITransformedDateFilterItem {
     to: string | number;
     datasetUri?: string;
     datasetIdentifier?: string;
+    localIdentifier?: string; // to support multiple date filters
 }
 
 export interface ITransformedAttributeFilterItem {
@@ -232,6 +233,7 @@ function transformDateFilterItem(dateFilterItem: DateFilterItem): ITransformedDa
     if (isAbsoluteDateFilter(dateFilterItem)) {
         const {
             absoluteDateFilter: { dataSet, from, to },
+            localIdentifier,
         } = dateFilterItem;
         const { uri: datasetUri, identifier: datasetIdentifier } = getObjectUriIdentifier(dataSet);
         return {
@@ -239,10 +241,12 @@ function transformDateFilterItem(dateFilterItem: DateFilterItem): ITransformedDa
             from,
             datasetUri,
             datasetIdentifier,
+            ...(localIdentifier ? { localIdentifier } : {}),
         };
     } else {
         const {
             relativeDateFilter: { granularity, dataSet, from, to },
+            localIdentifier,
         } = dateFilterItem;
         const { uri: datasetUri, identifier: datasetIdentifier } = getObjectUriIdentifier(dataSet);
         return {
@@ -251,6 +255,7 @@ function transformDateFilterItem(dateFilterItem: DateFilterItem): ITransformedDa
             granularity,
             datasetUri,
             datasetIdentifier,
+            ...(localIdentifier ? { localIdentifier } : {}),
         };
     }
 }

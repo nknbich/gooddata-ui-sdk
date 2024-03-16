@@ -8,6 +8,7 @@ const { URL } = require("url");
 const deps = require("./package.json").dependencies;
 const peerDeps = require("./package.json").peerDependencies;
 const Dotenv = require("dotenv-webpack");
+const { EsbuildPlugin } = require("esbuild-loader");
 require("dotenv").config();
 
 const { MODULE_FEDERATION_NAME } = require("./src/metadata.json");
@@ -15,8 +16,7 @@ const { MODULE_FEDERATION_NAME } = require("./src/metadata.json");
 const PORT = 3001;
 const DEFAULT_BACKEND_URL = "https://live-examples-proxy.herokuapp.com";
 
-function generateGooddataSharePackagesEntries(options = { allowPrereleaseVersions: false }) {
-    const { allowPrereleaseVersions } = options;
+function generateGooddataSharePackagesEntries() {
     // add all the gooddata packages that absolutely need to be shared and singletons because of contexts
     // allow sharing @gooddata/sdk-ui-dashboard here so that multiple plugins can share it among themselves
     // this makes redux related contexts work for example
@@ -24,7 +24,8 @@ function generateGooddataSharePackagesEntries(options = { allowPrereleaseVersion
         .filter(([pkgName]) => pkgName.startsWith("@gooddata"))
         .reduce((acc, [pkgName, version]) => {
             acc[pkgName] = {
-                requiredVersion: allowPrereleaseVersions ? false : version,
+                singleton: true,
+                requiredVersion: false,
             };
             return acc;
         }, {});
@@ -73,7 +74,7 @@ module.exports = (_env, argv) => {
             // Alias for ESM imports with .js suffix because
             // `import { abc } from "../abc.js"` may be in fact importing from `abc.tsx` file
             extensionAlias: {
-                    ".js": [".ts", ".tsx", ".js", ".jsx"],
+                ".js": [".ts", ".tsx", ".js", ".jsx"],
             },
 
             // Prefer ESM versions of packages to enable tree shaking
@@ -92,13 +93,7 @@ module.exports = (_env, argv) => {
                     test: /\.tsx?$/,
                     use: [
                         {
-                            loader: "babel-loader",
-                        },
-                        {
-                            loader: "ts-loader",
-                            options: {
-                                transpileOnly: true,
-                            },
+                            loader: "esbuild-loader",
                         },
                     ],
                 },
@@ -108,10 +103,7 @@ module.exports = (_env, argv) => {
                     exclude: /node_modules/,
                     use: [
                         {
-                            loader: "babel-loader",
-                            options: {
-                                presets: ["@babel/preset-react"],
-                            },
+                            loader: "esbuild-loader",
                         },
                     ],
                 },
@@ -129,7 +121,7 @@ module.exports = (_env, argv) => {
                     include: path.resolve(__dirname, "src"),
                     use: ["source-map-loader"],
                 },
-            ].filter(Boolean),                      
+            ].filter(Boolean),
         },
         plugins: [
             new CaseSensitivePathsPlugin(),
@@ -142,13 +134,16 @@ module.exports = (_env, argv) => {
                 NODE_DEBUG: "",
             }),
         ],
+        optimization: {
+            minimizer: [new EsbuildPlugin()],
+        },
     };
 
     return [
         {
             ...commonConfig,
             entry: "./src/index.js",
-            experiments: { ...commonConfig.experiments,topLevelAwait: true},
+            experiments: { ...commonConfig.experiments, topLevelAwait: true },
             name: "harness",
             ignoreWarnings: [/Failed to parse source map/], // some of the dependencies have invalid source maps, we do not care that much
             devServer: {
@@ -176,7 +171,7 @@ module.exports = (_env, argv) => {
                 }),
                 new HtmlWebpackPlugin({
                     template: "./src/harness/public/index.html",
-                    scriptLoading: "module"
+                    scriptLoading: "module",
                 }),
             ],
         },
@@ -222,9 +217,7 @@ module.exports = (_env, argv) => {
                             requiredVersion: deps["react-dom"],
                         },
                         // add all the packages that absolutely need to be shared and singletons because of contexts
-                        // change the allowPrereleaseVersions to true if you want to work with alpha or beta versions
-                        // beware that alpha and beta versions may break and may contain bugs, use at your own risk
-                        ...generateGooddataSharePackagesEntries({ allowPrereleaseVersions: false }),
+                        ...generateGooddataSharePackagesEntries(),
                     },
                 }),
             ],

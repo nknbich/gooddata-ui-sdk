@@ -1,4 +1,4 @@
-// (C) 2019-2023 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 
 import {
     IAuthenticatedPrincipal,
@@ -36,6 +36,10 @@ import {
     IOrganizationStylingService,
     IOrganizationSettingsService,
     IEntitlements,
+    IOrganizationPermissionService,
+    IOrganizationUserService,
+    IAttributeHierarchiesService,
+    IDataSourcesService,
 } from "@gooddata/sdk-backend-spi";
 import {
     IColorPalette,
@@ -64,6 +68,7 @@ import {
     recordedUserGroupsQuery,
     RecordedWorkspaceUsersQuery,
 } from "./userManagement.js";
+import RecordedAttributeHierarchiesService from "./attributeHierarchies.js";
 
 const defaultConfig: RecordedBackendConfig = {
     hostname: "test",
@@ -154,6 +159,9 @@ export function recordedBackend(
         },
         entitlements(): IEntitlements {
             return recordedEntitlements();
+        },
+        dataSources(): IDataSourcesService {
+            throw new NotSupported("not supported");
         },
     };
 
@@ -251,6 +259,9 @@ function recordedWorkspace(
         },
         accessControl(): IWorkspaceAccessControlService {
             return recordedAccessControlFactory(implConfig);
+        },
+        attributeHierarchies(): IAttributeHierarchiesService {
+            return new RecordedAttributeHierarchiesService(implConfig);
         },
     };
 }
@@ -354,6 +365,45 @@ function recordedOrganization(organizationId: string, implConfig: RecordedBacken
                 setColorPalette: () => Promise.resolve(),
                 deleteTheme: () => Promise.resolve(),
                 deleteColorPalette: () => Promise.resolve(),
+            };
+        },
+        permissions(): IOrganizationPermissionService {
+            return {
+                getOrganizationPermissionForUser: () => Promise.resolve([]),
+                getOrganizationPermissionForUserGroup: () => Promise.resolve([]),
+                updateOrganizationPermissions: () => Promise.resolve(),
+                getPermissionsForUser: () =>
+                    Promise.resolve({ workspacePermissions: [], dataSourcePermissions: [] }),
+                getPermissionsForUserGroup: () =>
+                    Promise.resolve({ workspacePermissions: [], dataSourcePermissions: [] }),
+                assignPermissions: () => Promise.resolve(),
+                revokePermissions: () => Promise.resolve(),
+            };
+        },
+        users(): IOrganizationUserService {
+            return {
+                createUser: () => {
+                    throw new NotSupported("not supported");
+                },
+                getUsersQuery: () => {
+                    throw new NotSupported("not supported");
+                },
+                getUserGroupsQuery: () => {
+                    throw new NotSupported("not supported");
+                },
+                addUsersToUserGroups: () => Promise.resolve(),
+                createUserGroup: () => Promise.resolve(),
+                deleteUsers: () => Promise.resolve(),
+                deleteUserGroups: () => Promise.resolve(),
+                getUser: () => Promise.resolve(undefined),
+                getUserGroup: () => Promise.resolve(undefined),
+                getUserGroups: () => Promise.resolve([]),
+                getUserGroupsOfUser: () => Promise.resolve([]),
+                getUsersOfUserGroup: () => Promise.resolve([]),
+                getUsers: () => Promise.resolve([]),
+                removeUsersFromUserGroups: () => Promise.resolve(),
+                updateUser: () => Promise.resolve(),
+                updateUserGroup: () => Promise.resolve(),
             };
         },
     };

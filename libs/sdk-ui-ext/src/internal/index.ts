@@ -1,4 +1,4 @@
-// (C) 2019-2022 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 import * as Axis from "./constants/axis.js";
 import * as DrillablePredicatesUtils from "./utils/drillablePredicates.js";
 import LabelRotationControl from "./components/configurationControls/axis/LabelRotationControl.js";
@@ -60,6 +60,10 @@ export {
     IDrillDownContext,
     IDrillDownDefinition,
     isDrillDownDefinition,
+    ICustomProps,
+    IConfigurationPanelRenderers,
+    InvalidColumnsSdkError,
+    isInvalidColumns,
 } from "./interfaces/Visualization.js";
 
 export {

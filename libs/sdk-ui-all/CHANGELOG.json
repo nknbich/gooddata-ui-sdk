@@ -2,6 +2,147 @@
   "name": "@gooddata/sdk-ui-all",
   "entries": [
     {
+      "version": "9.8.1",
+      "tag": "@gooddata/sdk-ui-all_v9.8.1",
+      "date": "Fri, 15 Mar 2024 13:31:24 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Introduce theme loading status with better information about state of theme loading"
+          }
+        ]
+      }
+    },
+    {
+      "version": "9.8.0",
+      "tag": "@gooddata/sdk-ui-all_v9.8.0",
+      "date": "Thu, 07 Mar 2024 09:02:52 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Rename word 'Insight' to 'Visualization'"
+          },
+          {
+            "comment": "Add services to list insights and dashboards with paging"
+          }
+        ]
+      }
+    },
+    {
+      "version": "9.7.0",
+      "tag": "@gooddata/sdk-ui-all_v9.7.0",
+      "date": "Thu, 22 Feb 2024 09:17:23 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Added new RichText widget to render markdown on dashboard (available for GoodData.CN / GoodData Cloud only)."
+          },
+          {
+            "comment": "Introduced possibility to use multiple date filters (available for GoodData.CN / GoodData Cloud only)."
+          },
+          {
+            "comment": "Introduce ability to limit attribute filter values by metric on GoodData Cloud dashboards."
+          }
+        ]
+      }
+    },
+    {
+      "version": "9.6.0",
+      "tag": "@gooddata/sdk-ui-all_v9.6.0",
+      "date": "Thu, 25 Jan 2024 10:00:31 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Deliver support for multiple date filters fully specified including date data set"
+          },
+          {
+            "comment": "Introduce cross-filtering highlighting in charts."
+          }
+        ]
+      }
+    },
+    {
+      "version": "9.5.0",
+      "tag": "@gooddata/sdk-ui-all_v9.5.0",
+      "date": "Thu, 11 Jan 2024 12:13:13 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Users can create multiple insight interactions per attribute/measure for the Panther environment."
+          },
+          {
+            "comment": "Users can create, edit, and delete attribute hierarchies in the UI. Additionally, they can view and interact with a list of drill-down interactions."
+          },
+          {
+            "comment": "Support for dependent filters on Tiger backend added. Attribute filter on Tiger can now be dependent on other filters which will effectively filter out some of its elements. It supports circular dependencies in filters, keeping selected values when parent filter changes and showing/clearing of filtered out elements."
+          },
+          {
+            "comment": "Introduce cross-filtering for GoodData Cloud"
+          },
+          {
+            "comment": "Dashboard plugins no longer support version lock of the GoodData.UI dependencies. Since now, all GoodData.UI dependencies will be injected to the plugin in their latest version at runtime. Also improve way to specify compatibility of the plugin."
+          },
+          {
+            "comment": "Add support for attribute filter selection in drill to custom url."
+          },
+          {
+            "comment": "Enable decorating attribute filters in plugins customization API."
+          },
+          {
+            "comment": "Enable decorating dashboard content in plugins customization API."
+          }
+        ]
+      }
+    },
+    {
+      "version": "9.4.0",
+      "tag": "@gooddata/sdk-ui-all_v9.4.0",
+      "date": "Thu, 30 Nov 2023 11:57:11 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Users can configure the dashboard filter to be interactive, locked, or hidden."
+          },
+          {
+            "comment": "Remove `isDomainAdmin` method from Bear Legacy Functions. "
+          }
+        ]
+      }
+    },
+    {
+      "version": "9.3.0",
+      "tag": "@gooddata/sdk-ui-all_v9.3.0",
+      "date": "Thu, 02 Nov 2023 11:25:49 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "The headline allows two secondary measures to be displayed as the headline values."
+          },
+          {
+            "comment": "The headline allows for the customization of comparison values and styles using the comparison config."
+          },
+          {
+            "comment": "Introduce possibility to cache client calls"
+          }
+        ]
+      }
+    },
+    {
+      "version": "9.2.0",
+      "tag": "@gooddata/sdk-ui-all_v9.2.0",
+      "date": "Fri, 06 Oct 2023 13:12:04 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Supporting to share the dashboard with all workspace users."
+          },
+          {
+            "comment": "Introduce new attribute hierarchy catalog entity which is used for implicit drill-down in dashboards."
+          }
+        ]
+      }
+    },
+    {
       "version": "9.1.0",
       "tag": "@gooddata/sdk-ui-all_v9.1.0",
       "date": "Fri, 08 Sep 2023 07:19:23 GMT",
@@ -87,6 +228,18 @@
           },
           {
             "comment": "Add the continuous line configuration for the Line, Area and Combo charts"
+          }
+        ]
+      }
+    },
+    {
+      "version": "8.12.3",
+      "tag": "@gooddata/sdk-ui-all_v8.12.3",
+      "date": "Thu, 05 Oct 2023 07:58:45 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Use @gooddata/number-formatter instead of @gooddata/numberjs library"
           }
         ]
       }

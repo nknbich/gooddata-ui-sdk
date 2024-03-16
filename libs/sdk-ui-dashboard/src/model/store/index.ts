@@ -1,4 +1,4 @@
-// (C) 2021-2023 GoodData Corporation
+// (C) 2021-2024 GoodData Corporation
 export { DashboardDispatch, DashboardState, DashboardSelector, DashboardSelectorEvaluator } from "./types.js";
 
 export { selectDashboardLoading, selectIsDashboardLoading } from "./loading/loadingSelectors.js";
@@ -14,6 +14,14 @@ export {
     selectSupportsAccessControlCapability,
     selectSupportsHierarchicalWorkspacesCapability,
     selectSupportsObjectUris,
+    selectSupportsSettingConnectingAttributes,
+    selectSupportsKeepingDependentFiltersSelection,
+    selectAllowMultipleInteractionsPerAttributeAndMeasure,
+    selectSupportsAttributeHierarchies,
+    selectSupportsSingleSelectDependentFilters,
+    selectSupportsCrossFiltering,
+    selectSupportsMultipleDateFilters,
+    selectSupportsRichTextWidgets,
 } from "./backendCapabilities/backendCapabilitiesSelectors.js";
 export { ConfigState } from "./config/configState.js";
 export {
@@ -61,8 +69,15 @@ export {
     selectEnableKPIDashboardDrillFromAttribute,
     selectIsShareButtonHidden,
     selectWeekStart,
-    selectEnableAttributeHierarchies,
     selectIsDrillDownEnabled,
+    selectEnableUnavailableItemsVisibility,
+    selectEnableKDDependentFilters,
+    selectIsKDDependentFiltersEnabled,
+    selectEnableKDCrossFiltering,
+    selectEnableMultipleDateFilters,
+    selectEnableKDRichText,
+    selectEnableAttributeFilterValuesValidation,
+    selectEnableKDAttributeFilterDatesValidation,
 } from "./config/configSelectors.js";
 export { EntitlementsState } from "./entitlements/entitlementsState.js";
 export { selectEntitlementExportPdf } from "./entitlements/entitlementsSelectors.js";
@@ -88,6 +103,7 @@ export {
     selectCanInviteUserToWorkspace,
     selectCanRefreshData,
     selectCanManageScheduledMail,
+    selectCanManageAttributeHierarchy,
 } from "./permissions/permissionsSelectors.js";
 export { DashboardPermissionsState } from "./dashboardPermissions/dashboardPermissionsState.js";
 export {
@@ -104,6 +120,7 @@ export {
     selectFilterContextIdentity,
     selectFilterContextFilters,
     selectFilterContextDateFilter,
+    selectFilterContextDateFiltersWithDimension,
     selectFilterContextAttributeFilters,
     selectOtherContextAttributeFilters,
     selectAttributeFilterDisplayFormsMap,
@@ -115,6 +132,9 @@ export {
     selectAttributeFilterDisplayFormByLocalId,
     selectIsCircularDependency,
     selectCanAddMoreAttributeFilters,
+    selectCanAddMoreFilters,
+    selectIsAttributeFilterDependentByLocalIdentifier,
+    selectFilterContextDateFilterByDataSet,
 } from "./filterContext/filterContextSelectors.js";
 export {
     // Core drills
@@ -127,6 +147,7 @@ export {
     selectImplicitDrillsByAvailableDrillTargets,
     selectDrillableItemsByAvailableDrillTargets,
     selectImplicitDrillsToUrlByWidgetRef,
+    selectGlobalDrillsDownAttributeHierarchyByWidgetRef,
     IImplicitDrillWithPredicates,
 } from "./widgetDrills/widgetDrillSelectors.js";
 export { selectLegacyDashboards } from "./legacyDashboards/legacyDashboardsSelectors.js";
@@ -154,6 +175,7 @@ export {
     selectInsightWidgetPlaceholderCoordinates,
     selectKpiWidgetPlaceholder,
     selectKpiWidgetPlaceholderCoordinates,
+    selectIgnoredDrillDownHierarchiesByWidgetRef,
 } from "./layout/layoutSelectors.js";
 export { DateFilterConfigState } from "./dateFilterConfig/dateFilterConfigState.js";
 export {
@@ -165,11 +187,24 @@ export {
     selectEffectiveDateFilterAvailableGranularities,
     selectDateFilterConfigValidationWarnings,
 } from "./dateFilterConfig/dateFilterConfigSelectors.js";
+export { AttributeFilterConfigsState } from "./attributeFilterConfigs/attributeFilterConfigsState.js";
+export {
+    selectAttributeFilterConfigsOverrides,
+    selectAttributeFilterConfigsModeMap,
+    selectEffectiveAttributeFiltersModeMap,
+} from "./attributeFilterConfigs/attributeFilterConfigsSelectors.js";
+export { DateFilterConfigsState } from "./dateFilterConfigs/dateFilterConfigsState.js";
+export {
+    selectDateFilterConfigsOverrides,
+    selectDateFilterConfigsModeMap,
+    selectEffectiveDateFiltersModeMap,
+} from "./dateFilterConfigs/dateFilterConfigsSelectors.js";
 export {
     selectInsights,
     selectInsightRefs,
     selectInsightsMap,
     selectInsightByRef,
+    selectInsightByWidgetRef,
 } from "./insights/insightsSelectors.js";
 export { CatalogState } from "./catalog/catalogState.js";
 export {
@@ -187,9 +222,25 @@ export {
     selectHasCatalogMeasures,
     selectHasCatalogDateDatasets,
     selectHasCatalogFacts,
+    selectCatalogAttributeHierarchies,
+    selectCatalogDateAttributes,
+    selectDateHierarchyTemplates,
+    selectAdhocDateHierarchies,
+    selectAllCatalogAttributeHierarchies,
 } from "./catalog/catalogSelectors.js";
-export { selectDrillableItems } from "./drill/drillSelectors.js";
+export { catalogActions } from "./catalog/index.js";
+export { drillActions } from "./drill/index.js";
+export {
+    selectDrillableItems,
+    selectCrossFilteringItems,
+    selectCrossFilteringItemByWidgetRef,
+    selectCrossFilteringFiltersLocalIdentifiers,
+    selectCrossFilteringFiltersLocalIdentifiersByWidgetRef,
+    selectCrossFilteringSelectedPointsByWidgetRef,
+    selectIsFilterFromCrossFilteringByLocalIdentifier,
+} from "./drill/drillSelectors.js";
 export { DrillState } from "./drill/drillState.js";
+export { ICrossFilteringItem } from "./drill/types.js";
 export { AlertsState } from "./alerts/alertsState.js";
 export {
     selectAlerts,
@@ -217,6 +268,7 @@ export {
     selectIsDashboardDirty,
     selectIsDashboardPrivate,
     selectDashboardWorkingDefinition,
+    selectDisableDashboardCrossFiltering,
 } from "./meta/metaSelectors.js";
 export {
     selectListedDashboards,

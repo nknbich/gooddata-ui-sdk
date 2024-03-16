@@ -9,7 +9,6 @@ if (process.env.WDYR === "true") {
         include: [/WithLoading/],
     });
 }
-import "@babel/polyfill";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { provideCreateRoot } from "@gooddata/sdk-ui-ext";

@@ -1,4 +1,4 @@
-// (C) 2019-2023 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 
 /**
  * Analytical Backend communicates its capabilities via objects of this type. In return, the capabilities
@@ -221,6 +221,75 @@ export interface IBackendCapabilities {
      * Indicates whether dackend supports enumerating datetime attributes.
      */
     supportsEnumeratingDatetimeAttributes?: boolean;
+
+    /**
+     * Indicates whether the UI supports hidden and locked filters.
+     *
+     * If set to true, the user interface (UI) provides functionality for managing hidden
+     * and locked filters. If set to false or undefined, the UI does not support these features.
+     */
+    supportsHiddenAndLockedFiltersOnUI?: boolean;
+
+    /**
+     * Indicates whether the UI supports multiple interactions per attribute and measure.
+     *
+     * IF set to true, the user interface (UI) provides functionality for managing multiple interactions per attribute and measure.
+     * If set to false or undefined, the UI does not support these features.
+     */
+    allowMultipleInteractionsPerAttributeAndMeasure?: boolean;
+
+    /**
+     * Indicates whether the UI supports attribute hierarchies.
+     *
+     * If set to true, the user interface (UI) provides functionality for managing attribute hierarchies
+     * If set to false or undefined, the UI does not support attribute hierarchies features.
+     */
+    supportsAttributeHierarchies?: boolean;
+
+    /**
+     * Indicates whether backend supports setting connecting attribute in dependent filters.
+     */
+    supportsSettingConnectingAttributes?: boolean;
+
+    /**
+     * Indicates whether backend supports to keep selection of dependent filters.
+     */
+    supportsKeepingDependentFiltersSelection?: boolean;
+
+    /**
+     * Indicates whether backend supports to circular dependencies in dependent filters.
+     */
+    supportsCircularDependencyInFilters?: boolean;
+
+    /**
+     * Indicates whether backend supports to show elements filtered out by limiting filters.
+     */
+    supportsShowingFilteredElements?: boolean;
+
+    /**
+     * Indicates whether backend supports to set dependencies for single-select filters.
+     */
+    supportsSingleSelectDependentFilters?: boolean;
+
+    /**
+     * Indicates whether backend supports cross filtering.
+     */
+    supportsCrossFiltering?: boolean;
+
+    /**
+     * Indicates whether backend supports to have multiple date filters.
+     */
+    supportsMultipleDateFilters?: boolean;
+
+    /**
+     * Indicates whether backend supports limiting of attribute filter elements by a metric, attribute, fact.
+     */
+    supportsAttributeFilterElementsLimiting?: boolean;
+
+    /**
+     * Indicates whether backend supports rich text widgets.
+     */
+    supportsRichTextWidgets?: boolean;
 
     /**
      * Catchall for additional capabilities

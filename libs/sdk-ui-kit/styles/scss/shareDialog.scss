@@ -177,7 +177,6 @@
         border: 1px dashed variables.$is-focused-background;
         line-height: 36px;
         text-align: center;
-        border-style: dashed;
     }
 
     .gd-grantee-item-icon-left {
@@ -188,6 +187,10 @@
         display: none;
         margin-left: 10px;
         cursor: pointer;
+
+        &.is-disabled {
+            cursor: default;
+        }
     }
 
     @media #{variables.$small-only} {
@@ -278,7 +281,7 @@
             background: var(--gd-palette-error-lightest, #fff2f1);
         }
 
-        .gd-grantee-icon-trash {
+        .gd-grantee-icon-trash:not(.is-disabled) {
             &::after {
                 color: var(--gd-palette-error-base, #e54d42);
             }
@@ -355,8 +358,4 @@
             margin-top: 2px;
         }
     }
-}
-
-.gd-granular-permissions-remove {
-    border-top: 1px solid variables.$gd-border-color;
 }

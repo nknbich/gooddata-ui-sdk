@@ -3,7 +3,8 @@
 # Absolute root directory - for volumes
 ROOT_DIR=$(echo $(cd $(dirname "${BASH_SOURCE[0]}")/../../.. && pwd -P))
 
-IMAGE="node:18.17.0-bullseye"
+# TODO: temporary fix - previous image was obtaining Node js version 18.19.0 which has some breaking changes on esm modules - https://github.com/nodejs/node/issues/51098
+IMAGE="020413372491.dkr.ecr.us-east-1.amazonaws.com/3rdparty/library/node:18.17.0-bullseye"
 
 echo "Running \"$*\" using ${IMAGE} in root directory ${ROOT_DIR}"
 
@@ -32,6 +33,7 @@ docker run \
   --env WIREMOCK_NET \
   --env HOME="/workspace" \
   --env EXAMPLES_BUILD_TYPE \
+  --env NPM_PUBLISH_TOKEN \
   --env EXAMPLE_MAPBOX_ACCESS_TOKEN \
   --env BROWSERSLIST_IGNORE_OLD_DATA=true \
   --rm \

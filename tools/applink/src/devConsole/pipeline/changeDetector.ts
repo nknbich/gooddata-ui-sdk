@@ -1,5 +1,5 @@
-// (C) 2020-2022 GoodData Corporation
-import { PackageDescriptor, SourceDescriptor, TargetDescriptor } from "../../base/types";
+// (C) 2020-2024 GoodData Corporation
+import { PackageDescriptor, SourceDescriptor, TargetDescriptor } from "../../base/types.js";
 import chokidar from "chokidar";
 import path from "path";
 import {
@@ -10,10 +10,10 @@ import {
     IEventListener,
     PackageChange,
     packagesChanged,
-} from "../events";
-import { appLogImportant, appLogWarn } from "../ui/utils";
-import intersection from "lodash/intersection";
-import values from "lodash/values";
+} from "../events.js";
+import { appLogImportant, appLogWarn } from "../ui/utils.js";
+import intersection from "lodash/intersection.js";
+import values from "lodash/values.js";
 
 /**
  * Change detector will wait until it has both source & target descriptors. After that it will determine
@@ -198,6 +198,15 @@ export class ChangeDetector implements IEventListener {
                 changes[packageName] = change;
             } else {
                 existingRequest.files!.push(...change.files!);
+            }
+        }
+
+        for (const changeId in changes) {
+            const change = changes[changeId];
+            // Omit __version files generated during the build, otherwise build ends up in endless cycle
+            changes[changeId].files = change.files.filter((file) => !file.includes("__version.ts"));
+            if (changes[changeId].files.length === 0) {
+                delete changes[changeId];
             }
         }
 

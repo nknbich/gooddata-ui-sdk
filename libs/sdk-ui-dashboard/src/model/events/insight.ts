@@ -9,6 +9,8 @@ import {
     IInsightWidgetDefinition,
     ICatalogDateDataset,
     IInsightWidgetConfiguration,
+    IDrillDownReference,
+    IDashboardDateFilter,
 } from "@gooddata/sdk-model";
 
 import { IDashboardEvent } from "./base.js";
@@ -149,6 +151,13 @@ export interface DashboardInsightWidgetFilterSettingsChangedPayload {
     readonly ignoredAttributeFilters: IDashboardAttributeFilter[];
 
     /**
+     * Date filters with dimension that are ignored for the widget.
+     *
+     * If empty, then all date filters defined for the dashboard are in effect.
+     */
+    readonly ignoredDateFilters?: IDashboardDateFilter[];
+
+    /**
      * Date dataset used for date filtering.
      *
      * If undefined, then dashboard's date filter is not in effect for the widget.
@@ -176,6 +185,7 @@ export function insightWidgetFilterSettingsChanged(
     ignoredAttributeFilters: IDashboardAttributeFilter[],
     dateDatasetForFiltering: ICatalogDateDataset | undefined,
     correlationId?: string,
+    ignoredDateFilters?: IDashboardDateFilter[],
 ): DashboardInsightWidgetFilterSettingsChanged {
     return {
         type: "GDC.DASH/EVT.INSIGHT_WIDGET.FILTER_SETTINGS_CHANGED",
@@ -184,6 +194,7 @@ export function insightWidgetFilterSettingsChanged(
         payload: {
             ref,
             ignoredAttributeFilters,
+            ignoredDateFilters,
             dateDatasetForFiltering,
         },
     };
@@ -518,6 +529,178 @@ export function insightWidgetDrillsRemoved(
 export const isDashboardInsightWidgetDrillsRemoved = eventGuard<DashboardInsightWidgetDrillsRemoved>(
     "GDC.DASH/EVT.INSIGHT_WIDGET.DRILLS_REMOVED",
 );
+
+//
+//
+//
+
+/**
+ * @alpha
+ */
+export interface DashboardInsightWidgetDrillDownRemovedPayload {
+    /**
+     * Reference to Insight Widget that was changed.
+     */
+    readonly ref: ObjRef;
+
+    /**
+     * Drill down references that were removed.
+     */
+    readonly removed: IDrillDownReference[];
+}
+
+/**
+ * @alpha
+ */
+export interface DashboardInsightWidgetDrillDownRemoved extends IDashboardEvent {
+    readonly type: "GDC.DASH/EVT.INSIGHT_WIDGET.DRILL_DOWN_REMOVED";
+    readonly payload: DashboardInsightWidgetDrillDownRemovedPayload;
+}
+
+/**
+ * @alpha
+ */
+export function insightWidgetDrillDownRemoved(
+    ctx: DashboardContext,
+    ref: ObjRef,
+    removed: IDrillDownReference[],
+    correlationId?: string,
+): DashboardInsightWidgetDrillDownRemoved {
+    return {
+        type: "GDC.DASH/EVT.INSIGHT_WIDGET.DRILL_DOWN_REMOVED",
+        ctx,
+        correlationId,
+        payload: {
+            ref,
+            removed,
+        },
+    };
+}
+
+//
+//
+//
+
+/**
+ * @alpha
+ */
+export interface DashboardInsightWidgetDrillDownAddedPayload {
+    /**
+     * Reference to Insight Widget that was changed.
+     */
+    readonly ref: ObjRef;
+
+    /**
+     * Reference to attribute hierarchy that were added.
+     */
+    readonly attributeHierarchyRef: ObjRef;
+
+    /**
+     * Reference to attribute that were added.
+     */
+    readonly attribute: ObjRef;
+}
+
+/**
+ * @alpha
+ */
+export interface DashboardInsightWidgetDrillDownAdded extends IDashboardEvent {
+    readonly type: "GDC.DASH/EVT.INSIGHT_WIDGET.DRILL_DOWN_ADDED";
+    readonly payload: DashboardInsightWidgetDrillDownAddedPayload;
+}
+
+/**
+ * @alpha
+ */
+export function insightWidgetDrillDownAdded(
+    ctx: DashboardContext,
+    ref: ObjRef,
+    attributeHierarchyRef: ObjRef,
+    attribute: ObjRef,
+    correlationId?: string,
+): DashboardInsightWidgetDrillDownAdded {
+    return {
+        type: "GDC.DASH/EVT.INSIGHT_WIDGET.DRILL_DOWN_ADDED",
+        ctx,
+        correlationId,
+        payload: {
+            ref,
+            attributeHierarchyRef,
+            attribute,
+        },
+    };
+}
+
+//
+//
+//
+
+/**
+ * @alpha
+ */
+export interface DashboardInsightWidgetDrillDownModifiedPayload {
+    /**
+     * Reference to Insight Widget that was changed.
+     */
+    readonly ref: ObjRef;
+
+    /**
+     * Drill down references that were updated.
+     */
+    readonly updated: IDrillDownReference[];
+}
+
+/**
+ * This event is emitted when the insight widget's drill definitions change. The change may include
+ * addition or change of drill definition for one or more drillable measures.
+ *
+ * @alpha
+ */
+export interface DashboardInsightWidgetDrillDownModified extends IDashboardEvent {
+    readonly type: "GDC.DASH/EVT.INSIGHT_WIDGET.DRILL_DOWN_MODIFIED";
+    readonly payload: DashboardInsightWidgetDrillDownModifiedPayload;
+}
+
+export function insightWidgetDrillDownModified(
+    ctx: DashboardContext,
+    ref: ObjRef,
+    updated: IDrillDownReference[],
+    correlationId?: string,
+): DashboardInsightWidgetDrillDownModified {
+    return {
+        type: "GDC.DASH/EVT.INSIGHT_WIDGET.DRILL_DOWN_MODIFIED",
+        ctx,
+        correlationId,
+        payload: {
+            ref,
+            updated,
+        },
+    };
+}
+
+//
+//
+//
+
+/**
+ * This event is emitted when Attribute Hierarchies have been updated/deleted.
+ *
+ * @beta
+ */
+export interface AttributeHierarchyModifiedEvent extends IDashboardEvent {
+    readonly type: "GDC.DASH/EVT.ATTRIBUTE_HIERARCHY_MODIFIED";
+}
+
+export function attributeHierarchyModifiedEvent(
+    ctx: DashboardContext,
+    correlationId?: string,
+): AttributeHierarchyModifiedEvent {
+    return {
+        type: "GDC.DASH/EVT.ATTRIBUTE_HIERARCHY_MODIFIED",
+        ctx,
+        correlationId,
+    };
+}
 
 //
 //

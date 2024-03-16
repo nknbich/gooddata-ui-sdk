@@ -9,6 +9,9 @@ import {
     OptionalKpiComponentProvider,
     OptionalDateFilterComponentProvider,
     OptionalAttributeFilterComponentProvider,
+    AttributeFilterComponentProvider,
+    DashboardContentComponentProvider,
+    OptionalDashboardContentComponentProvider,
 } from "../presentation/index.js";
 import {
     DashboardDispatch,
@@ -291,6 +294,61 @@ export type FluidLayoutCustomizationFn = (
 ) => void;
 
 /**
+ * @alpha
+ */
+export interface IDashboardContentCustomizer {
+    /**
+     * Register a factory for dashboard content decorator providers.
+     *
+     * @remarks
+     * Decorators are a way to add customizations or embellishments on top
+     * of an existing component. Decorators are more complex to write because they need to work with the component
+     * they should decorate and add 'something' on top of that component.
+     *
+     * This is best illustrated on an example:
+     *
+     * @example
+     * ```
+     * withCustomDecorator((next) => {
+     *     return (dashboard) => {
+     *         if (some_condition_to_prevent_decoration) {
+     *             return undefined;
+     *         }
+     *
+     *         // Make sure you call this outside the component render function,
+     *         // otherwise a new instance of the decorated component is created on each re-render.
+     *         const Decorated = next(dashboard);
+     *
+     *         function MyCustomDecorator(props) {
+     *              return (
+     *                  <div>
+     *                      <p>My Custom Decoration</p>
+     *                      <Decorated {...props} />
+     *                  </div>
+     *              )
+     *         }
+     *
+     *         return MyCustomDecorator;
+     *     }
+     * })
+     * ```
+     *
+     * The above shows how to register a decorator that will use some condition to determine if dashboard content
+     * will be decorated.
+     *
+     * Note: the factory function that you specify will be called immediately at the registration time. The
+     * provider that it returns will be called at render time.
+     *
+     * @param providerFactory - factory
+     */
+    withCustomDecorator(
+        providerFactory: (
+            next: DashboardContentComponentProvider,
+        ) => OptionalDashboardContentComponentProvider,
+    ): IDashboardContentCustomizer;
+}
+
+/**
  * Set of functions you can use to customize the layout of the dashboard rendered.
  *
  * @public
@@ -383,6 +441,54 @@ export interface IAttributeFiltersCustomizer {
      * @returns self, for call chaining sakes
      */
     withCustomProvider(provider: OptionalAttributeFilterComponentProvider): IAttributeFiltersCustomizer;
+
+    /**
+     * Register a factory for attribute filter decorator providers.
+     *
+     * @remarks
+     * Decorators are a way to add customizations or embellishments on top
+     * of an existing component. Decorators are more complex to write because they need to work with the component
+     * they should decorate and add 'something' on top of that component.
+     *
+     * This is best illustrated on an example:
+     *
+     * @example
+     * ```
+     * withCustomDecorator((next) => {
+     *     return (filter) => {
+     *         if (some_condition_to_prevent_decoration) {
+     *             return undefined;
+     *         }
+     *
+     *         // Make sure you call this outside the component render function,
+     *         // otherwise a new instance of the decorated component is created on each re-render.
+     *         const Decorated = next(filter);
+     *
+     *         function MyCustomDecorator(props) {
+     *              return (
+     *                  <div>
+     *                      <p>My Custom Decoration</p>
+     *                      <Decorated {...props} />
+     *                  </div>
+     *              )
+     *         }
+     *
+     *         return MyCustomDecorator;
+     *     }
+     * })
+     * ```
+     *
+     * The above shows how to register a decorator that will use some condition to determine whether particular
+     * attribute filter is eligible for decoration.
+     *
+     * Note: the factory function that you specify will be called immediately at the registration time. The
+     * provider that it returns will be called at render time.
+     *
+     * @param providerFactory - factory
+     */
+    withCustomDecorator(
+        providerFactory: (next: AttributeFilterComponentProvider) => OptionalAttributeFilterComponentProvider,
+    ): IAttributeFiltersCustomizer;
 }
 
 /**
@@ -450,6 +556,11 @@ export interface IDashboardCustomizer {
      * Customize how rendering of filters is done.
      */
     filters(): IFiltersCustomizer;
+
+    /**
+     * Customize dashboard content.
+     */
+    dashboard(): IDashboardContentCustomizer;
 }
 
 /**

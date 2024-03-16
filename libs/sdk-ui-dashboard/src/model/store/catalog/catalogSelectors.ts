@@ -12,6 +12,9 @@ import {
     ObjRef,
     areObjRefsEqual,
     objRefToString,
+    IDateHierarchyTemplate,
+    ICatalogDateAttributeHierarchy,
+    isCatalogAttributeHierarchy,
 } from "@gooddata/sdk-model";
 
 import {
@@ -24,11 +27,15 @@ import {
     newCatalogDateDatasetMap,
     newCatalogMeasureMap,
 } from "../../../_staging/metadata/objRefMap.js";
-import { selectBackendCapabilities } from "../backendCapabilities/backendCapabilitiesSelectors.js";
+import {
+    selectBackendCapabilities,
+    selectSupportsAttributeHierarchies,
+} from "../backendCapabilities/backendCapabilitiesSelectors.js";
 import { DashboardSelector, DashboardState } from "../types.js";
 import { createDisplayFormMap } from "../../../_staging/catalog/displayFormMap.js";
 import isEmpty from "lodash/isEmpty.js";
 import negate from "lodash/negate.js";
+import { selectIsDrillDownEnabled } from "../config/configSelectors.js";
 
 const selectSelf = createSelector(
     (state: DashboardState) => state,
@@ -136,6 +143,46 @@ export const selectCatalogAttributeHierarchies: DashboardSelector<ICatalogAttrib
 /**
  * @alpha
  */
+export const selectDateHierarchyTemplates: DashboardSelector<IDateHierarchyTemplate[]> = createSelector(
+    selectSelf,
+    (state) => {
+        return state.dateHierarchyTemplates ?? [];
+    },
+);
+
+/**
+ * @alpha
+ */
+export const selectAdhocDateHierarchies: DashboardSelector<ICatalogDateAttributeHierarchy[]> = createSelector(
+    [
+        selectDateHierarchyTemplates,
+        selectCatalogDateDatasets,
+        selectIsDrillDownEnabled,
+        selectSupportsAttributeHierarchies,
+    ],
+    (dateHierarchyTemplates, catalogDateDatasets, isDrillDownEnabled, isSupportAttributeHierarchies) => {
+        if (isDrillDownEnabled && isSupportAttributeHierarchies) {
+            return buildAdhocDateHierarchies(dateHierarchyTemplates, catalogDateDatasets);
+        }
+        return [];
+    },
+);
+
+/**
+ * @alpha
+ */
+export const selectAllCatalogAttributeHierarchies: DashboardSelector<
+    (ICatalogAttributeHierarchy | ICatalogDateAttributeHierarchy)[]
+> = createSelector(
+    [selectCatalogAttributeHierarchies, selectAdhocDateHierarchies],
+    (catalogAttributeHierarchies, adhocDateHierarchies) => {
+        return [...catalogAttributeHierarchies, ...adhocDateHierarchies];
+    },
+);
+
+/**
+ * @alpha
+ */
 export const selectAttributesWithDrillDown: DashboardSelector<(ICatalogAttribute | ICatalogDateAttribute)[]> =
     createSelector(
         [selectCatalogAttributes, selectCatalogDateAttributes],
@@ -145,48 +192,13 @@ export const selectAttributesWithDrillDown: DashboardSelector<(ICatalogAttribute
     );
 
 /**
- * Returns map of catalog attribute keys with all their descendants based on attribute hierarchies.
- *
- * This selector does descendant lookup for each existing catalog attribute. If an attribute is in any attribute hierarchy
- * and has at least one descendant, the attribute key is added to the map together with the descendant reference.
- *
- * @beta
+ * @alpha
  */
 export const selectAttributesWithHierarchyDescendants: DashboardSelector<Record<string, ObjRef[]>> =
     createSelector(
-        [selectCatalogAttributes, selectCatalogDateAttributes, selectCatalogAttributeHierarchies],
+        [selectCatalogAttributes, selectCatalogDateAttributes, selectAllCatalogAttributeHierarchies],
         (attributes = [], dateAttributes = [], attributeHierarchies = []) => {
-            const allCatalogAttributes = [...attributes, ...dateAttributes];
-            const attributeDescendants: Record<string, ObjRef[]> = {};
-
-            allCatalogAttributes.forEach((attribute) => {
-                const attributeRef = attribute.attribute.ref;
-                attributeHierarchies.forEach((hierarchy) => {
-                    const hierarchyAttributes = hierarchy.attributeHierarchy.attributes;
-                    const foundAttributeIndex = hierarchyAttributes.findIndex((ref) =>
-                        areObjRefsEqual(ref, attributeRef),
-                    );
-
-                    if (foundAttributeIndex < 0) {
-                        return;
-                    }
-
-                    const foundDescendant = hierarchyAttributes[foundAttributeIndex + 1];
-
-                    if (!foundDescendant) {
-                        return;
-                    }
-
-                    const attributeRefAsString = objRefToString(attributeRef);
-                    if (attributeDescendants[attributeRefAsString]) {
-                        attributeDescendants[attributeRefAsString].push(foundDescendant);
-                    } else {
-                        attributeDescendants[attributeRefAsString] = [foundDescendant];
-                    }
-                });
-            });
-
-            return attributeDescendants;
+            return getAttributesWithHierarchyDescendants(attributes, dateAttributes, attributeHierarchies);
         },
     );
 
@@ -281,3 +293,81 @@ export const selectCatalogDateAttributeToDataset: DashboardSelector<
         capabilities.hasTypeScopedIdentifiers,
     );
 });
+
+function getAttributesWithHierarchyDescendants(
+    attributes: ICatalogAttribute[],
+    dateAttributes: ICatalogDateAttribute[],
+    attributeHierarchies: (ICatalogAttributeHierarchy | ICatalogDateAttributeHierarchy)[],
+): Record<string, ObjRef[]> {
+    const allCatalogAttributes = [...attributes, ...dateAttributes];
+    const attributeDescendants: Record<string, ObjRef[]> = {};
+
+    allCatalogAttributes.forEach((attribute) => {
+        const attributeRef = attribute.attribute.ref;
+        attributeHierarchies.forEach((hierarchy) => {
+            const attributes = isCatalogAttributeHierarchy(hierarchy)
+                ? hierarchy.attributeHierarchy.attributes
+                : hierarchy.attributes;
+            const foundAttributeIndex = attributes.findIndex((ref) => areObjRefsEqual(ref, attributeRef));
+
+            if (foundAttributeIndex < 0) {
+                return;
+            }
+
+            const foundDescendant = attributes[foundAttributeIndex + 1];
+
+            if (!foundDescendant) {
+                return;
+            }
+
+            const attributeRefAsString = objRefToString(attributeRef);
+            if (attributeDescendants[attributeRefAsString]) {
+                attributeDescendants[attributeRefAsString].push(foundDescendant);
+            } else {
+                attributeDescendants[attributeRefAsString] = [foundDescendant];
+            }
+        });
+    });
+    return attributeDescendants;
+}
+
+function buildAdhocDateHierarchies(
+    dateHierarchyTemplates: IDateHierarchyTemplate[],
+    catalogDateDatasets: ICatalogDateDataset[],
+): ICatalogDateAttributeHierarchy[] {
+    const adhocDateHierarchies: ICatalogDateAttributeHierarchy[] = [];
+    catalogDateDatasets.forEach((dateDataset) => {
+        dateHierarchyTemplates.forEach((template) => {
+            const dateHierarchy = buildDateHierarchy(dateDataset, template);
+            if (dateHierarchy) {
+                adhocDateHierarchies.push(dateHierarchy);
+            }
+        });
+    });
+    return adhocDateHierarchies;
+}
+
+function buildDateHierarchy(
+    dateDataset: ICatalogDateDataset,
+    dateTemplate: IDateHierarchyTemplate,
+): ICatalogDateAttributeHierarchy | undefined {
+    const dateAttributes = dateDataset.dateAttributes;
+    const dateAttributesInHierarchy: ObjRef[] = [];
+    dateTemplate.granularities.forEach((templateGranularity) => {
+        const dateAttribute = dateAttributes.find((attr) => attr.granularity === templateGranularity);
+        if (dateAttribute) {
+            dateAttributesInHierarchy.push(dateAttribute.attribute.ref);
+        }
+    });
+    if (!isEmpty(dateAttributesInHierarchy)) {
+        return {
+            type: "dateAttributeHierarchy",
+            templateId: dateTemplate.id,
+            dateDatasetRef: dateDataset.dataSet.ref,
+            title: dateDataset.dataSet.title,
+            attributes: dateAttributesInHierarchy,
+        };
+    }
+
+    return undefined;
+}

@@ -1,4 +1,4 @@
-// (C) 2020-2022 GoodData Corporation
+// (C) 2020-2024 GoodData Corporation
 import {
     newNegativeAttributeFilter,
     newPositiveAttributeFilter,
@@ -93,14 +93,14 @@ export function dashboardDateFilterToDateFilterByWidget(
 ): IDateFilter {
     if (filter.dateFilter.type === "relative") {
         return newRelativeDateFilter(
-            widget.dateDataSet!,
+            filter.dateFilter.dataSet || widget.dateDataSet!,
             filter.dateFilter.granularity,
             numberOrStringToNumber(filter.dateFilter.from!),
             numberOrStringToNumber(filter.dateFilter.to!),
         );
     } else {
         return newAbsoluteDateFilter(
-            widget.dateDataSet!,
+            filter.dateFilter.dataSet || widget.dateDataSet!,
             filter.dateFilter.from!.toString(),
             filter.dateFilter.to!.toString(),
         );

@@ -1,4 +1,4 @@
-// (C) 2019-2023 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 import {
     IWorkspaceDashboardsService,
     layoutWidgetsWithPaths,
@@ -15,6 +15,8 @@ import {
     IGetScheduledMailOptions,
     IExportResult,
     IGetDashboardPluginOptions,
+    NotSupported,
+    IDashboardsQuery,
 } from "@gooddata/sdk-backend-spi";
 import {
     areObjRefsEqual,
@@ -48,6 +50,8 @@ import {
     IDashboardPluginDefinition,
     IDashboardPluginLink,
     IDashboardPermissions,
+    IDateFilter,
+    isDateFilter,
 } from "@gooddata/sdk-model";
 
 import { convertVisualization } from "../../../convertors/fromBackend/VisualizationConverter.js";
@@ -148,6 +152,10 @@ export class BearWorkspaceDashboards implements IWorkspaceDashboardsService {
             return toSdkModel.convertListedDashboard(link, availability, userMap);
         });
     };
+
+    public getDashboardsQuery(): IDashboardsQuery {
+        throw new NotSupported("not supported");
+    }
 
     public getDashboard = async (
         dashboardRef: ObjRef,
@@ -462,6 +470,21 @@ export class BearWorkspaceDashboards implements IWorkspaceDashboardsService {
     public getResolvedFiltersForWidget = async (widget: IWidget, filters: IFilter[]): Promise<IFilter[]> => {
         return resolveWidgetFilters(filters, widget.ignoreDashboardFilters, widget.dateDataSet, (refs) =>
             objRefsToUris(refs, this.workspace, this.authCall),
+        );
+    };
+    public getResolvedFiltersForWidgetWithMultipleDateFilters = async (
+        widget: IWidget,
+        commonDateFilters: IDateFilter[],
+        otherFilters: IFilter[],
+    ): Promise<IFilter[]> => {
+        if (commonDateFilters.length > 1 || otherFilters.filter(isDateFilter).length) {
+            throw new Error("This backend does not support multiple date filters");
+        }
+        return resolveWidgetFilters(
+            [...commonDateFilters, ...otherFilters],
+            widget.ignoreDashboardFilters,
+            widget.dateDataSet,
+            (refs) => objRefsToUris(refs, this.workspace, this.authCall),
         );
     };
 

@@ -1,19 +1,24 @@
-// (C) 2021-2022 GoodData Corporation
+// (C) 2021-2024 GoodData Corporation
 import { call, put, select } from "redux-saga/effects";
 import { SagaIterator } from "redux-saga";
 import { batchActions } from "redux-batched-actions";
 import difference from "lodash/difference.js";
 import partition from "lodash/partition.js";
+import compact from "lodash/compact.js";
+import { areObjRefsEqual, isInsightWidget } from "@gooddata/sdk-model";
 
 import { RemoveAttributeFilters } from "../../../commands/filters.js";
 import { invalidArgumentsProvided } from "../../../events/general.js";
 import { attributeFilterRemoved } from "../../../events/filters.js";
 import { filterContextActions } from "../../../store/filterContext/index.js";
+import { attributeFilterConfigsActions } from "../../../store/attributeFilterConfigs/index.js";
 import { selectFilterContextAttributeFilters } from "../../../store/filterContext/filterContextSelectors.js";
 import { DashboardContext } from "../../../types/commonTypes.js";
 import { dispatchFilterContextChanged } from "../common.js";
 import { dispatchDashboardEvent } from "../../../store/_infra/eventDispatcher.js";
 import { layoutActions } from "../../../store/layout/index.js";
+import { selectAllAnalyticalWidgets } from "../../../store/layout/layoutSelectors.js";
+import { validateDrillToCustomUrlParams } from "../../common/validateDrillToCustomUrlParams.js";
 
 export function* removeAttributeFiltersHandler(
     ctx: DashboardContext,
@@ -49,28 +54,50 @@ export function* removeAttributeFiltersHandler(
             ),
         );
 
-        const batch = batchActions([
-            // remove filter from parents and keep track of the affected filters
-            ...affectedChildren.map(({ attributeFilter }) =>
-                filterContextActions.setAttributeFilterParents({
-                    filterLocalId: attributeFilter.localIdentifier!,
-                    parentFilters: attributeFilter.filterElementsBy!.filter(
-                        (parent) =>
-                            parent.filterLocalIdentifier !== removedFilter?.attributeFilter.localIdentifier,
-                    ),
+        // When cross filtering, duplicate filter may exist in surviving filters. In such cases, we
+        // don't want to remove the filter from ignored filters of widget. We match by display form
+        // here instead of local identifier as the local identifier is not available in ignored
+        // filters state.
+        const isFilterDuplicatedInSurvivingFilters = survivingFilters.some((item) =>
+            areObjRefsEqual(item.attributeFilter.displayForm, removedFilter.attributeFilter.displayForm),
+        );
+        const removeIgnoredAttributeFilterActionArray = isFilterDuplicatedInSurvivingFilters
+            ? []
+            : [
+                  layoutActions.removeIgnoredAttributeFilter({
+                      displayFormRefs: [removedFilter.attributeFilter.displayForm],
+                  }),
+              ];
+
+        const batch = batchActions(
+            compact([
+                // remove filter from parents and keep track of the affected filters
+                ...affectedChildren.map(({ attributeFilter }) =>
+                    filterContextActions.setAttributeFilterParents({
+                        filterLocalId: attributeFilter.localIdentifier!,
+                        parentFilters: attributeFilter.filterElementsBy!.filter(
+                            (parent) =>
+                                parent.filterLocalIdentifier !==
+                                removedFilter?.attributeFilter.localIdentifier,
+                        ),
+                    }),
+                ),
+                // remove filter itself
+                filterContextActions.removeAttributeFilter({
+                    filterLocalId: removedFilter.attributeFilter.localIdentifier!,
                 }),
-            ),
-            // remove filter itself
-            filterContextActions.removeAttributeFilter({
-                filterLocalId: removedFilter.attributeFilter.localIdentifier!,
-            }),
-            // remove filter's display form metadata object
-            filterContextActions.removeAttributeFilterDisplayForms(removedFilter.attributeFilter.displayForm),
-            // house-keeping: ensure the removed attribute filter disappears from widget ignore lists
-            layoutActions.removeIgnoredAttributeFilter({
-                displayFormRefs: [removedFilter.attributeFilter.displayForm],
-            }),
-        ]);
+                // remove filter's display form metadata object
+                filterContextActions.removeAttributeFilterDisplayForms(
+                    removedFilter.attributeFilter.displayForm,
+                ),
+                // remove reflect dashboard attribute filter config
+                attributeFilterConfigsActions.removeAttributeFilterConfig(
+                    removedFilter.attributeFilter.localIdentifier!,
+                ),
+                // house-keeping: ensure the removed attribute filter disappears from widget ignore lists
+                ...removeIgnoredAttributeFilterActionArray,
+            ]),
+        );
 
         yield put(batch);
         yield dispatchDashboardEvent(
@@ -79,4 +106,7 @@ export function* removeAttributeFiltersHandler(
     }
 
     yield call(dispatchFilterContextChanged, ctx, cmd);
+
+    const widgets: ReturnType<typeof selectAllAnalyticalWidgets> = yield select(selectAllAnalyticalWidgets);
+    yield call(validateDrillToCustomUrlParams, widgets.filter(isInsightWidget));
 }

@@ -1,4 +1,4 @@
-// (C) 2019-2023 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 import {
     SortDirection,
     ObjRef,
@@ -147,6 +147,16 @@ export interface IElementsQueryOptions {
      * The value is applied only on backends without the supportsElementUris capability.
      */
     excludePrimaryLabel?: boolean;
+
+    /**
+     * Cache ID to use when requesting subsequent elements from the backend.
+     *
+     * @remarks
+     * This is to prevent inconsistent results when the underlying datasource is volatile.
+     * If not specified, the backend will generate a value that the client should use in subsequent requests.
+     * Note that not all backend types support this.
+     */
+    cacheId?: string;
 }
 
 /**
@@ -157,7 +167,11 @@ export interface IElementsQueryOptions {
  * and the filter attribute must be connected in the data model. The property `overAttribute` identifies
  * the connecting table in the logical data model.
  *
+ * Not all backends support overAttribute prop.
+ *
  * For method providing all possible connecting attributes see {@link IWorkspaceAttributesService.getCommonAttributes}.
+ * For method providing whether attributes have some connection in model
+ * see {@link IWorkspaceAttributesService.getConnectedAttributesByDisplayForm}.
  *
  * @public
  */
@@ -245,6 +259,17 @@ export interface IElementsQuery extends ICancelable<IElementsQuery> {
      * @returns element query
      */
     withMeasures(measures: IMeasure[]): IElementsQuery;
+
+    /**
+     * Sets the catalog objects based on which the elements are validated, i.e., if set, only the elements
+     * that are available with these metrics, attributes, etc. are returned.
+     *
+     * Note that this functionality is not supported by every backend.
+     *
+     * @param validateBy - metric, attributes, or other objects the elements are validated by.
+     * @returns element query
+     */
+    withAvailableElementsOnly(validateBy: ObjRef[]): IElementsQuery;
 
     /**
      * Allows to specify advanced options for the elements query.

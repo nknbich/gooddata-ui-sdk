@@ -1,4 +1,4 @@
-// (C) 2019-2022 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import defaultUserEvent from "@testing-library/user-event";
@@ -223,6 +223,27 @@ describe("BaseChartConfigurationPanel", () => {
 
             await userEvent.click(screen.getByText("X-Axis"));
             expect(screen.queryByTestId("xaxis")).not.toBeInTheDocument();
+        });
+
+        it("should not render interactions section in configuration panel", async () => {
+            createComponent({
+                ...defaultProps,
+                insight: insightWithSingleAttribute,
+            });
+
+            expect(screen.queryByText("Interactions")).not.toBeInTheDocument();
+        });
+
+        it("should render interactions section in configuration panel", async () => {
+            createComponent({
+                ...defaultProps,
+                insight: insightWithSingleAttribute,
+                panelConfig: {
+                    supportsAttributeHierarchies: true,
+                },
+            });
+
+            expect(screen.queryByText("Interactions")).toBeInTheDocument();
         });
     });
 });

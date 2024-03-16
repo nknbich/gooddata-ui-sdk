@@ -1,4 +1,4 @@
-// (C) 2007-2023 GoodData Corporation
+// (C) 2007-2024 GoodData Corporation
 import {
     IAnalyticalBackend,
     IBackendCapabilities,
@@ -24,11 +24,11 @@ import {
 import {
     AttributesDecoratorFactory,
     CatalogDecoratorFactory,
-    decoratedBackend,
     ExecutionDecoratorFactory,
     SecuritySettingsDecoratorFactory,
     WorkspaceSettingsDecoratorFactory,
-} from "../decoratedBackend/index.js";
+} from "../decoratedBackend/types.js";
+import { decoratedBackend } from "../decoratedBackend/index.js";
 import { LRUCache } from "lru-cache";
 import { DecoratedSecuritySettingsService } from "../decoratedBackend/securitySettings.js";
 import {
@@ -462,6 +462,7 @@ function elementsCacheKey(
         attributeFilters?: IElementsQueryAttributeFilter[];
         dateFilters?: IRelativeDateFilter[];
         measures?: IMeasure[];
+        validateBy?: ObjRef[];
     },
 ): string {
     return new SparkMD5().append(objRefToString(ref)).append(stringify(settings)).end();
@@ -504,6 +505,7 @@ class CachedElementsQuery extends DecoratedElementsQuery {
             attributeFilters?: IElementsQueryAttributeFilter[];
             dateFilters?: IRelativeDateFilter[];
             measures?: IMeasure[];
+            validateBy?: ObjRef[];
         } = {},
     ) {
         super(decorated, settings);
@@ -542,6 +544,7 @@ class CachedElementsQuery extends DecoratedElementsQuery {
             attributeFilters?: IElementsQueryAttributeFilter[] | undefined;
             dateFilters?: IRelativeDateFilter[] | undefined;
             measures?: IMeasure<IMeasureDefinitionType>[] | undefined;
+            validateBy?: ObjRef[];
         },
     ): IElementsQuery {
         return new CachedElementsQuery(decorated, this.ctx, this.workspace, this.ref, settings);

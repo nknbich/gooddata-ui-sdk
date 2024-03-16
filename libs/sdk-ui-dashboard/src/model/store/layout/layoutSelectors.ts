@@ -1,4 +1,4 @@
-// (C) 2021-2023 GoodData Corporation
+// (C) 2021-2024 GoodData Corporation
 import { createSelector } from "@reduxjs/toolkit";
 import {
     ObjRef,
@@ -11,8 +11,13 @@ import {
     IKpiWidget,
     IDrillToLegacyDashboard,
     InsightDrillDefinition,
+    IDrillDownReference,
+    isDashboardAttributeFilter,
+    isDashboardCommonDateFilter,
+    DrillDefinition,
 } from "@gooddata/sdk-model";
 import { invariant } from "ts-invariant";
+import partition from "lodash/partition.js";
 import isEmpty from "lodash/isEmpty.js";
 
 import { DashboardSelector, DashboardState } from "../types.js";
@@ -32,6 +37,7 @@ import {
 import { LayoutStash, LayoutState } from "./layoutState.js";
 import { isItemWithBaseWidget, getWidgetCoordinates } from "./layoutUtils.js";
 import { DashboardLayoutCommands } from "../../commands/index.js";
+import { selectCrossFilteringFiltersLocalIdentifiersByWidgetRef } from "../drill/drillSelectors.js";
 
 const selectSelf = createSelector(
     (state: DashboardState) => state,
@@ -66,7 +72,7 @@ export const selectUndoableLayoutCommands: DashboardSelector<UndoableCommand<Das
  * This selector returns dashboard's layout. It is expected that the selector is called only after the layout state
  * is correctly initialized. Invocations before initialization lead to invariant errors.
  *
- * @alpha
+ * @public
  */
 export const selectLayout: DashboardSelector<IDashboardLayout<ExtendedDashboardWidget>> = createSelector(
     selectSelf,
@@ -198,16 +204,25 @@ export const selectAnalyticalWidgetByRef: (
 );
 
 /**
+ * @alpha
+ */
+export const selectIgnoredDrillDownHierarchiesByWidgetRef: (
+    ref: ObjRef,
+) => DashboardSelector<IDrillDownReference[]> = createMemoizedSelector((ref: ObjRef) =>
+    createSelector(selectAnalyticalWidgetByRef(ref), (widget) => widget?.ignoredDrillDownHierarchies ?? []),
+);
+
+/**
  * Selects widget drills by the widget ref.
  *
  * @alpha
  */
 export const selectWidgetDrills: (
     ref: ObjRef | undefined,
-) => DashboardSelector<IDrillToLegacyDashboard[] | InsightDrillDefinition[]> = createMemoizedSelector(
-    (ref: ObjRef | undefined) =>
+) => DashboardSelector<IDrillToLegacyDashboard[] | InsightDrillDefinition[] | DrillDefinition[]> =
+    createMemoizedSelector((ref: ObjRef | undefined) =>
         createSelector(selectAnalyticalWidgetByRef(ref), (widget) => widget?.drills ?? []),
-);
+    );
 
 /**
  * Selects all filters from filter context converted to filters specific for a widget specified by a ref.
@@ -217,17 +232,37 @@ export const selectWidgetDrills: (
  *
  * @internal
  */
-export const selectAllFiltersForWidgetByRef: (ref: ObjRef) => DashboardSelector<IDashboardFilter[]> =
-    createMemoizedSelector((ref: ObjRef) => {
-        return createSelector(
-            selectWidgetByRef(ref),
-            selectFilterContextFilters,
-            (widget, dashboardFilters) => {
-                invariant(widget, `widget with ref ${objRefToString(ref)} does not exist in the state`);
-                return filterContextItemsToDashboardFiltersByWidget(dashboardFilters, widget);
-            },
-        );
-    });
+export const selectAllFiltersForWidgetByRef: (
+    ref: ObjRef,
+) => DashboardSelector<[IDashboardFilter[], IDashboardFilter[]]> = createMemoizedSelector((ref: ObjRef) => {
+    return createSelector(
+        selectWidgetByRef(ref),
+        selectFilterContextFilters,
+        selectCrossFilteringFiltersLocalIdentifiersByWidgetRef(ref),
+        (widget, dashboardFilters, crossFilteringFiltersLocalIdentifiers) => {
+            invariant(widget, `widget with ref ${objRefToString(ref)} does not exist in the state`);
+            const filtersWithoutCrossFilteringFilters = dashboardFilters.filter((f) => {
+                if (isDashboardAttributeFilter(f)) {
+                    return !crossFilteringFiltersLocalIdentifiers?.includes(
+                        f.attributeFilter.localIdentifier!,
+                    );
+                }
+
+                return true;
+            });
+
+            const [commonDateFilters, otherFilters] = partition(
+                filtersWithoutCrossFilteringFilters,
+                isDashboardCommonDateFilter,
+            );
+
+            return [
+                filterContextItemsToDashboardFiltersByWidget(commonDateFilters, widget),
+                filterContextItemsToDashboardFiltersByWidget(otherFilters, widget),
+            ];
+        },
+    );
+});
 
 const selectAllWidgets = createSelector(selectWidgetsMap, (widgetMap) => {
     return Array.from(widgetMap.values());

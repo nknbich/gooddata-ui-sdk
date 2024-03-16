@@ -5,6 +5,8 @@
 ```ts
 
 import { ActionsApiProcessInvitationRequest } from '@gooddata/api-client-tiger';
+import { AnalyzeCsvRequest } from '@gooddata/api-client-tiger';
+import { AnalyzeCsvResponse } from '@gooddata/api-client-tiger';
 import { AnonymousAuthProvider } from '@gooddata/sdk-backend-base';
 import { ApiEntitlement } from '@gooddata/api-client-tiger';
 import { ApiEntitlementNameEnum } from '@gooddata/api-client-tiger';
@@ -13,8 +15,6 @@ import { AxiosRequestConfig } from 'axios';
 import { DataSourceParameter } from '@gooddata/api-client-tiger';
 import { DeclarativeAnalytics } from '@gooddata/api-client-tiger';
 import { DeclarativeModel } from '@gooddata/api-client-tiger';
-import { DeclarativePdm } from '@gooddata/api-client-tiger';
-import { DeclarativeTables } from '@gooddata/api-client-tiger';
 import { DeclarativeWorkspaceDataFilters } from '@gooddata/api-client-tiger';
 import { DependentEntitiesRequest } from '@gooddata/api-client-tiger';
 import { DependentEntitiesResponse } from '@gooddata/api-client-tiger';
@@ -26,10 +26,12 @@ import { IAuthenticatedPrincipal } from '@gooddata/sdk-backend-spi';
 import { IAuthenticationContext } from '@gooddata/sdk-backend-spi';
 import { IAuthenticationProvider } from '@gooddata/sdk-backend-spi';
 import { IdentifierDuplications } from '@gooddata/api-client-tiger';
+import { ImportCsvRequest } from '@gooddata/api-client-tiger';
 import { ITigerClient } from '@gooddata/api-client-tiger';
 import { IUser } from '@gooddata/sdk-model';
 import { JsonApiAnalyticalDashboardOutMetaOrigin } from '@gooddata/api-client-tiger';
 import { JsonApiDatasetOutList } from '@gooddata/api-client-tiger';
+import { JsonApiDataSourceInAttributesCacheStrategyEnum } from '@gooddata/api-client-tiger';
 import { JsonApiDataSourceInAttributesTypeEnum } from '@gooddata/api-client-tiger';
 import { JsonApiDataSourceInDocument } from '@gooddata/api-client-tiger';
 import { JsonApiOrganizationOutMetaPermissionsEnum } from '@gooddata/api-client-tiger';
@@ -39,13 +41,18 @@ import { JsonApiWorkspaceDataFilterSettingInDocument } from '@gooddata/api-clien
 import { JsonApiWorkspaceDataFilterSettingOutDocument } from '@gooddata/api-client-tiger';
 import { JsonApiWorkspaceInDocument } from '@gooddata/api-client-tiger';
 import { LayoutApiPutWorkspaceLayoutRequest } from '@gooddata/api-client-tiger';
-import { LayoutApiSetPdmLayoutRequest } from '@gooddata/api-client-tiger';
 import { NotAuthenticated } from '@gooddata/sdk-backend-spi';
 import { NotAuthenticatedHandler } from '@gooddata/sdk-backend-spi';
 import { ObjectType } from '@gooddata/sdk-model';
 import { PlatformUsage } from '@gooddata/api-client-tiger';
+import { ScanResultPdm } from '@gooddata/api-client-tiger';
 import { ScanSqlResponse } from '@gooddata/api-client-tiger';
+import { StagingUploadLocation } from '@gooddata/api-client-tiger';
 import { TestDefinitionRequestTypeEnum } from '@gooddata/api-client-tiger';
+
+export { AnalyzeCsvRequest }
+
+export { AnalyzeCsvResponse }
 
 export { AnonymousAuthProvider }
 
@@ -75,8 +82,6 @@ export type DeclarativeAnalyticsModel = DeclarativeAnalytics;
 export type DeclarativeLogicalModel = DeclarativeModel;
 
 export { DeclarativeModel }
-
-export { DeclarativePdm }
 
 // @internal (undocumented)
 export type DependentEntitiesGraphRequest = DependentEntitiesRequest;
@@ -134,14 +139,6 @@ export interface ICustomApplicationSetting {
     id: string;
 }
 
-// @internal
-export interface IDataSource {
-    // (undocumented)
-    entity: JsonApiDataSourceInDocument;
-    // (undocumented)
-    pdm: DeclarativePdm;
-}
-
 // @internal (undocumented)
 export interface IDataSourceApiResult {
     // (undocumented)
@@ -151,15 +148,20 @@ export interface IDataSourceApiResult {
 }
 
 // @internal (undocumented)
+export type IDataSourceCacheStrategy = JsonApiDataSourceInAttributesCacheStrategyEnum;
+
+// @internal (undocumented)
 export interface IDataSourceConnectionInfo {
     // (undocumented)
-    decodedParameters?: Array<DataSourceParameter>;
+    cacheStrategy?: IDataSourceCacheStrategy;
+    // (undocumented)
+    decodedParameters?: Array<DataSourceParameter> | null;
     // (undocumented)
     id: string;
     // (undocumented)
     name: string;
     // (undocumented)
-    parameters?: Array<DataSourceParameter>;
+    parameters?: Array<DataSourceParameter> | null;
     // (undocumented)
     permissions?: IDataSourcePermission[];
     // (undocumented)
@@ -167,7 +169,7 @@ export interface IDataSourceConnectionInfo {
     // (undocumented)
     type: IDataSourceType;
     // (undocumented)
-    url?: string;
+    url?: string | null;
     // (undocumented)
     username?: string;
 }
@@ -182,6 +184,8 @@ export interface IDataSourceDeletedResponse {
 
 // @internal (undocumented)
 export interface IDataSourcePatchRequest {
+    // (undocumented)
+    cacheStrategy?: IDataSourceCacheStrategy;
     // (undocumented)
     id: string;
     // (undocumented)
@@ -237,6 +241,8 @@ export type IDataSourceType = JsonApiDataSourceInAttributesTypeEnum;
 // @internal (undocumented)
 export interface IDataSourceUpsertRequest {
     // (undocumented)
+    cacheStrategy?: IDataSourceCacheStrategy;
+    // (undocumented)
     id: string;
     // (undocumented)
     name: string;
@@ -264,6 +270,8 @@ export interface IInvitationUserResponse {
     successful?: boolean;
 }
 
+export { ImportCsvRequest }
+
 // @alpha (undocumented)
 export const isTigerCompatibleType: (obj: unknown) => obj is TigerObjectType;
 
@@ -275,19 +283,23 @@ export type JwtIsAboutToExpireHandler = (setJwt: SetJwtCallback) => void;
 
 // @alpha (undocumented)
 export const objectTypeToTigerIdType: {
+    variable: TigerObjectType;
+    user: TigerObjectType;
     measure: TigerObjectType;
     fact: TigerObjectType;
     attribute: TigerObjectType;
     displayForm: TigerObjectType;
     dataSet: TigerObjectType;
     insight: TigerObjectType;
-    variable: TigerObjectType;
     analyticalDashboard: TigerObjectType;
     theme: TigerObjectType;
     colorPalette: TigerObjectType;
     filterContext: TigerObjectType;
     dashboardPlugin: TigerObjectType;
     attributeHierarchy: TigerObjectType;
+    userGroup: TigerObjectType;
+    dateHierarchyTemplate: TigerObjectType;
+    dateAttributeHierarchy: TigerObjectType;
 };
 
 // @internal (undocumented)
@@ -297,15 +309,6 @@ export type OrganizationPermission = JsonApiOrganizationOutMetaPermissionsEnum;
 export type OriginInfoWithId = JsonApiAnalyticalDashboardOutMetaOrigin & {
     id: string;
 };
-
-// @internal (undocumented)
-export type PhysicalDataModel = DeclarativePdm;
-
-// @internal (undocumented)
-export interface PublishPdmResult {
-    // (undocumented)
-    status: string;
-}
 
 // @internal (undocumented)
 export type PutWorkspaceLayoutRequest = LayoutApiPutWorkspaceLayoutRequest;
@@ -330,10 +333,7 @@ export interface ScanRequest {
 }
 
 // @internal (undocumented)
-export interface ScanResult {
-    // (undocumented)
-    pdm: DeclarativeTables;
-}
+export type ScanResult = ScanResultPdm;
 
 // @internal (undocumented)
 export type ScanSqlResult = ScanSqlResponse;
@@ -341,8 +341,7 @@ export type ScanSqlResult = ScanSqlResponse;
 // @alpha
 export type SetJwtCallback = (jwt: string, secondsBeforeTokenExpirationToCallReminder?: number) => void;
 
-// @internal (undocumented)
-export type SetPdmLayoutRequest = LayoutApiSetPdmLayoutRequest;
+export { StagingUploadLocation }
 
 // @public
 export type TigerAfmType = "label" | "metric" | "dataset" | "fact" | "attribute" | "prompt";
@@ -402,10 +401,8 @@ export type TigerSpecificFunctions = {
     someDataSourcesExists?: (filter?: string) => Promise<boolean>;
     generateLogicalModel?: (dataSourceId: string, generateLogicalModelRequest: GenerateLogicalModelRequest) => Promise<DeclarativeLogicalModel>;
     scanDataSource?: (dataSourceId: string, scanRequest: ScanRequest) => Promise<ScanResult>;
-    publishPdm?: (dataSourceId: string, declarativePdm: PhysicalDataModel) => Promise<PublishPdmResult>;
     createDemoWorkspace?: (sampleWorkspace: WorkspaceDefinition) => Promise<string>;
     createDemoDataSource?: (sampleDataSource: DataSourceDefinition) => Promise<string>;
-    setPdmLayout?: (requestParameters: SetPdmLayoutRequest) => Promise<void>;
     createWorkspace?: (id: string, name: string) => Promise<string>;
     updateWorkspaceTitle?: (id: string, name: string) => Promise<void>;
     deleteWorkspace?: (id: string) => Promise<void>;
@@ -424,7 +421,6 @@ export type TigerSpecificFunctions = {
     testDataSourceConnection?: (connectionData: IDataSourceTestConnectionRequest, id?: string) => Promise<IDataSourceTestConnectionResponse>;
     publishLogicalModel?: (workspaceId: string, declarativeModel: DeclarativeLogicalModel) => Promise<void>;
     getDataSourceSchemata?: (dataSourceId: string) => Promise<string[]>;
-    getPdm?: (dataSourceId: string) => Promise<PhysicalDataModel>;
     getDependentEntitiesGraph?: (workspaceId: string) => Promise<DependentEntitiesGraphResponse>;
     getDependentEntitiesGraphFromEntryPoints?: (workspaceId: string, dependentEntitiesGraphRequest: DependentEntitiesGraphRequest) => Promise<DependentEntitiesGraphResponse>;
     resolveAllEntitlements?: () => Promise<ApiEntitlement[]>;
@@ -449,6 +445,9 @@ export type TigerSpecificFunctions = {
     getEntityUser?: (id: string) => Promise<IUser>;
     scanSql?: (dataSourceId: string, sql: string) => Promise<ScanSqlResult>;
     checkEntityOverrides?: (workspaceId: string, entities: Array<HierarchyObjectIdentification>) => Promise<Array<IdentifierDuplications>>;
+    getStagingUploadLocation?: (dataSourceId: string) => Promise<StagingUploadLocation>;
+    analyzeCsv?: (dataSourceId: string, analyzeCsvRequest: AnalyzeCsvRequest) => Promise<Array<AnalyzeCsvResponse>>;
+    importCsv?: (dataSourceId: string, importCsvRequest: ImportCsvRequest) => Promise<void>;
 };
 
 // @public

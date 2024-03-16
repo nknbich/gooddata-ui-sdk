@@ -44,6 +44,8 @@ import { legacyDashboardsSliceReducer } from "./legacyDashboards/index.js";
 import { renderModeSliceReducer } from "./renderMode/index.js";
 import { dashboardPermissionsSliceReducer } from "./dashboardPermissions/index.js";
 import { defaultImport } from "default-import";
+import { attributeFilterConfigsSliceReducer } from "./attributeFilterConfigs/index.js";
+import { dateFilterConfigsSliceReducer } from "./dateFilterConfigs/index.js";
 
 // There are known compatibility issues between CommonJS (CJS) and ECMAScript modules (ESM).
 // In ESM, default exports of CJS modules are wrapped in default properties instead of being exposed directly.
@@ -86,6 +88,9 @@ const nonSerializableEventsAndCommands: (DashboardEventType | DashboardCommandTy
     "GDC.DASH/CMD.DRILL.DRILL_TO_LEGACY_DASHBOARD",
     "GDC.DASH/EVT.DRILL.DRILL_TO_LEGACY_DASHBOARD.REQUESTED",
     "GDC.DASH/EVT.DRILL.DRILL_TO_LEGACY_DASHBOARD.RESOLVED",
+    "GDC.DASH/CMD.DRILL.CROSS_FILTERING",
+    "GDC.DASH/EVT.DRILL.CROSS_FILTERING.REQUESTED",
+    "GDC.DASH/EVT.DRILL.CROSS_FILTERING.RESOLVED",
     "GDC.DASH/CMD.DRILL.DRILLABLE_ITEMS.CHANGE",
     "GDC.DASH/EVT.DRILL.DRILLABLE_ITEMS.CHANGED",
     "meta/setDrillableItems",
@@ -297,6 +302,8 @@ export function createDashboardStore(config: DashboardStoreConfig): ReduxedDashb
         filterContext: filterContextSliceReducer,
         layout: layoutSliceReducer,
         dateFilterConfig: dateFilterConfigSliceReducer,
+        attributeFilterConfigs: attributeFilterConfigsSliceReducer,
+        dateFilterConfigs: dateFilterConfigsSliceReducer,
         insights: insightsSliceReducer,
         alerts: alertsSliceReducer,
         drillTargets: drillTargetsReducer,
@@ -350,6 +357,9 @@ export function createDashboardStore(config: DashboardStoreConfig): ReduxedDashb
                     ...(config.additionalMiddleware ? [config.additionalMiddleware] : []),
                     sagaMiddleware,
                 );
+        },
+        devTools: {
+            name: "Dashboard component state",
         },
     });
 

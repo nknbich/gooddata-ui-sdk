@@ -136,6 +136,8 @@ describe("KPI customizer", () => {
             expect(mutationContext).toEqual({
                 kpi: ["provider"],
                 insight: [],
+                attributeFilter: [],
+                dashboardContent: [],
                 layouts: {},
             });
         });
@@ -151,6 +153,8 @@ describe("KPI customizer", () => {
             expect(mutationContext).toEqual({
                 kpi: ["provider"],
                 insight: [],
+                attributeFilter: [],
+                dashboardContent: [],
                 layouts: {},
             });
         });
@@ -177,6 +181,8 @@ describe("KPI customizer", () => {
             expect(mutationContext).toEqual({
                 kpi: ["provider"],
                 insight: [],
+                attributeFilter: [],
+                dashboardContent: [],
                 layouts: {},
             });
         });
@@ -191,6 +197,8 @@ describe("KPI customizer", () => {
             expect(mutationContext).toEqual({
                 kpi: ["decorator"],
                 insight: [],
+                attributeFilter: [],
+                dashboardContent: [],
                 layouts: {},
             });
         });
@@ -209,6 +217,8 @@ describe("KPI customizer", () => {
             expect(mutationContext).toEqual({
                 kpi: ["decorator", "provider"],
                 insight: [],
+                attributeFilter: [],
+                dashboardContent: [],
                 layouts: {},
             });
         });
@@ -226,6 +236,8 @@ describe("KPI customizer", () => {
             expect(mutationContext).toEqual({
                 kpi: ["decorator", "provider"],
                 insight: [],
+                attributeFilter: [],
+                dashboardContent: [],
                 layouts: {},
             });
         });
@@ -241,6 +253,8 @@ describe("KPI customizer", () => {
             expect(mutationContext).toEqual({
                 kpi: ["decorator"],
                 insight: [],
+                attributeFilter: [],
+                dashboardContent: [],
                 layouts: {},
             });
         });
@@ -256,6 +270,8 @@ describe("KPI customizer", () => {
             expect(mutationContext).toEqual({
                 kpi: ["decorator"],
                 insight: [],
+                attributeFilter: [],
+                dashboardContent: [],
                 layouts: {},
             });
         });
@@ -277,6 +293,8 @@ describe("KPI customizer", () => {
             expect(mutationContext).toEqual({
                 kpi: ["decorator"],
                 insight: [],
+                attributeFilter: [],
+                dashboardContent: [],
                 layouts: {},
             });
         });
@@ -303,6 +321,8 @@ describe("KPI customizer", () => {
             expect(mutationContext).toEqual({
                 kpi: ["decorator", "provider"],
                 insight: [],
+                attributeFilter: [],
+                dashboardContent: [],
                 layouts: {},
             });
         });
@@ -327,6 +347,8 @@ describe("KPI customizer", () => {
             expect(mutationContext).toEqual({
                 kpi: ["decorator", "provider"],
                 insight: [],
+                attributeFilter: [],
+                dashboardContent: [],
                 layouts: {},
             });
         });

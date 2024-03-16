@@ -1,14 +1,16 @@
-// (C) 2019-2023 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 import {
     ElementsRequest,
     FilterByLabelTypeEnum,
     ElementsRequestSortOrderEnum,
     ElementsResponseGranularityEnum,
+    DependsOn,
 } from "@gooddata/api-client-tiger";
 import { InMemoryPaging, ServerPaging } from "@gooddata/sdk-backend-base";
 import {
     FilterWithResolvableElements,
     IElementsQuery,
+    IElementsQueryAttributeFilter,
     IElementsQueryFactory,
     IElementsQueryOptions,
     IElementsQueryResult,
@@ -27,15 +29,23 @@ import {
     isIdentifierRef,
     ObjRef,
     IAttributeElement,
+    isNegativeAttributeFilter,
+    filterObjRef,
+    objRefToString,
+    filterIsEmpty,
 } from "@gooddata/sdk-model";
 import { invariant } from "ts-invariant";
+import isEmpty from "lodash/isEmpty.js";
+
 import { TigerAuthenticatedCallGuard } from "../../../../types/index.js";
-import { getRelativeDateFilterShiftedValues } from "./date.js";
 import { toSdkGranularity } from "../../../../convertors/fromBackend/dateGranularityConversions.js";
 import { createDateValueFormatter } from "../../../../convertors/fromBackend/dateFormatting/dateValueFormatter.js";
 import { DateFormatter } from "../../../../convertors/fromBackend/dateFormatting/types.js";
 import { FormattingLocale } from "../../../../convertors/fromBackend/dateFormatting/defaultDateFormatter.js";
 import { TigerCancellationConverter } from "../../../../cancelation/index.js";
+import { toObjQualifier } from "../../../../convertors/toBackend/ObjRefConverter.js";
+
+import { getRelativeDateFilterShiftedValues } from "./date.js";
 
 export class TigerWorkspaceElements implements IElementsQueryFactory {
     constructor(
@@ -58,6 +68,8 @@ class TigerWorkspaceElementsQuery implements IElementsQuery {
     private offset: number = 0;
     private signal: AbortSignal | null = null;
     private options: IElementsQueryOptions | undefined;
+    private attributeFilters: IElementsQueryAttributeFilter[] | undefined;
+    private validateBy: ObjRef[] | undefined;
 
     constructor(
         private readonly authCall: TigerAuthenticatedCallGuard,
@@ -84,8 +96,9 @@ class TigerWorkspaceElementsQuery implements IElementsQuery {
         return this;
     }
 
-    public withAttributeFilters(): IElementsQuery {
-        throw new NotSupported("withAttributeFilters is not supported in sdk-backend-tiger yet");
+    public withAttributeFilters(filters: IElementsQueryAttributeFilter[]): IElementsQuery {
+        this.attributeFilters = filters;
+        return this;
     }
 
     public withDateFilters(): IElementsQuery {
@@ -93,7 +106,14 @@ class TigerWorkspaceElementsQuery implements IElementsQuery {
     }
 
     public withMeasures(): IElementsQuery {
-        throw new NotSupported("withMeasures is not supported in sdk-backend-tiger yet");
+        throw new NotSupported(
+            "withMeasures is not supported in sdk-backend-tiger yet. Use withAvailableElementsOnly instead.",
+        );
+    }
+
+    public withAvailableElementsOnly(validateBy: ObjRef[]): IElementsQuery {
+        this.validateBy = validateBy.length > 0 ? validateBy : undefined;
+        return this;
     }
 
     public withOptions(options: IElementsQueryOptions): IElementsQuery {
@@ -131,6 +151,32 @@ class TigerWorkspaceElementsQuery implements IElementsQuery {
         return {};
     }
 
+    private getDependsOnSpec(): Partial<ElementsRequest> {
+        const { attributeFilters } = this;
+        if (attributeFilters) {
+            const dependsOn: DependsOn[] = attributeFilters
+                // Do not include empty parent filters
+                .filter((filter) => !filterIsEmpty(filter.attributeFilter))
+                .map((filter) => {
+                    const { attributeFilter } = filter;
+                    const complementFilter = isNegativeAttributeFilter(attributeFilter);
+                    const label = objRefToString(filterObjRef(attributeFilter));
+                    const elements = filterAttributeElements(attributeFilter);
+                    const values = isAttributeElementsByRef(elements) ? elements.uris : elements.values;
+
+                    return {
+                        label,
+                        values: values,
+                        complementFilter,
+                    };
+                });
+
+            return !isEmpty(dependsOn) ? { dependsOn } : {};
+        }
+
+        return {};
+    }
+
     private async queryWorker(options: IElementsQueryOptions | undefined): Promise<IElementsQueryResult> {
         const { ref } = this;
         if (!isIdentifierRef(ref)) {
@@ -138,13 +184,14 @@ class TigerWorkspaceElementsQuery implements IElementsQuery {
         }
 
         return ServerPaging.for(
-            async ({ offset, limit }) => {
+            async ({ offset, limit, cacheId }) => {
                 const response = await this.authCall((client) => {
                     const elementsRequest: ElementsRequest = {
                         label: ref.identifier,
                         ...(options?.complement && { complementFilter: options.complement }),
                         ...(options?.filter && { patternFilter: options.filter }),
                         ...this.getExactFilterSpec(options ?? {}),
+                        ...this.getDependsOnSpec(),
                         ...(options?.excludePrimaryLabel && {
                             excludePrimaryLabel: options.excludePrimaryLabel,
                         }),
@@ -154,6 +201,8 @@ class TigerWorkspaceElementsQuery implements IElementsQuery {
                                     ? ElementsRequestSortOrderEnum.ASC
                                     : ElementsRequestSortOrderEnum.DESC,
                         }),
+                        ...(this.validateBy && { validateBy: this.validateBy.map(this.mapValidationItems) }),
+                        ...(cacheId && { cacheId: cacheId }),
                     };
 
                     const elementsRequestWrapped: Parameters<
@@ -170,7 +219,7 @@ class TigerWorkspaceElementsQuery implements IElementsQuery {
                     });
                 });
 
-                const { paging, elements, format, granularity } = response.data;
+                const { paging, elements, format, granularity, cacheId: responseCacheId } = response.data;
 
                 const elementsGranularity = granularity as ElementsResponseGranularityEnum;
                 const sdkGranularity = toSdkGranularity(elementsGranularity);
@@ -198,11 +247,17 @@ class TigerWorkspaceElementsQuery implements IElementsQuery {
                         };
                     }),
                     totalCount: paging.total,
+                    cacheId: responseCacheId,
                 };
             },
             this.limit,
             this.offset,
+            this.options?.cacheId,
         );
+    }
+
+    private mapValidationItems(item: ObjRef) {
+        return toObjQualifier(item).identifier;
     }
 }
 

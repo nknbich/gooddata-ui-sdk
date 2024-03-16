@@ -1,6 +1,6 @@
-// (C) 2022 GoodData Corporation
+// (C) 2022-2024 GoodData Corporation
 import { SagaIterator } from "redux-saga";
-import { all, call, cancelled, put, select, takeLatest } from "redux-saga/effects";
+import { SagaReturnType, all, call, cancelled, put, select, takeLatest } from "redux-saga/effects";
 
 import { actions } from "../store/slice.js";
 import { selectHiddenElements } from "../filter/filterSelectors.js";
@@ -8,8 +8,14 @@ import { initAttributeSaga } from "./initAttributeSaga.js";
 import { initSelectionSaga } from "./initSelectionSaga.js";
 import { initAttributeElementsPageSaga } from "./initElementsPageSaga.js";
 import { initTotalCountSaga } from "./initTotalCount.js";
-import { selectLimitingAttributeFilters } from "../elements/elementsSelectors.js";
+import {
+    selectLimitingAttributeFilters,
+    selectLimitingValidationItems,
+} from "../elements/elementsSelectors.js";
 import { isLimitingAttributeFiltersEmpty } from "../../../utils.js";
+import { initIrrelevantSelectionSaga } from "./initIrrelevantSelectionSaga.js";
+import { getAttributeFilterContext } from "../common/sagas.js";
+import { selectIsWorkingSelectionEmpty } from "../selection/selectionSelectors.js";
 
 /**
  * @internal
@@ -26,12 +32,23 @@ function* initSaga(action: ReturnType<typeof actions.init>): SagaIterator<void> 
     try {
         yield put(actions.initStart({ correlation }));
 
+        const context: SagaReturnType<typeof getAttributeFilterContext> = yield call(
+            getAttributeFilterContext,
+        );
         const hiddenElements: ReturnType<typeof selectHiddenElements> = yield select(selectHiddenElements);
         const limitingFilters: ReturnType<typeof selectLimitingAttributeFilters> = yield select(
             selectLimitingAttributeFilters,
         );
+        const limitingValidationItems: ReturnType<typeof selectLimitingValidationItems> = yield select(
+            selectLimitingValidationItems,
+        );
+        const isWorkingSelectionEmpty: ReturnType<typeof selectIsWorkingSelectionEmpty> = yield select(
+            selectIsWorkingSelectionEmpty,
+        );
+        const supportsShowingFilteredElements = context.backend.capabilities.supportsShowingFilteredElements;
 
-        const loadTotal = !isLimitingAttributeFiltersEmpty(limitingFilters);
+        const loadTotal =
+            !isLimitingAttributeFiltersEmpty(limitingFilters) || limitingValidationItems.length > 0;
 
         const sagas = [initSelectionSaga, initAttributeElementsPageSaga];
         if (hiddenElements?.length > 0) {
@@ -46,6 +63,12 @@ function* initSaga(action: ReturnType<typeof actions.init>): SagaIterator<void> 
             // It is because the fact that when elements fetched filtered by parent selection, the includeTotalCountWithoutFilters: true option does not work, despite its name
             sagas.push(initTotalCountSaga);
         }
+
+        if (loadTotal && !isWorkingSelectionEmpty && supportsShowingFilteredElements) {
+            // In this case we also load the irrelevant selection
+            sagas.push(initIrrelevantSelectionSaga);
+        }
+
         yield all(sagas.map((saga) => call(saga, correlation)));
 
         yield put(actions.initSuccess({ correlation: correlation }));

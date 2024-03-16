@@ -1,12 +1,10 @@
-// (C) 2022-2023 GoodData Corporation
+// (C) 2022-2024 GoodData Corporation
 
 import {
     JsonApiOrganizationOutMetaPermissionsEnum,
     GenerateLdmRequest,
     DeclarativeModel,
-    DeclarativePdm,
     JsonApiDataSourceInDocument,
-    LayoutApiSetPdmLayoutRequest,
     LayoutApiPutWorkspaceLayoutRequest,
     jsonApiHeaders,
     JsonApiOrganizationPatchTypeEnum,
@@ -23,7 +21,6 @@ import {
     TestDefinitionRequestTypeEnum,
     JsonApiDataSourceOutDocument,
     JsonApiDataSourceIdentifierOutDocument,
-    DeclarativeTables,
     DeclarativeAnalytics,
     JsonApiWorkspaceInDocument,
     DependentEntitiesRequest,
@@ -45,6 +42,12 @@ import {
     JsonApiWorkspaceDataFilterOutDocument,
     JsonApiWorkspaceDataFilterSettingOutDocument,
     JsonApiWorkspaceDataFilterSettingInDocument,
+    ScanResultPdm,
+    StagingUploadLocation,
+    AnalyzeCsvRequest,
+    AnalyzeCsvResponse,
+    ImportCsvRequest,
+    JsonApiDataSourceInAttributesCacheStrategyEnum,
 } from "@gooddata/api-client-tiger";
 import { convertApiError } from "../utils/errorHandling.js";
 import uniq from "lodash/uniq.js";
@@ -70,17 +73,6 @@ export interface IApiTokenExtended extends IApiToken {
 }
 
 /**
- * Copy of interface from gooddata/data-source-management
- * This should be refactored to have the source of truth here in SDK and not expose JSON API entities
- *
- * @internal
- */
-export interface IDataSource {
-    entity: JsonApiDataSourceInDocument;
-    pdm: DeclarativePdm;
-}
-
-/**
  * @internal
  */
 export interface ScanRequest {
@@ -95,16 +87,7 @@ export interface ScanRequest {
 /**
  * @internal
  */
-export interface ScanResult {
-    pdm: DeclarativeTables;
-}
-
-/**
- * @internal
- */
-export interface PublishPdmResult {
-    status: string;
-}
+export type ScanResult = ScanResultPdm;
 
 /**
  * @internal
@@ -123,6 +106,11 @@ export type IDataSourceType = JsonApiDataSourceInAttributesTypeEnum;
 /**
  * @internal
  */
+export type IDataSourceCacheStrategy = JsonApiDataSourceInAttributesCacheStrategyEnum;
+
+/**
+ * @internal
+ */
 export type IDataSourcePermission = "MANAGE" | "USE";
 
 /**
@@ -134,10 +122,11 @@ export interface IDataSourceConnectionInfo {
     name: string;
     schema: string;
     username?: string;
-    url?: string;
+    url?: string | null;
     permissions?: IDataSourcePermission[];
-    parameters?: Array<DataSourceParameter>;
-    decodedParameters?: Array<DataSourceParameter>;
+    parameters?: Array<DataSourceParameter> | null;
+    decodedParameters?: Array<DataSourceParameter> | null;
+    cacheStrategy?: IDataSourceCacheStrategy;
 }
 
 /**
@@ -161,6 +150,7 @@ export interface IDataSourceUpsertRequest {
     url?: string;
     username?: string;
     parameters?: Array<DataSourceParameter>;
+    cacheStrategy?: IDataSourceCacheStrategy;
 }
 
 /**
@@ -176,6 +166,7 @@ export interface IDataSourcePatchRequest {
     url?: string;
     username?: string;
     parameters?: Array<DataSourceParameter>;
+    cacheStrategy?: IDataSourceCacheStrategy;
 }
 
 /**
@@ -269,16 +260,6 @@ export type DeclarativeAnalyticsModel = DeclarativeAnalytics;
 /**
  * @internal
  */
-export type PhysicalDataModel = DeclarativePdm;
-
-/**
- * @internal
- */
-export type SetPdmLayoutRequest = LayoutApiSetPdmLayoutRequest;
-
-/**
- * @internal
- */
 export type PutWorkspaceLayoutRequest = LayoutApiPutWorkspaceLayoutRequest;
 
 /**
@@ -364,10 +345,8 @@ export type TigerSpecificFunctions = {
         generateLogicalModelRequest: GenerateLogicalModelRequest,
     ) => Promise<DeclarativeLogicalModel>;
     scanDataSource?: (dataSourceId: string, scanRequest: ScanRequest) => Promise<ScanResult>;
-    publishPdm?: (dataSourceId: string, declarativePdm: PhysicalDataModel) => Promise<PublishPdmResult>;
     createDemoWorkspace?: (sampleWorkspace: WorkspaceDefinition) => Promise<string>;
     createDemoDataSource?: (sampleDataSource: DataSourceDefinition) => Promise<string>;
-    setPdmLayout?: (requestParameters: SetPdmLayoutRequest) => Promise<void>;
     createWorkspace?: (id: string, name: string) => Promise<string>;
     updateWorkspaceTitle?: (id: string, name: string) => Promise<void>;
     deleteWorkspace?: (id: string) => Promise<void>;
@@ -389,7 +368,6 @@ export type TigerSpecificFunctions = {
     ) => Promise<IDataSourceTestConnectionResponse>;
     publishLogicalModel?: (workspaceId: string, declarativeModel: DeclarativeLogicalModel) => Promise<void>;
     getDataSourceSchemata?: (dataSourceId: string) => Promise<string[]>;
-    getPdm?: (dataSourceId: string) => Promise<PhysicalDataModel>;
     getDependentEntitiesGraph?: (workspaceId: string) => Promise<DependentEntitiesGraphResponse>;
     getDependentEntitiesGraphFromEntryPoints?: (
         workspaceId: string,
@@ -500,6 +478,28 @@ export type TigerSpecificFunctions = {
         workspaceId: string,
         entities: Array<HierarchyObjectIdentification>,
     ) => Promise<Array<IdentifierDuplications>>;
+
+    /**
+     * Get pre-signed S3 URL to upload a CSV file to the GDSTORAGE data source staging location
+     * @param dataSourceId - id of the data source
+     */
+    getStagingUploadLocation?: (dataSourceId: string) => Promise<StagingUploadLocation>;
+
+    /**
+     * Analyze CSV files in GDSTORAGE data source staging location
+     * @param analyzeRequest - the request to analyze CSV files
+     */
+    analyzeCsv?: (
+        dataSourceId: string,
+        analyzeCsvRequest: AnalyzeCsvRequest,
+    ) => Promise<Array<AnalyzeCsvResponse>>;
+
+    /**
+     * Import CSV files from GDSTORAGE data source staging location
+     * @param dataSourceId - id of the data source
+     * @param importRequest - the request to import CSV files
+     */
+    importCsv?: (dataSourceId: string, importCsvRequest: ImportCsvRequest) => Promise<void>;
 };
 
 const getDataSourceErrorMessage = (error: unknown) => {
@@ -513,7 +513,7 @@ const dataSourceResponseAsDataSourceConnectionInfo = (
     response: JsonApiDataSourceOutDocument,
 ): IDataSourceConnectionInfo => {
     const { id, meta, attributes } = response.data;
-    const { name, url, type, schema, username, parameters, decodedParameters } = attributes;
+    const { name, url, type, schema, username, parameters, decodedParameters, cacheStrategy } = attributes;
     return {
         id,
         type,
@@ -524,6 +524,7 @@ const dataSourceResponseAsDataSourceConnectionInfo = (
         permissions: meta?.permissions ?? [],
         parameters,
         decodedParameters,
+        cacheStrategy,
     };
 };
 
@@ -788,25 +789,6 @@ export const buildTigerSpecificFunctions = (
             throw convertApiError(error);
         }
     },
-    publishPdm: async (dataSourceId: string, declarativePdm: DeclarativePdm) => {
-        return await authApiCall(async (sdk) => {
-            return await sdk.declarativeLayout
-                .setPdmLayout({
-                    dataSourceId,
-                    declarativePdm,
-                })
-                .then(
-                    () => {
-                        return {
-                            status: "success",
-                        };
-                    },
-                    (error) => {
-                        return Promise.reject(error);
-                    },
-                );
-        });
-    },
     createDemoWorkspace: async (sampleWorkspace: WorkspaceDefinition) => {
         try {
             return await authApiCall(async (sdk) => {
@@ -826,15 +808,6 @@ export const buildTigerSpecificFunctions = (
                     jsonApiDataSourceInDocument: sampleDataSource,
                 });
                 return result.data.data.id;
-            });
-        } catch (error: any) {
-            throw convertApiError(error);
-        }
-    },
-    setPdmLayout: async (requestParameters: LayoutApiSetPdmLayoutRequest) => {
-        try {
-            return await authApiCall(async (sdk) => {
-                await sdk.declarativeLayout.setPdmLayout(requestParameters);
             });
         } catch (error: any) {
             throw convertApiError(error);
@@ -978,7 +951,8 @@ export const buildTigerSpecificFunctions = (
         }
     },
     createDataSource: async (requestData: IDataSourceUpsertRequest) => {
-        const { id, name, password, schema, token, type, url, username, parameters } = requestData;
+        const { id, name, password, schema, token, type, url, username, parameters, cacheStrategy } =
+            requestData;
         try {
             return await authApiCall(async (sdk) => {
                 return sdk.entities
@@ -994,6 +968,7 @@ export const buildTigerSpecificFunctions = (
                                     url,
                                     username,
                                     parameters,
+                                    cacheStrategy,
                                 },
                                 id,
                                 type: JsonApiDataSourceInTypeEnum.DATA_SOURCE,
@@ -1019,6 +994,7 @@ export const buildTigerSpecificFunctions = (
             url,
             username,
             parameters,
+            cacheStrategy,
         } = requestData;
         try {
             return await authApiCall(async (sdk) => {
@@ -1036,6 +1012,7 @@ export const buildTigerSpecificFunctions = (
                                     url,
                                     username,
                                     parameters,
+                                    cacheStrategy,
                                 },
                                 id: requestDataId,
                                 type: JsonApiDataSourceInTypeEnum.DATA_SOURCE,
@@ -1061,6 +1038,7 @@ export const buildTigerSpecificFunctions = (
             url,
             username,
             parameters,
+            cacheStrategy,
         } = requestData;
         try {
             return await authApiCall(async (sdk) => {
@@ -1078,6 +1056,7 @@ export const buildTigerSpecificFunctions = (
                                     url,
                                     username,
                                     parameters,
+                                    cacheStrategy,
                                 },
                                 id: requestDataId,
                                 type: JsonApiDataSourceInTypeEnum.DATA_SOURCE,
@@ -1129,17 +1108,6 @@ export const buildTigerSpecificFunctions = (
             return await sdk.scanModel.getDataSourceSchemata({ dataSourceId }).then((res) => {
                 return res?.data.schemaNames;
             });
-        });
-    },
-    getPdm: async (dataSourceId: string) => {
-        return await authApiCall(async (sdk) => {
-            return await sdk.declarativeLayout
-                .getPdmLayout({
-                    dataSourceId,
-                })
-                .then((res) => {
-                    return res?.data;
-                });
         });
     },
     getAllDataSources: async () => {
@@ -1501,6 +1469,52 @@ export const buildTigerSpecificFunctions = (
                     .then((response) => {
                         return response.data as Array<IdentifierDuplications>;
                     });
+            });
+        } catch (error: any) {
+            throw convertApiError(error);
+        }
+    },
+
+    getStagingUploadLocation: async (dataSourceId: string) => {
+        try {
+            return await authApiCall(async (sdk) => {
+                return await sdk.result
+                    .getStagingUploadLocation({
+                        dataSourceId: dataSourceId,
+                    })
+                    .then((res) => {
+                        return res?.data;
+                    });
+            });
+        } catch (error: any) {
+            throw convertApiError(error);
+        }
+    },
+
+    analyzeCsv: async (dataSourceId: string, analyzeCsvRequest: AnalyzeCsvRequest) => {
+        try {
+            return await authApiCall(async (sdk) => {
+                return await sdk.result
+                    .analyzeCsv({
+                        dataSourceId: dataSourceId,
+                        analyzeCsvRequest: analyzeCsvRequest,
+                    })
+                    .then((res) => {
+                        return res?.data;
+                    });
+            });
+        } catch (error: any) {
+            throw convertApiError(error);
+        }
+    },
+
+    importCsv: async (dataSourceId: string, importCsvRequest: ImportCsvRequest) => {
+        try {
+            return await authApiCall(async (sdk) => {
+                await sdk.result.importCsv({
+                    dataSourceId: dataSourceId,
+                    importCsvRequest: importCsvRequest,
+                });
             });
         } catch (error: any) {
             throw convertApiError(error);

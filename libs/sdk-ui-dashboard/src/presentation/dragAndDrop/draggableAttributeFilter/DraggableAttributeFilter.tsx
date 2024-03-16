@@ -6,9 +6,9 @@ import {
     useDashboardSelector,
     selectIsInEditMode,
     selectSupportsElementUris,
-    selectCanAddMoreAttributeFilters,
+    selectCanAddMoreFilters,
 } from "../../../model/index.js";
-import { AttributeFilterDropZoneHint } from "./AttributeFilterDropZoneHint.js";
+import { DraggableFilterDropZoneHint } from "../draggableFilterDropZone/DraggableFilterDropZoneHint.js";
 import { CustomDashboardAttributeFilterComponent } from "../../filterBar/types.js";
 import { useDashboardDrag } from "../useDashboardDrag.js";
 import { convertDashboardAttributeFilterElementsUrisToValues } from "../../../_staging/dashboard/legacyFilterConvertors.js";
@@ -17,6 +17,7 @@ type DraggableAttributeFilterProps = {
     filter: IDashboardAttributeFilter;
     filterIndex: number;
     autoOpen: boolean;
+    readonly: boolean;
     FilterComponent: CustomDashboardAttributeFilterComponent;
     onAttributeFilterChanged: (filter: IDashboardAttributeFilter) => void;
     onAttributeFilterAdded: (index: number) => void;
@@ -28,6 +29,7 @@ export function DraggableAttributeFilter({
     filter,
     filterIndex,
     autoOpen,
+    readonly,
     onAttributeFilterChanged,
     onAttributeFilterAdded,
     onAttributeFilterClose,
@@ -46,7 +48,7 @@ export function DraggableAttributeFilter({
     );
 
     const supportElementUris = useDashboardSelector(selectSupportsElementUris);
-    const canAddMoreAttributeFilters = useDashboardSelector(selectCanAddMoreAttributeFilters);
+    const canAddMoreAttributeFilters = useDashboardSelector(selectCanAddMoreFilters);
     const filterToUse = useMemo(() => {
         if (supportElementUris) {
             return filter;
@@ -63,7 +65,7 @@ export function DraggableAttributeFilter({
     return (
         <div className="draggable-attribute-filter">
             {showDropZones ? (
-                <AttributeFilterDropZoneHint
+                <DraggableFilterDropZoneHint
                     hintPosition="prev"
                     targetIndex={filterIndex}
                     onAddAttributePlaceholder={onAttributeFilterAdded}
@@ -82,13 +84,14 @@ export function DraggableAttributeFilter({
                     filter={filterToUse}
                     onFilterChanged={onAttributeFilterChanged}
                     isDraggable={isInEditMode}
+                    readonly={readonly}
                     autoOpen={autoOpen}
                     onClose={onClose}
                 />
             </div>
 
             {showDropZones ? (
-                <AttributeFilterDropZoneHint
+                <DraggableFilterDropZoneHint
                     hintPosition="next"
                     targetIndex={filterIndex}
                     onAddAttributePlaceholder={onAttributeFilterAdded}

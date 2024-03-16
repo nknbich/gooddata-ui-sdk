@@ -1,4 +1,4 @@
-// (C) 2021-2023 GoodData Corporation
+// (C) 2021-2024 GoodData Corporation
 import { createSelector } from "@reduxjs/toolkit";
 import { IBackendCapabilities } from "@gooddata/sdk-backend-spi";
 import { DashboardSelector, DashboardState } from "../types.js";
@@ -28,10 +28,7 @@ export const selectBackendCapabilities: DashboardSelector<IBackendCapabilities> 
  *
  * @public
  */
-export const selectSupportsElementsQueryParentFiltering: DashboardSelector<boolean> = createSelector(
-    selectBackendCapabilities,
-    (capabilities) => capabilities.supportsElementsQueryParentFiltering ?? false,
-);
+export const selectSupportsElementsQueryParentFiltering: DashboardSelector<boolean> = () => true;
 
 /**
  * Selector for {@link @gooddata/sdk-backend-spi#IBackendCapabilities.supportsKpiWidget}
@@ -101,4 +98,95 @@ export const selectSupportsExportToXlsx: DashboardSelector<boolean> = createSele
 export const selectSupportsObjectUris: DashboardSelector<boolean> = createSelector(
     selectBackendCapabilities,
     (capabilities) => capabilities.supportsObjectUris ?? false,
+);
+
+/**
+ * Selector for {@link @gooddata/sdk-backend-spi#IBackendCapabilities.supportsSettingConnectingAttributes}
+ *
+ * @internal
+ */
+export const selectSupportsSettingConnectingAttributes: DashboardSelector<boolean> = createSelector(
+    selectBackendCapabilities,
+    (capabilities) => capabilities.supportsSettingConnectingAttributes ?? false,
+);
+
+/**
+ * Selector for {@link @gooddata/sdk-backend-spi#IBackendCapabilities.supportsKeepingDependentFiltersSelection}
+ *
+ * @internal
+ */
+export const selectSupportsKeepingDependentFiltersSelection: DashboardSelector<boolean> = createSelector(
+    selectBackendCapabilities,
+    (capabilities) => capabilities.supportsKeepingDependentFiltersSelection ?? false,
+);
+
+/**
+ * Selector for {@link @gooddata/sdk-backend-spi#IBackendCapabilities.supportsCircularDependencyInFilters}
+ *
+ * @internal
+ */
+export const selectSupportsCircularDependencyInFilters: DashboardSelector<boolean> = createSelector(
+    selectBackendCapabilities,
+    (capabilities) => capabilities.supportsCircularDependencyInFilters ?? false,
+);
+
+/**
+ * Selector for {@link @gooddata/sdk-backend-spi#IBackendCapabilities.allowMultipleInteractionsPerAttributeAndMeasure}
+ *
+ * @internal
+ */
+export const selectAllowMultipleInteractionsPerAttributeAndMeasure: DashboardSelector<boolean> =
+    createSelector(
+        selectBackendCapabilities,
+        (capabilities) => capabilities.allowMultipleInteractionsPerAttributeAndMeasure ?? false,
+    );
+
+/**
+ * Selector for {@link @gooddata/sdk-backend-spi#IBackendCapabilities.selectSupportsAttributeHierarchies}
+ *
+ * @internal
+ */
+export const selectSupportsAttributeHierarchies: DashboardSelector<boolean> = createSelector(
+    selectBackendCapabilities,
+    (capabilities) => capabilities.supportsAttributeHierarchies ?? false,
+);
+
+/**
+ * Selector for {@link @gooddata/sdk-backend-spi#IBackendCapabilities.supportsSingleSelectDependentFilters}
+ *
+ * @internal
+ */
+export const selectSupportsSingleSelectDependentFilters: DashboardSelector<boolean> = createSelector(
+    selectBackendCapabilities,
+    (capabilities) => capabilities.supportsSingleSelectDependentFilters ?? false,
+);
+
+/**
+ * Selector for {@link @gooddata/sdk-backend-spi#IBackendCapabilities.supportsCrossFiltering}
+ *
+ * @internal
+ */
+export const selectSupportsCrossFiltering: DashboardSelector<boolean> = createSelector(
+    selectBackendCapabilities,
+    (capabilities) => capabilities.supportsCrossFiltering ?? false,
+);
+
+/**
+ * Selector for {@link @gooddata/sdk-backend-spi#IBackendCapabilities.supportsMultipleDateFilters}
+ *
+ * @internal
+ */
+export const selectSupportsMultipleDateFilters: DashboardSelector<boolean> = createSelector(
+    selectBackendCapabilities,
+    (capabilities) => capabilities.supportsMultipleDateFilters ?? false,
+);
+
+/**
+ * Selector for {@link @gooddata/sdk-backend-spi#IBackendCapabilities.supportsRichTextWidgets}
+ *
+ * @internal
+ */
+export const selectSupportsRichTextWidgets: DashboardSelector<boolean> = createSelector(
+    selectBackendCapabilities,
+    (capabilities) => capabilities.supportsRichTextWidgets ?? false,
 );

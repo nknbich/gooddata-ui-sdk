@@ -1,4 +1,4 @@
-// (C) 2021-2023 GoodData Corporation
+// (C) 2021-2024 GoodData Corporation
 import React from "react";
 import { IntlWrapper } from "@gooddata/sdk-ui";
 import { AttributeFilterComponentsProvider } from "./Context/AttributeFilterComponentsContext.js";
@@ -23,11 +23,14 @@ export const AttributeFilterProviders: React.FC<IAttributeFilterBaseProps & { ch
         connectToPlaceholder,
         parentFilters,
         parentFilterOverAttribute,
+        validateElementsBy,
         hiddenElements,
         staticElements,
         fullscreenOnMobile = false,
         selectionMode = "multi",
         selectFirst = false,
+        disabled,
+        customIcon,
         onApply,
         onError,
         ErrorComponent,
@@ -85,6 +88,7 @@ export const AttributeFilterProviders: React.FC<IAttributeFilterBaseProps & { ch
                     resetOnParentFilterChange={resetOnParentFilterChange}
                     parentFilters={parentFilters}
                     parentFilterOverAttribute={parentFilterOverAttribute}
+                    validateElementsBy={validateElementsBy}
                     onApply={onApply}
                     onError={onError}
                     hiddenElements={hiddenElements}
@@ -92,6 +96,8 @@ export const AttributeFilterProviders: React.FC<IAttributeFilterBaseProps & { ch
                     fullscreenOnMobile={fullscreenOnMobile}
                     selectionMode={selectionMode}
                     selectFirst={selectFirst}
+                    disabled={disabled}
+                    customIcon={customIcon}
                 >
                     {children}
                 </AttributeFilterContextProvider>

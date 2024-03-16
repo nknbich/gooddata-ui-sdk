@@ -1,4 +1,4 @@
-// (C) 2021-2023 GoodData Corporation
+// (C) 2021-2024 GoodData Corporation
 import { createSelector } from "@reduxjs/toolkit";
 import { DashboardSelector, DashboardState } from "../types.js";
 import { invariant } from "ts-invariant";
@@ -9,16 +9,20 @@ import {
     IDashboardAttributeFilter,
     IDashboardDateFilter,
     isDashboardAttributeFilter,
-    isDashboardDateFilter,
     uriRef,
     idRef,
     IAttributeDisplayFormMetadataObject,
     IFilterContextDefinition,
     IDashboardObjectIdentity,
+    isDashboardDateFilterWithDimension,
+    isObjRef,
+    isDashboardCommonDateFilter,
 } from "@gooddata/sdk-model";
 import { ObjRefMap, newDisplayFormMap } from "../../../_staging/metadata/objRefMap.js";
 import { createMemoizedSelector } from "../_infra/selectors.js";
 import compact from "lodash/compact.js";
+import isEmpty from "lodash/isEmpty.js";
+import { selectSupportsCircularDependencyInFilters } from "../backendCapabilities/backendCapabilitiesSelectors.js";
 
 const selectSelf = createSelector(
     (state: DashboardState) => state,
@@ -197,8 +201,97 @@ export const selectFilterContextAttributeFilters: DashboardSelector<IDashboardAt
  */
 export const selectFilterContextDateFilter: DashboardSelector<IDashboardDateFilter | undefined> =
     createSelector(selectFilterContextFilters, (filters): IDashboardDateFilter | undefined =>
-        filters.find(isDashboardDateFilter),
+        filters.find(isDashboardCommonDateFilter),
     );
+
+/**
+ * This selector returns dashboard's filter context draggable filters.
+ *
+ * @remarks
+ * It is expected that the selector is called only after the filter context state is correctly initialized.
+ * Invocations before initialization lead to invariant errors.
+ *
+ * @public
+ */
+export const selectFilterContextDraggableFilters: DashboardSelector<
+    Array<IDashboardDateFilter | IDashboardAttributeFilter>
+> = createSelector(
+    selectFilterContextFilters,
+    (filters): Array<IDashboardDateFilter | IDashboardAttributeFilter> =>
+        filters.filter((f) => isDashboardDateFilterWithDimension(f) || isDashboardAttributeFilter(f)),
+);
+
+/**
+ * This selector returns dashboard's filter context date filter with dimension specified.
+ *
+ * @remarks
+ * It is expected that the selector is called only after the filter context state is correctly initialized.
+ * Invocations before initialization lead to invariant errors.
+ *
+ * @public
+ */
+export const selectFilterContextDateFiltersWithDimension: DashboardSelector<IDashboardDateFilter[]> =
+    createSelector(selectFilterContextFilters, (filters): IDashboardDateFilter[] =>
+        filters.filter(isDashboardDateFilterWithDimension),
+    );
+
+/**
+ * Creates a selector for selecting date filter by its dataset {@link @gooddata/sdk-model#ObjRef}.
+ *
+ * @remarks
+ * Invocations before initialization lead to invariant errors.
+ *
+ * @public
+ */
+export const selectFilterContextDateFilterByDataSet: (
+    dataSet: ObjRef,
+) => (state: DashboardState) => IDashboardDateFilter | undefined = createMemoizedSelector((dataSet: ObjRef) =>
+    createSelector(selectFilterContextDateFiltersWithDimension, (dateFilters) => {
+        return dateFilters.find((filter) => areObjRefsEqual(filter.dateFilter.dataSet, dataSet));
+    }),
+);
+
+/**
+ * Creates a selector for selecting date filter's index by its dataset {@link @gooddata/sdk-model#ObjRef}.
+ *
+ * @remarks
+ * Invocations before initialization lead to invariant errors.
+ *
+ * @public
+ */
+export const selectFilterContextDateFilterIndexByDataSet: (
+    dataSet: ObjRef,
+) => (state: DashboardState) => number = createMemoizedSelector((dataSet: ObjRef) =>
+    createSelector(selectFilterContextDateFiltersWithDimension, (dateFilters) => {
+        return dateFilters.findIndex((filter) => areObjRefsEqual(filter.dateFilter.dataSet, dataSet));
+    }),
+);
+
+/**
+ * Creates a selector for selecting draggable filter's index by its ref:
+ * dataSet ref for date filters {@link @gooddata/sdk-model#ObjRef}
+ * localIdentifier for attribute filters
+ *
+ * @remarks
+ * Invocations before initialization lead to invariant errors.
+ *
+ * @public
+ */
+export const selectFilterContextDraggableFilterIndexByRef: (
+    ref: ObjRef | string,
+) => (state: DashboardState) => number = createMemoizedSelector((ref: ObjRef | string) =>
+    createSelector(selectFilterContextFilters, (filters) => {
+        return filters.findIndex((filter) => {
+            if (isDashboardDateFilterWithDimension(filter) && isObjRef(ref)) {
+                return areObjRefsEqual(filter.dateFilter.dataSet, ref);
+            }
+            if (isDashboardAttributeFilter(filter) && typeof ref === "string") {
+                return filter.attributeFilter.localIdentifier === ref;
+            }
+            return false;
+        });
+    }),
+);
 
 /**
  * Creates a selector for selecting attribute filter by its displayForm {@link @gooddata/sdk-model#ObjRef}.
@@ -267,31 +360,41 @@ export const selectFilterContextAttributeFilterIndexByLocalId: (
  *
  * @remarks
  * Invocations before initialization lead to invariant errors.
+ * This selector should only be used when circular filter dependencies are not allowed.
  *
  * @public
  */
 export const selectAttributeFilterDescendants: (localId: string) => DashboardSelector<string[]> =
     createMemoizedSelector((localId: string) =>
-        createSelector(selectFilterContextAttributeFilters, (attributeFilters) => {
-            const toCheck = compact([localId]);
-            const result = new Set<string>();
-
-            while (toCheck.length) {
-                const current = toCheck.pop();
-                const children = attributeFilters.filter((f) =>
-                    f.attributeFilter.filterElementsBy?.some(
-                        (parent) => parent.filterLocalIdentifier === current,
-                    ),
+        createSelector(
+            selectFilterContextAttributeFilters,
+            selectSupportsCircularDependencyInFilters,
+            (attributeFilters, supportsCircularDependencies) => {
+                invariant(
+                    !supportsCircularDependencies,
+                    "Filter descendants cannot be computed as this backend supports circular dependencies in filters. Do not use this selector.",
                 );
 
-                children.forEach((child) => {
-                    result.add(child.attributeFilter.localIdentifier!);
-                    toCheck.push(child.attributeFilter.localIdentifier!);
-                });
-            }
+                const toCheck = compact([localId]);
+                const result = new Set<string>();
 
-            return Array.from(result);
-        }),
+                while (toCheck.length) {
+                    const current = toCheck.pop();
+                    const children = attributeFilters.filter((f) =>
+                        f.attributeFilter.filterElementsBy?.some(
+                            (parent) => parent.filterLocalIdentifier === current,
+                        ),
+                    );
+
+                    children.forEach((child) => {
+                        result.add(child.attributeFilter.localIdentifier!);
+                        toCheck.push(child.attributeFilter.localIdentifier!);
+                    });
+                }
+
+                return Array.from(result);
+            },
+        ),
     );
 
 /**
@@ -328,6 +431,9 @@ export const selectAttributeFilterDisplayFormByLocalId: (localId: string) => Das
 /**
  * Creates a selector which checks for a circular dependency between filters.
  *
+ * @remarks
+ * This selector should only be used when circular filter dependencies are not allowed.
+ *
  * @internal
  */
 export const selectIsCircularDependency: (
@@ -335,12 +441,39 @@ export const selectIsCircularDependency: (
     neighborFilterLocalId: string,
 ) => DashboardSelector<boolean> = createMemoizedSelector(
     (currentFilterLocalId: string, neighborFilterLocalId: string) =>
-        createSelector(selectAttributeFilterDescendants(currentFilterLocalId), (descendants) => {
-            return descendants.some((descendant) => descendant === neighborFilterLocalId);
-        }),
+        createSelector(
+            selectAttributeFilterDescendants(currentFilterLocalId),
+            selectSupportsCircularDependencyInFilters,
+            (descendants, supportsCircularDependencies) => {
+                invariant(
+                    !supportsCircularDependencies,
+                    "No need to compute circular dependencies as this backend supports it in filters. Do not use this selector.",
+                );
+
+                return descendants.some((descendant) => descendant === neighborFilterLocalId);
+            },
+        ),
 );
 
-const MAX_ATTRIBUTE_FILTERS_COUNT = 30;
+const MAX_DRAGGABLE_FILTERS_COUNT = 30;
+
+/**
+ * This selector returns whether any more attribute filters can be added.
+ *
+ * @remarks
+ * It is expected that the selector is called only after the filter context state is correctly initialized.
+ * Invocations before initialization lead to invariant errors.
+ *
+ * @public
+ * @deprecated use selectCanAddMoreFilters instead
+ */
+export const selectCanAddMoreAttributeFilters: DashboardSelector<boolean> = createSelector(
+    selectFilterContextAttributeFilters,
+    selectFilterContextDateFiltersWithDimension,
+    (attributeFilters, dateFiltersWithDimension) => {
+        return attributeFilters.length + dateFiltersWithDimension.length < MAX_DRAGGABLE_FILTERS_COUNT;
+    },
+);
 
 /**
  * This selector returns whether any more attribute filters can be added.
@@ -351,9 +484,20 @@ const MAX_ATTRIBUTE_FILTERS_COUNT = 30;
  *
  * @public
  */
-export const selectCanAddMoreAttributeFilters: DashboardSelector<boolean> = createSelector(
-    selectFilterContextAttributeFilters,
-    (attributeFilters) => {
-        return attributeFilters.length < MAX_ATTRIBUTE_FILTERS_COUNT;
-    },
+export const selectCanAddMoreFilters = selectCanAddMoreAttributeFilters;
+
+/**
+ * This selector returns information whether attribute filter from filter context has some dependencies.
+ *
+ * @internal
+ */
+export const selectIsAttributeFilterDependentByLocalIdentifier: (
+    attributeFilterLocalIdentifier: string,
+) => DashboardSelector<boolean> = createMemoizedSelector((attributeFilterLocalIdentifier: string) =>
+    createSelector(
+        selectFilterContextAttributeFilterByLocalId(attributeFilterLocalIdentifier),
+        (filterContextAttributeFilter) => {
+            return !isEmpty(filterContextAttributeFilter?.attributeFilter?.filterElementsBy);
+        },
+    ),
 );

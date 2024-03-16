@@ -1,6 +1,6 @@
 // (C) 2020-2023 GoodData Corporation
 
-import { isDrillToLegacyDashboard } from "@gooddata/sdk-model";
+import { isCrossFiltering, isDrillToLegacyDashboard } from "@gooddata/sdk-model";
 import { IDrillEvent, isDrillIntersectionAttributeItem } from "@gooddata/sdk-ui";
 import isEqual from "lodash/isEqual.js";
 import compact from "lodash/compact.js";
@@ -52,11 +52,12 @@ export function filterDrillFromAttributeByPriority(
             if (!isDrillToLegacyDashboard(drill) && isDrillConfigured(drill, configuredDrills)) {
                 return getDrillOriginLocalIdentifier(drill);
             }
+            return undefined;
         }),
     );
 
     return uniqueDrillDefinitions.filter((drill) => {
-        if (isDrillToLegacyDashboard(drill)) {
+        if (isDrillToLegacyDashboard(drill) || isCrossFiltering(drill)) {
             return true;
         }
 

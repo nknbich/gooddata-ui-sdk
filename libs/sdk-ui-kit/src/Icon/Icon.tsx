@@ -1,4 +1,4 @@
-// (C) 2021-2023 GoodData Corporation
+// (C) 2021-2024 GoodData Corporation
 
 import { IIconProps } from "./typings.js";
 
@@ -14,6 +14,7 @@ import { Logout } from "./icons/Logout.js";
 import { Pdf } from "./icons/Pdf.js";
 import { ExternalLink } from "./icons/ExternalLink.js";
 import { Hyperlink } from "./icons/Hyperlink.js";
+import { BoldHyperlink } from "./icons/BoldHyperlink.js";
 import { Undo } from "./icons/Undo.js";
 import { Home } from "./icons/Home.js";
 import { BurgerMenu } from "./icons/BurgerMenu.js";
@@ -73,6 +74,13 @@ import { Run } from "./icons/Run.js";
 import { Invite } from "./icons/Invite.js";
 import { Funnel } from "./icons/InsightIcons/Funnel.js";
 import { Pyramid } from "./icons/InsightIcons/Pyramid.js";
+import { Reset } from "./icons/Reset.js";
+import { RichText } from "./icons/RichText.js";
+import { DataSource } from "./icons/DataSource.js";
+import { User } from "./icons/User.js";
+import { UserGroup } from "./icons/UserGroup.js";
+import { Repeater } from "./icons/InsightIcons/Repeater.js";
+import { Image } from "./icons/Image.js";
 
 /**
  * @internal
@@ -80,6 +88,7 @@ import { Pyramid } from "./icons/InsightIcons/Pyramid.js";
 export const Icon: Record<string, React.FC<IIconProps>> = {
     Book,
     Refresh,
+    Reset,
     DrillDown,
     DrillToDashboard,
     DrillToInsight,
@@ -90,6 +99,7 @@ export const Icon: Record<string, React.FC<IIconProps>> = {
     Pdf,
     ExternalLink,
     Hyperlink,
+    BoldHyperlink,
     Undo,
     Home,
     BurgerMenu,
@@ -149,6 +159,12 @@ export const Icon: Record<string, React.FC<IIconProps>> = {
     Invite,
     Pyramid,
     Funnel,
+    RichText,
+    DataSource,
+    User,
+    UserGroup,
+    Repeater,
+    Image,
 };
 
 export { IRowsIconProps, IColumnsIconProps };

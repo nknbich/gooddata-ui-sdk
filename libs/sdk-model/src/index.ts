@@ -1,4 +1,4 @@
-// (C) 2019-2023 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 /**
  * This package provides domain models for GoodData.UI.
  *
@@ -471,6 +471,8 @@ export {
     getSelectedElementsCount,
     isDashboardAttributeFilterReference,
     isDashboardDateFilter,
+    isDashboardDateFilterWithDimension,
+    isDashboardCommonDateFilter,
     isRelativeDashboardDateFilter,
     isAbsoluteDashboardDateFilter,
     isDashboardDateFilterReference,
@@ -497,6 +499,9 @@ export {
     DrillTransition,
     DrillType,
     IDrill,
+    IDrillDownReference,
+    IDateHierarchyReference,
+    IAttributeHierarchyReference,
     IDrillFromAttribute,
     IDrillFromMeasure,
     IDrillOrigin,
@@ -510,6 +515,7 @@ export {
     IDrillToLegacyDashboard,
     InsightDrillDefinition,
     KpiDrillDefinition,
+    ICrossFiltering,
     isDrillFromAttribute,
     isDrillFromMeasure,
     isDrillToAttributeUrl,
@@ -517,6 +523,8 @@ export {
     isDrillToDashboard,
     isDrillToInsight,
     isDrillToLegacyDashboard,
+    isAttributeHierarchyReference,
+    isCrossFiltering,
 } from "./dashboard/drill.js";
 
 export {
@@ -556,6 +564,9 @@ export {
     IInsightWidgetConfiguration,
     IInsightWidgetDescriptionConfiguration,
     InsightWidgetDescriptionSourceType,
+    IRichTextWidget,
+    IRichTextWidgetBase,
+    IRichTextWidgetDefinition,
 } from "./dashboard/analyticalWidgets.js";
 
 export {
@@ -570,6 +581,7 @@ export {
     ICatalogDateAttribute,
     isCatalogAttribute,
     isCatalogAttributeHierarchy,
+    isCatalogDateAttributeHierarchy,
     isCatalogFact,
     isCatalogMeasure,
     isCatalogDateDataset,
@@ -577,6 +589,7 @@ export {
     IGroupableCatalogItemBase,
     GroupableCatalogItem,
     catalogItemMetadataObject,
+    ICatalogDateAttributeHierarchy,
 } from "./ldm/catalog/index.js";
 
 export {
@@ -610,6 +623,7 @@ export {
     attributeDisplayFormMetadataObjectTitle,
     IAttributeHierarchyMetadataObject,
     isAttributeHierarchyMetadataObject,
+    IDateHierarchyTemplate,
 } from "./ldm/metadata/index.js";
 
 export {
@@ -640,6 +654,8 @@ export {
     isKpiWidget,
     isInsightWidgetDefinition,
     isInsightWidget,
+    isRichTextWidget,
+    isRichTextWidgetDefinition,
 } from "./dashboard/widget.js";
 
 export {
@@ -654,7 +670,16 @@ export {
     IScheduledMailBase,
 } from "./dashboard/scheduledMail.js";
 
-export { IUser, IWorkspaceUser, userFullName } from "./user/index.js";
+export {
+    IUser,
+    IUserGroup,
+    IWorkspaceUser,
+    userFullName,
+    IOrganizationUser,
+    IOrganizationUserGroup,
+    isIOrganizationUser,
+    isIOrganizationUserGroup,
+} from "./user/index.js";
 
 export {
     IDashboardLayout,
@@ -679,6 +704,11 @@ export {
     IDashboardBase,
     IDashboardDateFilterConfig,
     DashboardDateFilterConfigMode,
+    IDashboardAttributeFilterConfig,
+    IDashboardDateFilterConfigItem,
+    DashboardAttributeFilterConfigMode,
+    DashboardDateFilterConfigModeValues,
+    DashboardAttributeFilterConfigModeValues,
     IDashboardDateFilterAddedPresets,
     IDashboardPluginBase,
     IDashboardPlugin,
@@ -803,7 +833,28 @@ export {
     isGranularUserAccess,
     isGranularUserGroupAccess,
     isGranularRulesAccessGrantee,
+    WorkspaceAccessPermission,
+    IWorkspaceAccess,
+    IUserWorkspaceAccessGrantee,
+    IUserGroupWorkspaceAccessGrantee,
+    isUserWorkspaceAccessGrantee,
+    isUserGroupWorkspaceAccessGrantee,
 } from "./accessControl/index.js";
 
-export { IOrganizationDescriptor } from "./organization/index.js";
+export {
+    IOrganizationDescriptor,
+    IWorkspacePermissionAssignment,
+    IAssignedWorkspace,
+    AssignedWorkspacePermission,
+    AssignedWorkspacePermissionValue,
+    IOrganizationPermissionAssignment,
+    OrganizationPermissionAssignment,
+    OrganizationPermissionAssignmentValue,
+    IOrganizationAssignee,
+    AssignedDataSourcePermission,
+    AssignedDataSourcePermissionValue,
+    IAssignedDataSource,
+    IDataSourcePermissionAssignment,
+} from "./organization/index.js";
 export { IEntitlementsName, IEntitlementDescriptor } from "./entitlements/index.js";
+export { DataSourceType, IDataSourceIdentifierDescriptor } from "./dataSources/index.js";

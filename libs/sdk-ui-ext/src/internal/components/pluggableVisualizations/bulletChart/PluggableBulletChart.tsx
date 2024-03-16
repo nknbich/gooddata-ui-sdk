@@ -13,6 +13,7 @@ import {
     InvalidBucketsSdkError,
     IUiConfig,
     IDrillDownDefinition,
+    IVisProps,
 } from "../../../interfaces/Visualization.js";
 
 import {
@@ -84,7 +85,6 @@ export class PluggableBulletChart extends PluggableBaseChart {
 
         this.type = VisualizationTypes.BULLET;
         this.supportedPropertiesList = BULLET_CHART_SUPPORTED_PROPERTIES;
-
         this.initializeProperties(props.visualizationProperties);
     }
 
@@ -158,10 +158,14 @@ export class PluggableBulletChart extends PluggableBaseChart {
         return modifyBucketsAttributesForDrillDown(withFilters, drillDownContext.drillDefinition);
     }
 
-    protected renderConfigurationPanel(insight: IInsightDefinition): React.ReactNode {
+    protected renderConfigurationPanel(insight: IInsightDefinition, options: IVisProps): React.ReactNode {
         const configPanelElement = this.getConfigPanelElement();
 
         if (configPanelElement) {
+            const panelConfig = {
+                supportsAttributeHierarchies: this.backendCapabilities.supportsAttributeHierarchies,
+            };
+
             this.renderFun(
                 <BulletChartConfigurationPanel
                     locale={this.locale}
@@ -175,6 +179,8 @@ export class PluggableBulletChart extends PluggableBaseChart {
                     isError={this.getIsError()}
                     isLoading={this.isLoading}
                     featureFlags={this.featureFlags}
+                    panelConfig={panelConfig}
+                    configurationPanelRenderers={options.custom?.configurationPanelRenderers}
                 />,
                 configPanelElement,
             );

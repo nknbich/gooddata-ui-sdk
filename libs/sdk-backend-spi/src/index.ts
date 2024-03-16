@@ -1,4 +1,4 @@
-// (C) 2019-2023 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 /**
  * This package provides definitions of the Service Provider Interface (SPI) for the Analytical Backend.
  *
@@ -48,6 +48,7 @@ export {
     IWorkspaceInsightsService,
     InsightOrdering,
     IInsightsQueryOptions,
+    IInsightsQuery,
     IInsightsQueryResult,
     IInsightReferences,
     IInsightReferencing,
@@ -115,6 +116,8 @@ export {
     IWorkspaceDescriptor,
 } from "./workspace/index.js";
 
+export { IAttributeHierarchiesService } from "./workspace/attributeHierarchies/index.js";
+
 export { IWorkspacePermissionsService } from "./workspace/permissions/index.js";
 
 export { IWorkspaceAttributesService } from "./workspace/attributes/index.js";
@@ -134,6 +137,8 @@ export {
     SupportedWidgetReferenceTypes,
     IDashboardReferences,
     IDashboardWithReferences,
+    IDashboardsQuery,
+    IDashboardsQueryResult,
 } from "./workspace/dashboards/index.js";
 export {
     isDashboardLayoutEmpty,
@@ -177,6 +182,7 @@ export {
 
 export { IOrganization, IOrganizations } from "./organization/index.js";
 export { IEntitlements } from "./entitlements/index.js";
+export { IDataSourcesService } from "./dataSources/index.js";
 export { ISecuritySettingsService, ValidationContext } from "./organization/securitySettings/index.js";
 export { IOrganizationStylingService } from "./organization/styling/index.js";
 export { IOrganizationSettingsService } from "./organization/settings/index.js";
@@ -188,3 +194,12 @@ export {
 } from "./workspace/userGroups/index.js";
 
 export { IWorkspaceAccessControlService } from "./workspace/accessControl/index.js";
+
+export {
+    IOrganizationUserService,
+    IOrganizationUsersQuery,
+    IOrganizationUsersQueryResult,
+    IOrganizationUserGroupsQuery,
+    IOrganizationUserGroupsQueryResult,
+} from "./organization/users/index.js";
+export { IOrganizationPermissionService, IPermissionsAssignment } from "./organization/permissions/index.js";

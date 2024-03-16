@@ -1,4 +1,4 @@
-// (C) 2020-2022 GoodData Corporation
+// (C) 2020-2024 GoodData Corporation
 
 import React, { useMemo } from "react";
 import stringify from "json-stable-stringify";
@@ -16,6 +16,8 @@ import {
     isDrillToInsight,
     isDrillToLegacyDashboard,
     IListedDashboard,
+    isCrossFiltering,
+    isAttributeDescriptor,
 } from "@gooddata/sdk-model";
 import { isDrillToUrl } from "../types.js";
 import { DrillSelectListBody } from "./DrillSelectListBody.js";
@@ -30,6 +32,7 @@ import {
 import { dashboardMatch } from "../utils/dashboardPredicate.js";
 import { getDrillOriginLocalIdentifier } from "../../../_staging/drills/drillingUtils.js";
 import { ObjRefMap } from "../../../_staging/metadata/objRefMap.js";
+import compact from "lodash/compact.js";
 
 export interface DrillSelectDropdownProps extends DrillSelectContext {
     dropDownAnchorClass: string;
@@ -145,6 +148,23 @@ export const createDrillSelectItems = (
                 name: intl.formatMessage({ id: "drill_modal_picker.more.details" }),
                 drillDefinition,
                 attributeValue,
+                id: stringify(drillDefinition),
+            };
+        }
+
+        if (isCrossFiltering(drillDefinition)) {
+            const title = compact(
+                drillEvent.drillContext.intersection?.map((item) =>
+                    isAttributeDescriptor(item.header) && !item.header.attributeHeader.granularity
+                        ? item.header.attributeHeader.name
+                        : undefined,
+                ),
+            ).join(", ");
+
+            return {
+                name: title,
+                type: DrillType.CROSS_FILTERING,
+                drillDefinition,
                 id: stringify(drillDefinition),
             };
         }

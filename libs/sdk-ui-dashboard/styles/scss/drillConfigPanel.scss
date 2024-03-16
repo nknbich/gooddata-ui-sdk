@@ -145,6 +145,101 @@
     }
 }
 
+.drill-config-empty-hierarchy-target {
+    margin: 10px 0;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 18px;
+    color: kit-variables.$gd-color-link;
+}
+
+.attribute-hierarchy-list-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 10px;
+    align-items: center;
+    cursor: pointer;
+    color: kit-variables.$gd-color-text;
+
+    .attribute-hierarchy-list-item-description,
+    .attribute-hierarchy-item-edit-button {
+        display: none;
+    }
+
+    &:hover {
+        color: kit-variables.$gd-palette-primary-base;
+
+        .attribute-hierarchy-list-item-description,
+        .attribute-hierarchy-item-edit-button {
+            display: block;
+        }
+    }
+
+    &.is-disabled {
+        .attribute-hierarchy-list-item-content {
+            opacity: 0.5;
+            color: kit-variables.$gd-color-disabled;
+
+            &:hover {
+                opacity: 0.5;
+                color: kit-variables.$gd-color-disabled;
+            }
+        }
+    }
+
+    .attribute-hierarchy-list-item-actions {
+        width: 38px;
+        height: 28px;
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 5px;
+
+        .attribute-hierarchy-item-edit-button {
+            font-size: 14px;
+            color: var(--gd-palette-complementary-6, #94a1ad);
+
+            &:hover,
+            &:active,
+            &:focus {
+                color: kit-variables.$gd-palette-primary-base;
+            }
+        }
+    }
+}
+
+.attribute-hierarchy-list-item-content {
+    padding-left: 25px;
+    font-size: 12px;
+    font-style: normal;
+    max-width: calc(100% - 45px);
+    min-width: calc(100% - 45px);
+    text-decoration: none;
+    white-space: nowrap;
+
+    &::before {
+        content: "";
+        position: absolute;
+        top: 3px;
+        left: 12px;
+        display: block;
+        width: 18px;
+        height: 24px;
+        background-image: url("~@gooddata/sdk-ui-dashboard/esm/assets/attribute-hierarchy.svg");
+        background-repeat: no-repeat;
+        background-position: left top;
+        background-size: contain;
+    }
+
+    .attribute-hierarchy-title {
+        display: inline-block;
+        width: 100%;
+        white-space: nowrap;
+    }
+}
+
 .gd-drill-config-measure-item {
     display: inline-flex;
     flex-wrap: nowrap;
@@ -185,6 +280,10 @@
         text-overflow: ellipsis;
         padding-left: 5px;
         padding-right: 5px;
+    }
+
+    &.is-readonly .dm-button-title {
+        padding-right: 10px;
     }
 
     .dm-button-delete-wrapper {
@@ -270,6 +369,34 @@
         height: 100%;
         padding: 10px;
         background-color: var(--gd-palette-complementary-2, #e3e9f0);
+
+        .empty-attribute-hierarchy-info-content {
+            position: relative;
+            color: var(--gd-palette-complementary-8, #464e56);
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 18px;
+            margin: 10px 1px;
+
+            a.gd-button-link-dimmed {
+                position: absolute;
+                bottom: -1px;
+                color: var(--gd-palette-complementary-7, #6d7680);
+                font-size: 12px;
+                font-weight: 400;
+                line-height: 18px;
+                text-decoration-line: underline;
+                padding-left: 2px;
+            }
+        }
+
+        .add-attribute-hierarchy-button {
+            padding: 0 0 0 17px;
+
+            &::before {
+                left: -6px;
+            }
+        }
     }
 
     .gd-button-small {
@@ -291,7 +418,11 @@
 
 .gd-drill-config-panel-target,
 .drill-config-target {
-    .gd-icon-drill-to-dashboard::before {
+    .gd-icon-drill-to-dashboard::before,
+    .gd-icon-drill-to-insight::before,
+    .gd-icon-drill-down::before,
+    .gd-icon-hyperlink-disabled::before,
+    .gd-icon-attribute-hierarchy::before {
         content: "";
         position: relative;
         top: -1px;
@@ -300,19 +431,26 @@
         height: 16px;
         margin-right: 4px;
         vertical-align: bottom;
+    }
+
+    .gd-icon-drill-to-dashboard::before {
         background-image: url("~@gooddata/sdk-ui-dashboard/esm/assets/drill-to-dashboard.svg");
     }
 
     .gd-icon-drill-to-insight::before {
-        content: "";
-        position: relative;
-        top: -1px;
-        display: inline-block;
-        width: 16px;
-        height: 16px;
-        margin-right: 4px;
-        vertical-align: bottom;
         background-image: url("~@gooddata/sdk-ui-dashboard/esm/assets/drill-to-insight.svg");
+    }
+
+    .gd-icon-drill-down::before {
+        background-image: url("~@gooddata/sdk-ui-dashboard/esm/assets/drill-down.svg");
+        background-repeat: no-repeat;
+        top: 1px;
+    }
+
+    .gd-icon-attribute-hierarchy::before {
+        background-image: url("~@gooddata/sdk-ui-dashboard/esm/assets/attribute-hierarchy.svg");
+        background-repeat: no-repeat;
+        top: 1px;
     }
 
     .gd-icon-hyperlink-disabled::before {
@@ -438,6 +576,12 @@ $gd-gd-drill-to-url-body-width: 230px;
         &.gd-icon-sharp::before {
             content: "\E63D";
             color: kit-variables.$is-selected-color;
+            text-align: center;
+        }
+
+        &.gd-icon-filter::before {
+            content: "\E63C";
+            color: #94a1ad;
             text-align: center;
         }
 
@@ -576,8 +720,13 @@ $gd-gd-drill-to-url-body-width: 230px;
             color: kit-variables.$gd-color-warning-text;
         }
 
+        .cm-filter {
+            color: kit-variables.$gd-color-warning-text;
+        }
+
         .cm-invalid-identifier,
-        .cm-invalid-attribute {
+        .cm-invalid-attribute,
+        .cm-invalid-filter {
             color: kit-variables.$gd-palette-error-base;
         }
     }
@@ -629,4 +778,12 @@ $gd-gd-drill-to-url-body-width: 230px;
         font-size: 14px;
         color: kit-variables.$gd-color-highlight;
     }
+}
+
+.gd-list.gd-infinite-list.gd-infinite-list.hierarchies-dropdown-body {
+    margin-bottom: 0;
+}
+
+.attribute-hierarchy-list-footer {
+    padding: 0 0 10px;
 }

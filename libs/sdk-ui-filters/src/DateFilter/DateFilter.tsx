@@ -3,12 +3,7 @@ import React from "react";
 import isEqual from "lodash/isEqual.js";
 import isNil from "lodash/isNil.js";
 import noop from "lodash/noop.js";
-import {
-    DateFilterGranularity,
-    isAbsoluteDateFilterForm,
-    DashboardDateFilterConfigMode,
-    WeekStart,
-} from "@gooddata/sdk-model";
+import { DateFilterGranularity, isAbsoluteDateFilterForm, WeekStart } from "@gooddata/sdk-model";
 import { canExcludeCurrentPeriod } from "./utils/PeriodExclusion.js";
 
 import { DateFilterCore } from "./DateFilterCore.js";
@@ -20,6 +15,8 @@ import {
 } from "./interfaces/index.js";
 import { DEFAULT_DATE_FORMAT } from "./constants/Platform.js";
 import { normalizeSelectedFilterOption } from "./utils/FilterOptionNormalization.js";
+import { IFilterButtonCustomIcon, VisibilityMode } from "../shared/index.js";
+import { IFilterConfigurationProps } from "./DateFilterBody/types.js";
 
 /**
  * Props of the {@link DateFilter} component that are reflected in the state.
@@ -33,19 +30,33 @@ export interface IDateFilterStatePropsIntersection {
 
 /**
  * Props of the {@link DateFilter} component.
- *
  * @public
  */
 export interface IDateFilterOwnProps extends IDateFilterStatePropsIntersection {
     filterOptions: IDateFilterOptionsByType;
     availableGranularities: DateFilterGranularity[];
     isEditMode?: boolean;
+    openOnInit?: boolean;
     customFilterName?: string;
-    dateFilterMode: DashboardDateFilterConfigMode;
+    dateFilterMode: VisibilityMode;
     dateFormat?: string;
     locale?: string;
     isTimeForAbsoluteRangeEnabled?: boolean;
+    showDropDownHeaderMessage?: boolean;
     weekStart?: WeekStart;
+    /**
+     * Represents a custom icon with associated tooltip information.
+     *
+     * @alpha
+     */
+    customIcon?: IFilterButtonCustomIcon;
+
+    /**
+     * Represents a custom component for configuration.
+     *
+     * @alpha
+     */
+    FilterConfigurationComponent?: React.ComponentType<IFilterConfigurationProps>;
 }
 
 /**
@@ -169,9 +180,13 @@ export class DateFilter extends React.PureComponent<IDateFilterProps, IDateFilte
             excludeCurrentPeriod: originalExcludeCurrentPeriod,
             availableGranularities,
             isEditMode,
+            openOnInit,
             locale,
             isTimeForAbsoluteRangeEnabled,
             weekStart,
+            customIcon,
+            showDropDownHeaderMessage,
+            FilterConfigurationComponent,
         } = this.props;
         const { excludeCurrentPeriod, selectedFilterOption, isExcludeCurrentPeriodEnabled } = this.state;
         return dateFilterMode === "hidden" ? null : (
@@ -179,6 +194,8 @@ export class DateFilter extends React.PureComponent<IDateFilterProps, IDateFilte
                 availableGranularities={availableGranularities}
                 customFilterName={customFilterName}
                 dateFormat={dateFormat}
+                openOnInit={openOnInit}
+                showDropDownHeaderMessage={showDropDownHeaderMessage}
                 disabled={dateFilterMode === "readonly"}
                 excludeCurrentPeriod={excludeCurrentPeriod}
                 originalExcludeCurrentPeriod={originalExcludeCurrentPeriod}
@@ -196,6 +213,8 @@ export class DateFilter extends React.PureComponent<IDateFilterProps, IDateFilte
                 onSelectedFilterOptionChange={this.handleSelectedFilterOptionChange}
                 errors={validateFilterOption(selectedFilterOption)}
                 weekStart={weekStart}
+                customIcon={customIcon}
+                FilterConfigurationComponent={FilterConfigurationComponent}
             />
         );
     }

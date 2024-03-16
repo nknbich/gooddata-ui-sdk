@@ -69,9 +69,9 @@ exports[`PluggableBaseChart > should cut out measures tail when getting nM 0Vb 1
         "icon": "local:column/bucket-title-measures.svg",
         "isShowInPercentEnabled": false,
         "isShowInPercentVisible": true,
-        "itemsLimit": 20,
+        "itemsLimit": 40,
         "title": "Measures",
-        "warningMessage": "To add additional measure, remove <span class=\\"attr-field-icon\\" /> from <span class=\\"stack-by\\">stack by</span>",
+        "warningMessage": "To add additional measure, remove <span class="attr-field-icon" /> from <span class="stack-by">stack by</span>",
       },
       "stack": {
         "accepts": [
@@ -201,9 +201,9 @@ exports[`PluggableBaseChart > should handle wrong order of buckets in reference 
         "icon": "local:column/bucket-title-measures.svg",
         "isShowInPercentEnabled": false,
         "isShowInPercentVisible": true,
-        "itemsLimit": 20,
+        "itemsLimit": 40,
         "title": "Measures",
-        "warningMessage": "To add additional measure, remove <span class=\\"attr-field-icon\\" /> from <span class=\\"stack-by\\">stack by</span>",
+        "warningMessage": "To add additional measure, remove <span class="attr-field-icon" /> from <span class="stack-by">stack by</span>",
       },
       "stack": {
         "accepts": [
@@ -370,7 +370,7 @@ exports[`PluggableBaseChart > should return ref. point with multiple metrics and
         "icon": "local:column/bucket-title-measures.svg",
         "isShowInPercentEnabled": false,
         "isShowInPercentVisible": true,
-        "itemsLimit": 20,
+        "itemsLimit": 40,
         "title": "Measures",
       },
       "stack": {
@@ -385,7 +385,7 @@ exports[`PluggableBaseChart > should return ref. point with multiple metrics and
         "isShowInPercentEnabled": false,
         "itemsLimit": 1,
         "title": "Stack by",
-        "warningMessage": "To stack by, an insight can have only one measure",
+        "warningMessage": "To stack by, an visualization can have only one measure",
       },
       "view": {
         "accepts": [
@@ -482,7 +482,7 @@ exports[`PluggableBaseChart > should return reference point with base recommenda
         "icon": "local:column/bucket-title-measures.svg",
         "isShowInPercentEnabled": false,
         "isShowInPercentVisible": true,
-        "itemsLimit": 20,
+        "itemsLimit": 40,
         "title": "Measures",
       },
       "stack": {
@@ -642,7 +642,7 @@ exports[`PluggableBaseChart > should return reference point with multiple metric
         "icon": "local:column/bucket-title-measures.svg",
         "isShowInPercentEnabled": false,
         "isShowInPercentVisible": true,
-        "itemsLimit": 20,
+        "itemsLimit": 40,
         "title": "Measures",
       },
       "stack": {
@@ -657,7 +657,7 @@ exports[`PluggableBaseChart > should return reference point with multiple metric
         "isShowInPercentEnabled": false,
         "itemsLimit": 1,
         "title": "Stack by",
-        "warningMessage": "To stack by, an insight can have only one measure",
+        "warningMessage": "To stack by, an visualization can have only one measure",
       },
       "view": {
         "accepts": [
@@ -775,9 +775,9 @@ exports[`PluggableBaseChart > should return reference point with one metric and 
         "icon": "local:column/bucket-title-measures.svg",
         "isShowInPercentEnabled": false,
         "isShowInPercentVisible": true,
-        "itemsLimit": 20,
+        "itemsLimit": 40,
         "title": "Measures",
-        "warningMessage": "To add additional measure, remove <span class=\\"attr-field-icon\\" /> from <span class=\\"stack-by\\">stack by</span>",
+        "warningMessage": "To add additional measure, remove <span class="attr-field-icon" /> from <span class="stack-by">stack by</span>",
       },
       "stack": {
         "accepts": [
@@ -952,9 +952,9 @@ exports[`PluggableBaseChart > should return reference point with one metric and 
         "icon": "local:column/bucket-title-measures.svg",
         "isShowInPercentEnabled": false,
         "isShowInPercentVisible": true,
-        "itemsLimit": 20,
+        "itemsLimit": 40,
         "title": "Measures",
-        "warningMessage": "To add additional measure, remove <span class=\\"attr-field-icon\\" /> from <span class=\\"stack-by\\">stack by</span>",
+        "warningMessage": "To add additional measure, remove <span class="attr-field-icon" /> from <span class="stack-by">stack by</span>",
       },
       "stack": {
         "accepts": [
@@ -1129,9 +1129,9 @@ exports[`PluggableBaseChart > should return reference point with one metric, one
         "icon": "local:column/bucket-title-measures.svg",
         "isShowInPercentEnabled": false,
         "isShowInPercentVisible": true,
-        "itemsLimit": 20,
+        "itemsLimit": 40,
         "title": "Measures",
-        "warningMessage": "To add additional measure, remove <span class=\\"attr-field-icon\\" /> from <span class=\\"stack-by\\">stack by</span>",
+        "warningMessage": "To add additional measure, remove <span class="attr-field-icon" /> from <span class="stack-by">stack by</span>",
       },
       "stack": {
         "accepts": [
@@ -1261,9 +1261,9 @@ exports[`PluggableBaseChart > should return reference point without Date in stac
         "icon": "local:column/bucket-title-measures.svg",
         "isShowInPercentEnabled": false,
         "isShowInPercentVisible": true,
-        "itemsLimit": 20,
+        "itemsLimit": 40,
         "title": "Measures",
-        "warningMessage": "To add additional measure, remove <span class=\\"attr-field-icon\\" /> from <span class=\\"stack-by\\">stack by</span>",
+        "warningMessage": "To add additional measure, remove <span class="attr-field-icon" /> from <span class="stack-by">stack by</span>",
       },
       "stack": {
         "accepts": [
@@ -1393,9 +1393,9 @@ exports[`PluggableBaseChart > should use second non-date attribute when switchin
         "icon": "local:column/bucket-title-measures.svg",
         "isShowInPercentEnabled": false,
         "isShowInPercentVisible": true,
-        "itemsLimit": 20,
+        "itemsLimit": 40,
         "title": "Measures",
-        "warningMessage": "To add additional measure, remove <span class=\\"attr-field-icon\\" /> from <span class=\\"stack-by\\">stack by</span>",
+        "warningMessage": "To add additional measure, remove <span class="attr-field-icon" /> from <span class="stack-by">stack by</span>",
       },
       "stack": {
         "accepts": [

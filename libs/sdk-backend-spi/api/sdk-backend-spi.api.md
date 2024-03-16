@@ -37,7 +37,11 @@ import { IDashboardPlugin } from '@gooddata/sdk-model';
 import { IDashboardPluginDefinition } from '@gooddata/sdk-model';
 import { IDashboardWidget } from '@gooddata/sdk-model';
 import { IDataset } from '@gooddata/sdk-model';
+import { IDataSourceIdentifierDescriptor } from '@gooddata/sdk-model';
+import { IDataSourcePermissionAssignment } from '@gooddata/sdk-model';
+import { IDateFilter } from '@gooddata/sdk-model';
 import { IDateFilterConfig } from '@gooddata/sdk-model';
+import { IDateHierarchyTemplate } from '@gooddata/sdk-model';
 import { IDimension } from '@gooddata/sdk-model';
 import { IDimensionDescriptor } from '@gooddata/sdk-model';
 import { IEntitlementDescriptor } from '@gooddata/sdk-model';
@@ -55,7 +59,11 @@ import { IMeasureMetadataObject } from '@gooddata/sdk-model';
 import { IMeasureMetadataObjectDefinition } from '@gooddata/sdk-model';
 import { IMetadataObject } from '@gooddata/sdk-model';
 import { INullableFilter } from '@gooddata/sdk-model';
+import { IOrganizationAssignee } from '@gooddata/sdk-model';
 import { IOrganizationDescriptor } from '@gooddata/sdk-model';
+import { IOrganizationPermissionAssignment } from '@gooddata/sdk-model';
+import { IOrganizationUser } from '@gooddata/sdk-model';
+import { IOrganizationUserGroup } from '@gooddata/sdk-model';
 import { IRelativeDateFilter } from '@gooddata/sdk-model';
 import { IResultHeader } from '@gooddata/sdk-model';
 import { IResultWarning } from '@gooddata/sdk-model';
@@ -68,17 +76,20 @@ import { ITheme } from '@gooddata/sdk-model';
 import { IThemeDefinition } from '@gooddata/sdk-model';
 import { IThemeMetadataObject } from '@gooddata/sdk-model';
 import { IUser } from '@gooddata/sdk-model';
+import { IUserGroup } from '@gooddata/sdk-model';
 import { IVisualizationClass } from '@gooddata/sdk-model';
 import { IWhiteLabeling } from '@gooddata/sdk-model';
 import { IWidget } from '@gooddata/sdk-model';
 import { IWidgetAlert } from '@gooddata/sdk-model';
 import { IWidgetAlertDefinition } from '@gooddata/sdk-model';
 import { IWidgetDefinition } from '@gooddata/sdk-model';
+import { IWorkspacePermissionAssignment } from '@gooddata/sdk-model';
 import { IWorkspacePermissions } from '@gooddata/sdk-model';
 import { IWorkspaceUser } from '@gooddata/sdk-model';
 import { IWorkspaceUserGroup } from '@gooddata/sdk-model';
 import { ObjectType } from '@gooddata/sdk-model';
 import { ObjRef } from '@gooddata/sdk-model';
+import { OrganizationPermissionAssignment } from '@gooddata/sdk-model';
 import { SortDirection } from '@gooddata/sdk-model';
 
 // @public
@@ -152,6 +163,7 @@ export interface IAnalyticalBackend {
     readonly capabilities: IBackendCapabilities;
     readonly config: IAnalyticalBackendConfig;
     currentUser(): IUserService;
+    dataSources(): IDataSourcesService;
     deauthenticate(): Promise<void>;
     entitlements(): IEntitlements;
     isAuthenticated(): Promise<IAuthenticatedPrincipal | null>;
@@ -172,6 +184,8 @@ export interface IAnalyticalBackendConfig {
 // @public
 export interface IAnalyticalWorkspace {
     accessControl(): IWorkspaceAccessControlService;
+    // @alpha
+    attributeHierarchies(): IAttributeHierarchiesService;
     attributes(): IWorkspaceAttributesService;
     catalog(): IWorkspaceCatalogFactory;
     dashboards(): IWorkspaceDashboardsService;
@@ -179,7 +193,7 @@ export interface IAnalyticalWorkspace {
     dateFilterConfigs(): IDateFilterConfigsQuery;
     execution(): IExecutionFactory;
     facts(): IWorkspaceFactsService;
-    getDescriptor(): Promise<IWorkspaceDescriptor>;
+    getDescriptor(includeParentPrefixes?: boolean): Promise<IWorkspaceDescriptor>;
     getParentWorkspace(): Promise<IAnalyticalWorkspace | undefined>;
     insights(): IWorkspaceInsightsService;
     measures(): IWorkspaceMeasuresService;
@@ -197,6 +211,15 @@ export interface IAttributeElementExpressionToken {
     deleted?: boolean;
     type: "attributeElement";
     value: string | undefined;
+}
+
+// @alpha
+export interface IAttributeHierarchiesService {
+    createAttributeHierarchy(title: string, attributes: ObjRef[]): Promise<ICatalogAttributeHierarchy>;
+    deleteAttributeHierarchy(attributeHierarchyId: string): Promise<void>;
+    getDateHierarchyTemplates(): Promise<IDateHierarchyTemplate[]>;
+    getValidDescendants(attributes: ObjRef[]): Promise<ObjRef[]>;
+    updateAttributeHierarchy(catalogAttributeHierarchy: ICatalogAttributeHierarchy): Promise<ICatalogAttributeHierarchy>;
 }
 
 // @public
@@ -223,6 +246,7 @@ export interface IAuthenticationProvider {
 // @public
 export interface IBackendCapabilities {
     [key: string]: undefined | boolean | number | string;
+    allowMultipleInteractionsPerAttributeAndMeasure?: boolean;
     allowsInconsistentRelations?: boolean;
     canCalculateGrandTotals?: boolean;
     canCalculateNativeTotals?: boolean;
@@ -237,7 +261,11 @@ export interface IBackendCapabilities {
     hasTypeScopedIdentifiers?: boolean;
     maxDimensions?: number;
     supportsAccessControl?: boolean;
+    supportsAttributeFilterElementsLimiting?: boolean;
+    supportsAttributeHierarchies?: boolean;
     supportsBootstrapResource?: boolean;
+    supportsCircularDependencyInFilters?: boolean;
+    supportsCrossFiltering?: boolean;
     supportsCsvUploader?: boolean;
     supportsCustomColorPalettes?: boolean;
     supportsElementsQueryParentFiltering?: boolean;
@@ -247,19 +275,26 @@ export interface IBackendCapabilities {
     supportsExplain?: boolean;
     supportsGenericDateAttributeElements?: boolean;
     supportsGranularAccessControl?: boolean;
+    supportsHiddenAndLockedFiltersOnUI?: boolean;
     supportsHierarchicalWorkspaces?: boolean;
     supportsHyperlinkAttributeLabels?: boolean;
     supportsInlineMeasures?: boolean;
+    supportsKeepingDependentFiltersSelection?: boolean;
     supportsKpiWidget?: boolean;
     supportsMetadataObjectLocking?: boolean;
+    supportsMultipleDateFilters?: boolean;
     supportsNonProductionDatasets?: boolean;
     supportsObjectUris?: boolean;
     supportsOrganizationSettings?: boolean;
     supportsOwners?: boolean;
     supportsRankingFilter?: boolean;
     supportsRankingFilterWithMeasureValueFilter?: boolean;
+    supportsRichTextWidgets?: boolean;
     supportsSeparateLatitudeLongitudeLabels?: boolean;
+    supportsSettingConnectingAttributes?: boolean;
     supportsShowAllAttributeValues?: boolean;
+    supportsShowingFilteredElements?: boolean;
+    supportsSingleSelectDependentFilters?: boolean;
     supportsTimeGranularities?: boolean;
     supportsWidgetEntity?: boolean;
     usesStrictAccessControl?: boolean;
@@ -289,12 +324,31 @@ export interface IDashboardReferences {
     plugins: IDashboardPlugin[];
 }
 
+// @public
+export interface IDashboardsQuery {
+    query(): Promise<IDashboardsQueryResult>;
+    withFilter(filter: {
+        title?: string;
+    }): IDashboardsQuery;
+    withPage(page: number): IDashboardsQuery;
+    withSize(size: number): IDashboardsQuery;
+    withSorting(sort: string[]): IDashboardsQuery;
+}
+
+// @public
+export type IDashboardsQueryResult = IPagedResource<IListedDashboard>;
+
 // @alpha
 export interface IDashboardWithReferences {
     // (undocumented)
     dashboard: IDashboard;
     // (undocumented)
     references: IDashboardReferences;
+}
+
+// @alpha
+export interface IDataSourcesService {
+    getDataSourceIdentifiers(): Promise<IDataSourceIdentifierDescriptor[]>;
 }
 
 // @public
@@ -327,6 +381,7 @@ export type IDateFilterConfigsQueryResult = IPagedResource<IDateFilterConfig>;
 export interface IElementsQuery extends ICancelable<IElementsQuery> {
     query(): Promise<IElementsQueryResult>;
     withAttributeFilters(filters: IElementsQueryAttributeFilter[]): IElementsQuery;
+    withAvailableElementsOnly(validateBy: ObjRef[]): IElementsQuery;
     withDateFilters(filters: IRelativeDateFilter[]): IElementsQuery;
     withLimit(limit: number): IElementsQuery;
     withMeasures(measures: IMeasure[]): IElementsQuery;
@@ -350,6 +405,7 @@ export interface IElementsQueryFactory {
 
 // @public
 export interface IElementsQueryOptions {
+    cacheId?: string;
     complement?: boolean;
     elements?: ElementsQueryOptionsElementsSpecification;
     excludePrimaryLabel?: boolean;
@@ -484,6 +540,17 @@ export interface IInsightReferencing {
 }
 
 // @public
+export interface IInsightsQuery {
+    query(): Promise<IInsightsQueryResult>;
+    withFilter(filter: {
+        title?: string;
+    }): IInsightsQuery;
+    withPage(page: number): IInsightsQuery;
+    withSize(size: number): IInsightsQuery;
+    withSorting(sort: string[]): IInsightsQuery;
+}
+
+// @public
 export interface IInsightsQueryOptions {
     author?: string;
     limit?: number;
@@ -523,11 +590,30 @@ export interface IObjectExpressionToken {
 
 // @public
 export interface IOrganization {
-    getDescriptor(): Promise<IOrganizationDescriptor>;
+    getDescriptor(includeAdditionalDetails?: boolean): Promise<IOrganizationDescriptor>;
     readonly organizationId: string;
+    permissions(): IOrganizationPermissionService;
     securitySettings(): ISecuritySettingsService;
     settings(): IOrganizationSettingsService;
     styling(): IOrganizationStylingService;
+    users(): IOrganizationUserService;
+}
+
+// @alpha
+export interface IOrganizationPermissionService {
+    assignPermissions(permissionsAsignment: IPermissionsAssignment): Promise<void>;
+    getOrganizationPermissionForUser(userId: string): Promise<OrganizationPermissionAssignment[]>;
+    getOrganizationPermissionForUserGroup(userGroupId: string): Promise<OrganizationPermissionAssignment[]>;
+    getPermissionsForUser(userId: string): Promise<{
+        workspacePermissions: IWorkspacePermissionAssignment[];
+        dataSourcePermissions: IDataSourcePermissionAssignment[];
+    }>;
+    getPermissionsForUserGroup(userGroupId: string): Promise<{
+        workspacePermissions: IWorkspacePermissionAssignment[];
+        dataSourcePermissions: IDataSourcePermissionAssignment[];
+    }>;
+    revokePermissions(permissionsAsignment: IPermissionsAssignment): Promise<void>;
+    updateOrganizationPermissions(permissionAssignments: IOrganizationPermissionAssignment[]): Promise<void>;
 }
 
 // @public
@@ -568,9 +654,63 @@ export interface IOrganizationStylingService {
 }
 
 // @public
+export interface IOrganizationUserGroupsQuery {
+    query(): Promise<IOrganizationUserGroupsQueryResult>;
+    withFilter(filter: {
+        workspace?: string;
+        group?: string;
+        name?: string;
+        dataSource?: string;
+    }): IOrganizationUserGroupsQuery;
+    withPage(page: number): IOrganizationUserGroupsQuery;
+    withSize(size: number): IOrganizationUserGroupsQuery;
+}
+
+// @public
+export type IOrganizationUserGroupsQueryResult = IPagedResource<IOrganizationUserGroup>;
+
+// @alpha
+export interface IOrganizationUserService {
+    addUsersToUserGroups(userIds: string[], userGroupIds: string[]): Promise<void>;
+    createUser(user: IUser): Promise<IUser>;
+    createUserGroup(group: IUserGroup): Promise<void>;
+    deleteUserGroups(ids: string[]): Promise<void>;
+    deleteUsers(ids: string[]): Promise<void>;
+    getUser(id: string): Promise<IUser | undefined>;
+    getUserGroup(id: string): Promise<IUserGroup | undefined>;
+    getUserGroups(): Promise<IOrganizationUserGroup[]>;
+    getUserGroupsOfUser(userId: string): Promise<IUserGroup[]>;
+    getUserGroupsQuery(): IOrganizationUserGroupsQuery;
+    getUsers(): Promise<IOrganizationUser[]>;
+    getUsersOfUserGroup(userGroupId: string): Promise<IUser[]>;
+    getUsersQuery(): IOrganizationUsersQuery;
+    removeUsersFromUserGroups(userIds: string[], userGroupIds: string[]): Promise<void>;
+    updateUser(user: IUser): Promise<void>;
+    updateUserGroup(group: IUserGroup): Promise<void>;
+}
+
+// @public
+export interface IOrganizationUsersQuery {
+    query(): Promise<IOrganizationUsersQueryResult>;
+    withFilter(filter: {
+        workspace?: string;
+        group?: string;
+        name?: string;
+        dataSource?: string;
+    }): IOrganizationUsersQuery;
+    withPage(page: number): IOrganizationUsersQuery;
+    withSize(size: number): IOrganizationUsersQuery;
+}
+
+// @public
+export type IOrganizationUsersQueryResult = IPagedResource<IOrganizationUser>;
+
+// @public
 export interface IPagedResource<TItem> {
     all(): Promise<TItem[]>;
     allSorted(compareFn: (a: TItem, b: TItem) => number): Promise<TItem[]>;
+    // (undocumented)
+    readonly cacheId?: string;
     goTo(pageIndex: number): Promise<IPagedResource<TItem>>;
     // (undocumented)
     readonly items: TItem[];
@@ -581,6 +721,13 @@ export interface IPagedResource<TItem> {
     readonly offset: number;
     // (undocumented)
     readonly totalCount: number;
+}
+
+// @alpha
+export interface IPermissionsAssignment {
+    assignees: IOrganizationAssignee[];
+    dataSources?: Omit<IDataSourcePermissionAssignment, "assigneeIdentifier">[];
+    workspaces?: Omit<IWorkspacePermissionAssignment, "assigneeIdentifier">[];
 }
 
 // @public
@@ -722,6 +869,7 @@ export interface IWorkspaceAttributesService {
     getAttributes(refs: ObjRef[]): Promise<IAttributeMetadataObject[]>;
     getCommonAttributes(attributeRefs: ObjRef[]): Promise<ObjRef[]>;
     getCommonAttributesBatch(attributesRefsBatch: ObjRef[][]): Promise<ObjRef[][]>;
+    getConnectedAttributesByDisplayForm(ref: ObjRef): Promise<ObjRef[]>;
 }
 
 // @public
@@ -810,9 +958,11 @@ export interface IWorkspaceDashboardsService {
     getDashboardPlugins(options?: IGetDashboardPluginOptions): Promise<IDashboardPlugin[]>;
     getDashboardReferencedObjects(dashboard: IDashboard, types?: SupportedDashboardReferenceTypes[]): Promise<IDashboardReferences>;
     getDashboards(options?: IGetDashboardOptions): Promise<IListedDashboard[]>;
+    getDashboardsQuery(): IDashboardsQuery;
     getDashboardWidgetAlertsForCurrentUser(ref: ObjRef): Promise<IWidgetAlert[]>;
     getDashboardWithReferences(ref: ObjRef, filterContextRef?: ObjRef, options?: IGetDashboardOptions, types?: SupportedDashboardReferenceTypes[]): Promise<IDashboardWithReferences>;
     getResolvedFiltersForWidget(widget: IWidget, filters: IFilter[]): Promise<IFilter[]>;
+    getResolvedFiltersForWidgetWithMultipleDateFilters(widget: IWidget, commonDateFilters: IDateFilter[], otherFilters: IFilter[]): Promise<IFilter[]>;
     getScheduledMailsCountForDashboard(ref: ObjRef): Promise<number>;
     getScheduledMailsForDashboard(ref: ObjRef, options?: IGetScheduledMailOptions): Promise<IScheduledMail[]>;
     getWidgetAlertsCountForWidgets(refs: ObjRef[]): Promise<IWidgetAlertCount[]>;
@@ -859,6 +1009,7 @@ export interface IWorkspaceInsightsService {
     getInsightReferencedObjects(insight: IInsight, types?: SupportedInsightReferenceTypes[]): Promise<IInsightReferences>;
     getInsightReferencingObjects(ref: ObjRef): Promise<IInsightReferencing>;
     getInsights(options?: IInsightsQueryOptions): Promise<IInsightsQueryResult>;
+    getInsightsQuery(): IInsightsQuery;
     getInsightWithAddedFilters<T extends IInsightDefinition>(insight: T, filters: IFilter[]): Promise<T>;
     getVisualizationClass(ref: ObjRef): Promise<IVisualizationClass>;
     getVisualizationClasses(options?: IGetVisualizationClassesOptions): Promise<IVisualizationClass[]>;

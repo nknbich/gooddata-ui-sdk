@@ -1,4 +1,4 @@
-// (C) 2019-2020 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 import { BucketNames } from "@gooddata/sdk-ui";
 import { IInsight, IInsightDefinition, IVisualizationClass, newAttribute } from "@gooddata/sdk-model";
 
@@ -32,6 +32,57 @@ export const dummyInsight: IInsightDefinition = {
         sorts: [],
         properties: {},
         title: "Dummy insight with single attribute",
+    },
+};
+
+export const insightWithSinglePrimaryAndSecondaryMeasureNoIdentifier: IInsight = {
+    insight: {
+        visualizationUrl: "local:headline",
+        buckets: [
+            {
+                localIdentifier: BucketNames.MEASURES,
+                items: [
+                    {
+                        measure: {
+                            localIdentifier: "m1",
+                            definition: {
+                                measureDefinition: {
+                                    item: {
+                                        uri: "/gdc/md/project/obj/1269",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+            {
+                localIdentifier: BucketNames.SECONDARY_MEASURES,
+                items: [
+                    {
+                        measure: {
+                            localIdentifier: "m2",
+                            definition: {
+                                measureDefinition: {
+                                    item: {
+                                        uri: "/gdc/md/project/obj/1279",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+        ],
+        filters: [],
+        sorts: [],
+        properties: {},
+        identifier: undefined,
+        uri: "/gdc/md/project/obj/1234",
+        ref: {
+            identifier: undefined,
+        },
+        title: "Dummy insight with single primary and secondary measure",
     },
 };
 
@@ -563,6 +614,44 @@ export const insightWithNoMeasureAndOneAttribute: IInsightDefinition = {
         sorts: [],
         properties: {},
         title: "Dummy insight with no measure and one attribute",
+    },
+};
+
+export const insightWithOneColumnAndOneAttribute: IInsightDefinition = {
+    insight: {
+        visualizationUrl: "table",
+        buckets: [
+            {
+                localIdentifier: BucketNames.ATTRIBUTE,
+                items: [
+                    {
+                        attribute: {
+                            localIdentifier: "a1",
+                            displayForm: {
+                                uri: "/gdc/md/project/obj/1028",
+                            },
+                        },
+                    },
+                ],
+            },
+            {
+                localIdentifier: BucketNames.COLUMNS,
+                items: [
+                    {
+                        attribute: {
+                            localIdentifier: "a1_clone",
+                            displayForm: {
+                                uri: "/gdc/md/project/obj/1028",
+                            },
+                        },
+                    },
+                ],
+            },
+        ],
+        filters: [],
+        sorts: [],
+        properties: {},
+        title: "Dummy insight with one column and one attribute",
     },
 };
 

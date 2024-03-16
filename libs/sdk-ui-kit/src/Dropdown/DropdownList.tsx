@@ -1,5 +1,5 @@
-// (C) 2007-2022 GoodData Corporation
-import React, { useCallback } from "react";
+// (C) 2007-2024 GoodData Corporation
+import React, { useCallback, useState, useEffect } from "react";
 import cx from "classnames";
 import { injectIntl, WrappedComponentProps } from "react-intl";
 import { Input } from "../Form/index.js";
@@ -21,10 +21,13 @@ export interface IDropdownListNoDataRenderProps {
  * @internal
  */
 export interface IDropdownListProps<T> extends IListProps<T> {
+    title?: string;
     className?: string;
+    tabsClassName?: string;
 
     height?: number;
     width?: number;
+    maxHeight?: number;
 
     isLoading?: boolean;
 
@@ -80,10 +83,13 @@ const defaultNoData = injectIntl(
  */
 export function DropdownList<T>(props: IDropdownListProps<T>): JSX.Element {
     const {
+        title,
         className = "",
+        tabsClassName = "",
 
         width,
         height,
+        maxHeight,
 
         isMobile,
         isLoading,
@@ -111,8 +117,9 @@ export function DropdownList<T>(props: IDropdownListProps<T>): JSX.Element {
         ...listProps
     } = props;
 
+    const [currentSearchString, setCurrentSearchString] = useState(searchString);
     const hasNoData = !isLoading && itemsCount === 0;
-    const hasNoMatchingData = hasNoData && !!searchString;
+    const hasNoMatchingData = hasNoData && !!currentSearchString;
 
     const listClassNames = cx("gd-infinite-list", className);
 
@@ -132,14 +139,26 @@ export function DropdownList<T>(props: IDropdownListProps<T>): JSX.Element {
         return footer;
     };
 
-    const onChange = useCallback((search: string | number) => onSearch(search.toString()), [onSearch]);
+    const onChange = useCallback(
+        (search: string | number) => {
+            onSearch(search.toString());
+            setCurrentSearchString(search.toString());
+        },
+        [onSearch],
+    );
+
+    useEffect(() => {
+        // update string if dropdown is not getting unmounted on close to not have previous search on re-open
+        setCurrentSearchString(searchString);
+    }, [searchString]);
 
     return (
         <React.Fragment>
+            {title ? <div className="gd-list-title">{title}</div> : null}
             {showSearch ? (
                 <Input
                     className={searchFieldClassNames}
-                    value={searchString}
+                    value={currentSearchString}
                     onChange={onChange}
                     isSmall={searchFieldSize === "small"}
                     placeholder={searchPlaceholder}
@@ -149,7 +168,12 @@ export function DropdownList<T>(props: IDropdownListProps<T>): JSX.Element {
                 />
             ) : null}
             {showTabs ? (
-                <DropdownTabs tabs={tabs} selectedTabId={selectedTabId} onTabSelect={onTabSelect} />
+                <DropdownTabs
+                    tabs={tabs}
+                    selectedTabId={selectedTabId}
+                    onTabSelect={onTabSelect}
+                    className={tabsClassName}
+                />
             ) : null}
             {hasNoData ? (
                 <div style={{ width: isMobile ? "auto" : width }}>{renderNoData({ hasNoMatchingData })}</div>
@@ -166,6 +190,7 @@ export function DropdownList<T>(props: IDropdownListProps<T>): JSX.Element {
                                 className={listClassNames}
                                 width={listWidth}
                                 height={listHeight}
+                                maxHeight={maxHeight}
                                 items={items}
                                 itemsCount={itemsCount}
                                 itemHeight={isMobile ? Math.max(mobileItemHeight, itemHeight) : itemHeight}

@@ -1,4 +1,4 @@
-// (C) 2021-2023 GoodData Corporation
+// (C) 2021-2024 GoodData Corporation
 import { CaseReducer, PayloadAction } from "@reduxjs/toolkit";
 import { LayoutState } from "./layoutState.js";
 import { invariant } from "ts-invariant";
@@ -28,6 +28,9 @@ import {
     IDrillToLegacyDashboard,
     IInsightWidgetConfiguration,
     IKpiWidgetConfiguration,
+    IDrillDownReference,
+    isDashboardAttributeFilterReference,
+    isRichTextWidget,
 } from "@gooddata/sdk-model";
 import { WidgetDescription, WidgetHeader } from "../../types/widgetTypes.js";
 import flatMap from "lodash/flatMap.js";
@@ -421,6 +424,29 @@ const replaceWidgetDrill: LayoutReducer<ReplaceWidgetDrillDefinitions> = (state,
 //
 //
 
+type ReplaceWidgetBlacklistHierarchies = {
+    ref: ObjRef;
+    blacklistHierarchies: IDrillDownReference[];
+};
+
+const replaceWidgetBlacklistHierarchies: LayoutReducer<ReplaceWidgetBlacklistHierarchies> = (
+    state,
+    action,
+) => {
+    invariant(state.layout);
+
+    const { blacklistHierarchies, ref } = action.payload;
+    const widget = getWidgetByRef(state, ref);
+
+    invariant(widget && (isKpiWidget(widget) || isInsightWidget(widget)));
+
+    widget.ignoredDrillDownHierarchies = blacklistHierarchies ?? [];
+};
+
+//
+//
+//
+
 type ReplaceWidgetVisProperties = {
     ref: ObjRef;
     properties: VisualizationProperties | undefined;
@@ -570,6 +596,39 @@ const replaceWidgetDateDataset: LayoutReducer<ReplaceWidgetDateDataset> = (state
 
     widget.dateDataSet = dateDataSet;
 };
+//
+//
+//
+
+type RemoveIgnoredDateFilter = {
+    dateDataSets: ObjRef[];
+};
+
+const removeIgnoredDateFilter: LayoutReducer<RemoveIgnoredDateFilter> = (state, action) => {
+    invariant(state.layout);
+
+    const { dateDataSets } = action.payload;
+
+    state.layout.sections.forEach((section) => {
+        section.items.forEach((item) => {
+            const widget = item.widget;
+
+            if (isInsightWidget(widget) || isKpiWidget(widget)) {
+                const updatedFilters = widget.ignoreDashboardFilters.filter((filter) => {
+                    if (isDashboardAttributeFilterReference(filter)) {
+                        return true;
+                    }
+
+                    return (
+                        dateDataSets.find((removed) => areObjRefsEqual(removed, filter.dataSet)) === undefined
+                    );
+                });
+
+                widget.ignoreDashboardFilters = updatedFilters;
+            }
+        });
+    });
+};
 
 //
 //
@@ -652,10 +711,30 @@ const replaceKpiWidgetConfiguration: LayoutReducer<ReplaceKpiWidgetConfiguration
     setOrDelete(widget, "configuration", config);
 };
 
+//
+//
+//
+
+type ReplaceRichTextWidgetContent = {
+    ref: ObjRef;
+    content: string;
+};
+
+const replaceRichTextWidgetContent: LayoutReducer<ReplaceRichTextWidgetContent> = (state, action) => {
+    invariant(state.layout);
+
+    const { content, ref } = action.payload;
+    const widget = getWidgetByRef(state, ref);
+
+    invariant(widget && isRichTextWidget(widget));
+    setOrDelete(widget, "content", content);
+};
+
 export const layoutReducers = {
     setLayout,
     updateWidgetIdentities,
     removeIgnoredAttributeFilter,
+    removeIgnoredDateFilter,
     addSection: withUndo(addSection),
     removeSection: withUndo(removeSection),
     moveSection: withUndo(moveSection),
@@ -668,6 +747,7 @@ export const layoutReducers = {
     replaceWidgetDescription: withUndo(replaceWidgetDescription),
     replaceWidgetDrillWithoutUndo: replaceWidgetDrill, // useful in internal sanitization use cases
     replaceWidgetDrills: withUndo(replaceWidgetDrill),
+    replaceWidgetBlacklistHierarchies: withUndo(replaceWidgetBlacklistHierarchies),
     replaceInsightWidgetVisProperties: withUndo(replaceInsightWidgetVisProperties),
     replaceInsightWidgetVisConfiguration: withUndo(replaceInsightWidgetVisConfiguration),
     replaceInsightWidgetInsight: withUndo(replaceInsightWidgetInsight),
@@ -678,6 +758,7 @@ export const layoutReducers = {
     replaceKpiWidgetDrillWithoutUndo: replaceKpiWidgetDrill, // useful in internal sanitization use cases
     replaceKpiWidgetDrill: withUndo(replaceKpiWidgetDrill),
     replaceKpiWidgetConfiguration: withUndo(replaceKpiWidgetConfiguration),
+    replaceRichTextWidgetContent: withUndo(replaceRichTextWidgetContent),
     undoLayout: undoReducer,
     clearLayoutHistory: resetUndoReducer,
     changeItemsHeight: changeItemsHeight,

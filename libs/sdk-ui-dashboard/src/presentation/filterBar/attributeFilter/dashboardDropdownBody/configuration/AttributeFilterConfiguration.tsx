@@ -1,26 +1,38 @@
-// (C) 2022-2023 GoodData Corporation
+// (C) 2022-2024 GoodData Corporation
 import React, { useCallback, useEffect, useMemo } from "react";
+import { IntlShape } from "react-intl";
+import {
+    DashboardAttributeFilterConfigMode,
+    DashboardAttributeFilterConfigModeValues,
+    IDashboardAttributeFilter,
+    ObjRef,
+} from "@gooddata/sdk-model";
+import { LoadingSpinner } from "@gooddata/sdk-ui-kit";
+import { useTheme } from "@gooddata/sdk-ui-theme-provider";
+import { invariant } from "ts-invariant";
+
 import { ConfigurationCategory } from "./ConfigurationCategory.js";
 import { ConfigurationPanelHeader } from "./ConfigurationPanelHeader.js";
-
 import {
     useDashboardSelector,
     selectOtherContextAttributeFilters,
     selectFilterContextAttributeFilters,
-    selectSupportsElementsQueryParentFiltering,
+    selectSupportsSingleSelectDependentFilters,
+    selectBackendCapabilities,
 } from "../../../../../model/index.js";
-import { IDashboardAttributeFilter, ObjRef } from "@gooddata/sdk-model";
 import { ParentFiltersList } from "./parentFilters/ParentFiltersList.js";
-
-import { invariant } from "ts-invariant";
 import { AttributeDisplayFormsDropdown } from "./displayForms/AttributeDisplayFormsDropdown.js";
 import { useAttributeFilterParentFiltering } from "../../AttributeFilterParentFilteringContext.js";
 import { useConnectingAttributes } from "./hooks/useConnectingAttributes.js";
-import { LoadingSpinner } from "@gooddata/sdk-ui-kit";
-import { useTheme } from "@gooddata/sdk-ui-theme-provider";
+import { useAvailableDatasetsForItems } from "./hooks/useAvailableDatasetsForItems.js";
 import { useAttributes } from "../../../../../_staging/sharedHooks/useAttributes.js";
-import { AttributeTitleRenaming } from "./title/AttributeTitleRenaming.js";
+import { AttributeTitleRenaming } from "../../../configuration/title/AttributeTitleRenaming.js";
 import { SelectionMode } from "./selectionMode/SelectionMode.js";
+import { ConfigModeSelect } from "../../../configuration/ConfigurationModeSelect.js";
+import { useMetricsAndFacts } from "../../../../../_staging/sharedHooks/useMetricsAndFacts.js";
+
+import { useValidNeighbourAttributes } from "./hooks/useValidNeighbourAttributes.js";
+import { LocalizedLimitValuesConfiguration } from "./limitValues/LimitValuesConfiguration.js";
 
 interface IAttributeFilterConfigurationProps {
     closeHandler: () => void;
@@ -34,6 +46,9 @@ interface IAttributeFilterConfigurationProps {
     singleSelectionOptionText: string;
     singleSelectionDisabledTooltip: string;
     parentFiltersDisabledTooltip: string;
+    intl: IntlShape;
+    modeCategoryTitleText: string;
+    showConfigModeSection: boolean;
 }
 
 export const AttributeFilterConfiguration: React.FC<IAttributeFilterConfigurationProps> = (props) => {
@@ -49,6 +64,9 @@ export const AttributeFilterConfiguration: React.FC<IAttributeFilterConfiguratio
         singleSelectionDisabledTooltip,
         parentFiltersDisabledTooltip,
         closeHandler,
+        intl,
+        modeCategoryTitleText,
+        showConfigModeSection,
     } = props;
     const theme = useTheme();
 
@@ -61,7 +79,11 @@ export const AttributeFilterConfiguration: React.FC<IAttributeFilterConfiguratio
     const neighborFilters: IDashboardAttributeFilter[] = useDashboardSelector(
         selectOtherContextAttributeFilters(filterRef),
     );
-    const isDependentFiltersEnabled = useDashboardSelector(selectSupportsElementsQueryParentFiltering);
+    const supportsSingleSelectDependentFilters = useDashboardSelector(
+        selectSupportsSingleSelectDependentFilters,
+    );
+    const capabilities = useDashboardSelector(selectBackendCapabilities);
+    const showDependentFiltersConfiguration = !capabilities.supportsAttributeFilterElementsLimiting;
 
     const neighborFilterDisplayForms = useMemo(() => {
         return neighborFilters.map((filter) => filter.attributeFilter.displayForm);
@@ -90,20 +112,47 @@ export const AttributeFilterConfiguration: React.FC<IAttributeFilterConfiguratio
         onTitleReset,
         selectionMode,
         onSelectionModeUpdate,
+        mode,
+        onModeUpdate,
+        limitingItems,
+        onLimitingItemsUpdate,
+        availableDatasetsForFilter,
+        dependentDateFilters,
     } = useAttributeFilterParentFiltering();
+
+    const disableParentFiltersList = selectionMode === "single" && !supportsSingleSelectDependentFilters;
 
     const { connectingAttributesLoading, connectingAttributes } = useConnectingAttributes(
         currentFilter.attributeFilter.displayForm,
         neighborFilterDisplayForms,
     );
 
+    const { availableDatasetsForItemsLoading, availableDatasetForItems } =
+        useAvailableDatasetsForItems(availableDatasetsForFilter);
+
+    const { validNeighbourAttributesLoading, validNeighbourAttributes } = useValidNeighbourAttributes(
+        filterDisplayForms.selectedDisplayForm,
+        neighborFilterDisplayForms,
+    );
+
     const { attributes, attributesLoading } = useAttributes(neighborFilterDisplayForms);
+    const { metricsAndFacts, metricsAndFactsLoading } = useMetricsAndFacts();
 
-    const parentsSelected = useCallback(() => {
+    const getIsSelectionDisabled = useCallback(() => {
+        if (supportsSingleSelectDependentFilters) {
+            return false;
+        }
+
         return parents.filter((parent) => parent.isSelected).length > 0;
-    }, [parents]);
+    }, [parents, supportsSingleSelectDependentFilters]);
 
-    if (connectingAttributesLoading || attributesLoading) {
+    if (
+        connectingAttributesLoading ||
+        attributesLoading ||
+        validNeighbourAttributesLoading ||
+        metricsAndFactsLoading ||
+        availableDatasetsForItemsLoading
+    ) {
         return (
             <div className="gd-loading-equalizer-attribute-filter-config-wrap">
                 <LoadingSpinner
@@ -114,9 +163,19 @@ export const AttributeFilterConfiguration: React.FC<IAttributeFilterConfiguratio
         );
     }
 
-    if (!filterRef || !connectingAttributes || !attributes) {
+    if (
+        !filterRef ||
+        !connectingAttributes ||
+        !validNeighbourAttributes ||
+        !attributes ||
+        !availableDatasetForItems
+    ) {
         return null;
     }
+
+    const handleModeChanged = (value: string) => {
+        onModeUpdate(value as DashboardAttributeFilterConfigMode);
+    };
 
     return (
         <div className="s-attribute-filter-dropdown-configuration attribute-filter-dropdown-configuration sdk-edit-mode-on">
@@ -136,21 +195,36 @@ export const AttributeFilterConfiguration: React.FC<IAttributeFilterConfiguratio
                 singleSelectionDisabledTooltip={singleSelectionDisabledTooltip}
                 selectionMode={selectionMode}
                 onSelectionModeChange={onSelectionModeUpdate}
-                disabled={parentsSelected()}
+                disabled={getIsSelectionDisabled()}
             />
-            {isDependentFiltersEnabled && parents.length > 0 ? (
-                <ConfigurationCategory categoryTitle={filterByText} />
+            <LocalizedLimitValuesConfiguration
+                attributeTitle={title ?? defaultAttributeFilterTitle}
+                parentFilters={parents}
+                validParentFilters={validNeighbourAttributes}
+                validateElementsBy={limitingItems}
+                onLimitingItemUpdate={onLimitingItemsUpdate}
+                onParentFilterUpdate={onParentSelect}
+                metricsAndFacts={metricsAndFacts!}
+                intl={intl}
+                availableDatasets={availableDatasetForItems}
+                dependentDateFilters={dependentDateFilters}
+            />
+            {showDependentFiltersConfiguration && parents.length > 0 ? (
+                <>
+                    <ConfigurationCategory categoryTitle={filterByText} />
+                    <ParentFiltersList
+                        currentFilterLocalId={currentFilter.attributeFilter.localIdentifier!}
+                        parents={parents}
+                        setParents={onParentSelect}
+                        onConnectingAttributeChanged={onConnectingAttributeChanged}
+                        connectingAttributes={connectingAttributes}
+                        attributes={attributes}
+                        disabled={disableParentFiltersList}
+                        disabledTooltip={parentFiltersDisabledTooltip}
+                        validParents={validNeighbourAttributes}
+                    />
+                </>
             ) : null}
-            <ParentFiltersList
-                currentFilterLocalId={currentFilter.attributeFilter.localIdentifier!}
-                parents={parents}
-                setParents={onParentSelect}
-                onConnectingAttributeChanged={onConnectingAttributeChanged}
-                connectingAttributes={connectingAttributes}
-                attributes={attributes}
-                disabled={selectionMode === "single"}
-                disabledTooltip={parentFiltersDisabledTooltip}
-            />
             {showDisplayFormPicker ? (
                 <div className="s-display-form-configuration">
                     <ConfigurationCategory categoryTitle={displayValuesAsText} />
@@ -162,6 +236,16 @@ export const AttributeFilterConfiguration: React.FC<IAttributeFilterConfiguratio
                         />
                     </div>
                 </div>
+            ) : null}
+            {showConfigModeSection ? (
+                <>
+                    <ConfigurationCategory categoryTitle={modeCategoryTitleText} />
+                    <ConfigModeSelect
+                        intl={intl}
+                        selectedMode={mode ?? DashboardAttributeFilterConfigModeValues.ACTIVE}
+                        onChanged={handleModeChanged}
+                    />
+                </>
             ) : null}
         </div>
     );

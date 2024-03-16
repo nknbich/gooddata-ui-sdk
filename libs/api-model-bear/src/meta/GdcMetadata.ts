@@ -50,7 +50,11 @@ export type ObjectCategory =
     | "visualizationWidget"
     | "theme"
     | "colorPalette"
-    | "attributeHierarchy";
+    | "attributeHierarchy"
+    | "user"
+    | "userGroup"
+    | "dateHierarchyTemplate"
+    | "dateAttributeHierarchy";
 
 /**
  * @public

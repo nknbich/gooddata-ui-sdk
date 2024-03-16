@@ -1,3 +1,5 @@
+// (C) 2024 GoodData Corporation
+
 /* eslint-disable */
 /**
  * OpenAPI definition
@@ -30,16 +32,16 @@ import { BASE_PATH, COLLECTION_FORMATS, RequestArgs, BaseAPI, RequiredError } fr
 export interface ColumnWarning {
     /**
      * Column name.
-     * @type {Array<string>}
+     * @type {string}
      * @memberof ColumnWarning
      */
-    name: Array<string>;
+    name: string;
     /**
      * Warning message related to the column.
-     * @type {Array<string>}
+     * @type {string}
      * @memberof ColumnWarning
      */
-    message: Array<string>;
+    message: string;
 }
 /**
  * A parameter for testing data source connection
@@ -308,16 +310,16 @@ export type SqlColumnDataTypeEnum = typeof SqlColumnDataTypeEnum[keyof typeof Sq
 export interface TableWarning {
     /**
      * Table name.
-     * @type {Array<string>}
+     * @type {string}
      * @memberof TableWarning
      */
-    name: Array<string>;
+    name: string;
     /**
      * Warning message related to the table.
-     * @type {Array<string>}
+     * @type {string}
      * @memberof TableWarning
      */
-    message?: Array<string>;
+    message?: string;
     /**
      *
      * @type {Array<ColumnWarning>}
@@ -390,6 +392,10 @@ export const TestDefinitionRequestTypeEnum = {
     AZURESQL: "AZURESQL",
     SYNAPSESQL: "SYNAPSESQL",
     DATABRICKS: "DATABRICKS",
+    GDSTORAGE: "GDSTORAGE",
+    CLICKHOUSE: "CLICKHOUSE",
+    MYSQL: "MYSQL",
+    MARIADB: "MARIADB",
 } as const;
 
 export type TestDefinitionRequestTypeEnum =

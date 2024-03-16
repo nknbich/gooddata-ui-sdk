@@ -1,4 +1,4 @@
-// (C) 2022 GoodData Corporation
+// (C) 2022-2024 GoodData Corporation
 import {
     IMultiSelectAttributeFilterHandler,
     AsyncOperationStatus,
@@ -12,6 +12,7 @@ import {
     IMeasure,
     IRelativeDateFilter,
     SortDirection,
+    ObjRef,
 } from "@gooddata/sdk-model";
 import { GoodDataSdkError } from "@gooddata/sdk-ui";
 
@@ -50,6 +51,7 @@ export interface IUseAttributeFilterHandlerStateResult {
             limitingAttributeFilters?: IElementsQueryAttributeFilter[];
             limitingMeasures?: IMeasure[];
             limitingDateFilters?: IRelativeDateFilter[];
+            limitingValidationItems?: ObjRef[];
         };
     };
     selection: {
@@ -57,6 +59,7 @@ export interface IUseAttributeFilterHandlerStateResult {
             elements?: IAttributeElement[];
             keys?: string[];
             isInverted?: boolean;
+            irrelevantElements?: IAttributeElement[];
         };
         working: {
             elements?: IAttributeElement[];
@@ -64,6 +67,7 @@ export interface IUseAttributeFilterHandlerStateResult {
             isInverted?: boolean;
             isChanged?: boolean;
             isEmpty?: boolean;
+            irrelevantElements?: IAttributeElement[];
         };
     };
     config?: {
@@ -112,6 +116,7 @@ export const useAttributeFilterHandlerState = (
                 limitingAttributeFilters: handler.getLimitingAttributeFilters(),
                 limitingDateFilters: handler.getLimitingDateFilters(),
                 limitingMeasures: handler.getLimitingMeasures(),
+                limitingValidationItems: handler.getLimitingValidationItems(),
                 order: handler.getOrder(),
             },
         },
@@ -120,6 +125,10 @@ export const useAttributeFilterHandlerState = (
                 elements: initStatus === "success" ? handler.getElementsByKey(committedSelection.keys) : [],
                 keys: committedSelection.keys,
                 isInverted: committedSelection.isInverted,
+                irrelevantElements:
+                    initStatus === "success"
+                        ? handler.getElementsByKey(committedSelection.irrelevantKeys)
+                        : [],
             },
             working: {
                 elements: initStatus === "success" ? handler.getElementsByKey(workingSelection.keys) : [],
@@ -127,6 +136,8 @@ export const useAttributeFilterHandlerState = (
                 isInverted: workingSelection.isInverted,
                 isChanged: handler.isWorkingSelectionChanged(),
                 isEmpty: handler.isWorkingSelectionEmpty(),
+                irrelevantElements:
+                    initStatus === "success" ? handler.getElementsByKey(workingSelection.irrelevantKeys) : [],
             },
         },
     };

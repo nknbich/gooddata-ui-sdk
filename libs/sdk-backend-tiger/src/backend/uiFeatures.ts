@@ -1,4 +1,4 @@
-// (C) 2020-2023 GoodData Corporation
+// (C) 2020-2024 GoodData Corporation
 
 /**
  * This is list of feature flags managed on Panther by FeatureHub
@@ -46,15 +46,33 @@ export enum TigerFeaturesNames {
     EnableTableTotalRows = "enableTableTotalRows",
     //boolean + possible values: enabled, disabled
     EnablePdmRemovalDeprecationPhase = "enablePdmRemovalDeprecationPhase",
-    //boolean + possible values: enabled, disabled
-    EnablePivotTableTransposition = "enablePivotTableTransposition",
-    //boolean + possible values: enabled, disabled
-    EnableColumnHeadersPosition = "enableColumnHeadersPosition",
     EnableNewHeadline = "enableNewHeadline",
     //boolean + possible values: enabled, disabled
-    EnableAttributeHierarchies = "enableAttributeHierarchies",
-    //boolean + possible values: enabled, disabled
     EnableUnavailableItemsVisible = "enableUnavailableItemsVisible",
+    //boolean + possible values: enabled, disabled
+    EnablePivotTableIncreaseBucketSize = "enablePivotTableIncreaseBucketSize",
+    // boolean + possible values: enabled, disabled
+    EnableUserManagement = "enableUserManagement",
+    //boolean + possible values: enabled, disabled
+    EnableKDSavedFilters = "enableKDSavedFilters",
+    //boolean + possible values: enabled, disabled
+    EnableClickHouseDataSource = "enableClickHouseDataSource",
+    //boolean + possible values: enabled, disabled
+    EnableKDCrossFiltering = "enableKDCrossFiltering",
+    //boolean + possible values: enabled, disabled
+    EnableMultipleDateFilters = "enableMultipleDateFilters",
+    //boolean + possible values: enabled, disabled
+    EnableADMultipleDateFilters = "enableADMultipleDateFilters",
+    EnableKDRichText = "enableKDRichText",
+    EnableAttributeFilterValuesValidation = "enableAttributeFilterValuesValidation",
+    EnableMySqlDataSource = "enableMySqlDataSource",
+    EnableCreateUser = "enableCreateUser",
+    //boolean + possible values: enabled, disabled
+    EnableDirectQuery = "enableDirectQuery",
+    EnableMariaDbDataSource = "enableMariaDbDataSource",
+    EnableRepeaterChart = "enableRepeaterChart",
+    //boolean + possible values: enabled, disabled
+    EnableKDAttributeFilterDatesValidation = "enableKDAttributeFilterDatesValidation",
 }
 
 export type ITigerFeatureFlags = {
@@ -77,11 +95,23 @@ export type ITigerFeatureFlags = {
     enableCompositeGrain: typeof FeatureFlagsValues["enableCompositeGrain"][number];
     enableTableTotalRows: typeof FeatureFlagsValues["enableTableTotalRows"][number];
     enablePdmRemovalDeprecationPhase: typeof FeatureFlagsValues["enablePdmRemovalDeprecationPhase"][number];
-    enablePivotTableTransposition: typeof FeatureFlagsValues["enablePivotTableTransposition"][number];
-    enableColumnHeadersPosition: typeof FeatureFlagsValues["enableColumnHeadersPosition"][number];
     enableNewHeadline: typeof FeatureFlagsValues["enableNewHeadline"][number];
-    enableAttributeHierarchies: typeof FeatureFlagsValues["enableAttributeHierarchies"][number];
     enableUnavailableItemsVisible: typeof FeatureFlagsValues["enableUnavailableItemsVisible"][number];
+    enablePivotTableIncreaseBucketSize: typeof FeatureFlagsValues["enablePivotTableIncreaseBucketSize"][number];
+    enableUserManagement: typeof FeatureFlagsValues["enableUserManagement"][number];
+    enableKDSavedFilters: typeof FeatureFlagsValues["enableKDSavedFilters"][number];
+    enableClickHouseDataSource: typeof FeatureFlagsValues["enableClickHouseDataSource"][number];
+    enableKDCrossFiltering: typeof FeatureFlagsValues["enableKDCrossFiltering"][number];
+    enableMultipleDateFilters: typeof FeatureFlagsValues["enableMultipleDateFilters"][number];
+    enableADMultipleDateFilters: typeof FeatureFlagsValues["enableADMultipleDateFilters"][number];
+    enableKDRichText: typeof FeatureFlagsValues["enableKDRichText"][number];
+    enableAttributeFilterValuesValidation: typeof FeatureFlagsValues["enableAttributeFilterValuesValidation"][number];
+    enableMySqlDataSource: typeof FeatureFlagsValues["enableMySqlDataSource"][number];
+    enableCreateUser: typeof FeatureFlagsValues["enableCreateUser"][number];
+    enableDirectQuery: typeof FeatureFlagsValues["enableDirectQuery"][number];
+    enableMariaDbDataSource: typeof FeatureFlagsValues["enableMariaDbDataSource"][number];
+    enableRepeaterChart: typeof FeatureFlagsValues["enableRepeaterChart"][number];
+    enableKDAttributeFilterDatesValidation: typeof FeatureFlagsValues["enableKDAttributeFilterDatesValidation"][number];
 };
 
 export const DefaultFeatureFlags: ITigerFeatureFlags = {
@@ -104,11 +134,23 @@ export const DefaultFeatureFlags: ITigerFeatureFlags = {
     enableCompositeGrain: false,
     enableTableTotalRows: true,
     enablePdmRemovalDeprecationPhase: false,
-    enablePivotTableTransposition: true,
-    enableColumnHeadersPosition: true,
     enableNewHeadline: true,
-    enableAttributeHierarchies: false,
     enableUnavailableItemsVisible: false,
+    enablePivotTableIncreaseBucketSize: true,
+    enableUserManagement: true,
+    enableKDSavedFilters: true,
+    enableClickHouseDataSource: false,
+    enableKDCrossFiltering: true,
+    enableMultipleDateFilters: true,
+    enableADMultipleDateFilters: true,
+    enableKDRichText: true,
+    enableAttributeFilterValuesValidation: true,
+    enableMySqlDataSource: false,
+    enableCreateUser: true,
+    enableDirectQuery: false,
+    enableMariaDbDataSource: false,
+    enableRepeaterChart: false,
+    enableKDAttributeFilterDatesValidation: false,
 };
 
 export const FeatureFlagsValues = {
@@ -135,9 +177,21 @@ export const FeatureFlagsValues = {
     enableCompositeGrain: [true, false] as const,
     enableTableTotalRows: [true, false] as const,
     enablePdmRemovalDeprecationPhase: [true, false] as const,
-    enablePivotTableTransposition: [true, false] as const,
-    enableColumnHeadersPosition: [true, false] as const,
     enableNewHeadline: [true, false] as const,
-    enableAttributeHierarchies: [true, false] as const,
     enableUnavailableItemsVisible: [true, false] as const,
+    enablePivotTableIncreaseBucketSize: [true, false] as const,
+    enableUserManagement: [true, false] as const,
+    enableKDSavedFilters: [true, false] as const,
+    enableClickHouseDataSource: [true, false] as const,
+    enableKDCrossFiltering: [true, false] as const,
+    enableMultipleDateFilters: [true, false] as const,
+    enableADMultipleDateFilters: [true, false] as const,
+    enableKDRichText: [true, false] as const,
+    enableAttributeFilterValuesValidation: [true, false] as const,
+    enableMySqlDataSource: [true, false] as const,
+    enableCreateUser: [true, false] as const,
+    enableDirectQuery: [true, false] as const,
+    enableMariaDbDataSource: [true, false] as const,
+    enableRepeaterChart: [true, false] as const,
+    enableKDAttributeFilterDatesValidation: [true, false] as const,
 };

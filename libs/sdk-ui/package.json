@@ -1,6 +1,6 @@
 {
     "name": "@gooddata/sdk-ui",
-    "version": "9.3.0-alpha.5",
+    "version": "9.10.0-alpha.13",
     "description": "GoodData.UI SDK - Core",
     "repository": {
         "type": "git",
@@ -26,12 +26,9 @@
         "styles"
     ],
     "scripts": {
-        "clean": "rm -rf ci dist esm coverage *.log",
+        "clean": "rm -rf ci dist esm coverage *.log tsconfig.tsbuildinfo",
         "api-extractor": "mkdir -p api && [ -z \"${CI}\" ] && (api-extractor run -l) || (api-extractor run)",
-        "build": "bash scripts/build.sh && npm run api-extractor",
-        "build-dev": "bash scripts/build.sh --dev",
-        "build-esm": "tsc -p tsconfig.build.json",
-        "dev": "bash scripts/build.sh --dev-watch",
+        "build": "tsc -p tsconfig.json && npm run api-extractor",
         "test": "vitest watch",
         "test-once": "vitest run",
         "test-ci": "vitest run --reporter=junit --outputFile=./ci/results/test-results.xml",
@@ -50,7 +47,7 @@
         "validate-locales-ci": "i18n-toolkit"
     },
     "dependencies": {
-        "@gooddata/number-formatter": "^1.0.1",
+        "@gooddata/number-formatter": "^1.0.5",
         "@gooddata/sdk-backend-spi": "workspace:*",
         "@gooddata/sdk-model": "workspace:*",
         "@gooddata/util": "workspace:*",
@@ -61,7 +58,7 @@
         "lodash": "^4.17.19",
         "memoize-one": "^6.0.0",
         "react-intl": "^6.4.1",
-        "ts-invariant": "^0.7.3",
+        "ts-invariant": "^0.7.5",
         "tslib": "^2.5.0",
         "uuid": "^8.3.2"
     },
@@ -83,7 +80,7 @@
         "@testing-library/user-event": "^14.4.2",
         "@types/hoist-non-react-statics": "^3.3.1",
         "@types/json-stable-stringify": "^1.0.32",
-        "@types/lodash": "^4.14.158",
+        "@types/lodash": "^4.14.202",
         "@types/node": "^18.17.6",
         "@types/raf": "^3.4.0",
         "@types/react": "^18.2.0",
@@ -115,8 +112,8 @@
         "stylelint-checkstyle-formatter": "^0.1.2",
         "stylelint-config-prettier": "^8.0.2",
         "tsd": "^0.21.0",
-        "typescript": "5.0.2",
-        "vitest": "0.31.4",
-        "vitest-dom": "0.1.0"
+        "typescript": "5.3.3",
+        "vitest": "1.0.4",
+        "vitest-dom": "0.1.1"
     }
 }

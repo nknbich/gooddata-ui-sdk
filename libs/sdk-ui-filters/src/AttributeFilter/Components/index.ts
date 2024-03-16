@@ -1,10 +1,10 @@
-// (C) 2021-2023 GoodData Corporation
+// (C) 2021-2024 GoodData Corporation
 
 export {
     AttributeFilterDropdownButton,
     IAttributeFilterDropdownButtonProps,
 } from "./DropdownButton/AttributeFilterDropdownButton.js";
-export { AttributeFilterButtonToolip } from "./DropdownButton/AttributeFilterButtonTooltip.js";
+export { AttributeFilterButtonTooltip } from "./DropdownButton/AttributeFilterButtonTooltip.js";
 export {
     AttributeFilterSimpleDropdownButton,
     AttributeFilterSimpleDropdownButtonWithSelection,
@@ -81,3 +81,7 @@ export {
 } from "./Addons/AttributeFilterDeleteButton.js";
 export { useAutoOpenAttributeFilterDropdownButton } from "./Addons/hooks/useAutoOpenAttributeFilterDropdownButton.js";
 export { useOnCloseAttributeFilterDropdownButton } from "./Addons/hooks/useOnCloseAttributeFilterDropdownButton.js";
+export {
+    AttributeFilterDependencyTooltip,
+    IAttributeFilterDependencyTooltipProps,
+} from "./Addons/AttributeFilterDependencyTooltip.js";

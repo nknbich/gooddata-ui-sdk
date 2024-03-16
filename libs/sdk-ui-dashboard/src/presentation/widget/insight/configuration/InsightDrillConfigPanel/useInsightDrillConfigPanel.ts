@@ -1,23 +1,43 @@
-// (C) 2022-2023 GoodData Corporation
-import { InsightDrillDefinition, isInsightWidget, ObjRef } from "@gooddata/sdk-model";
+// (C) 2022-2024 GoodData Corporation
 import { useCallback, useMemo } from "react";
 import { defineMessages } from "react-intl";
+import { invariant } from "ts-invariant";
 import { useToastMessage } from "@gooddata/sdk-ui-kit";
+import { IAvailableDrillTargets } from "@gooddata/sdk-ui";
+import {
+    IDrillDownReference,
+    InsightDrillDefinition,
+    isInsightWidget,
+    localIdRef,
+    ObjRef,
+} from "@gooddata/sdk-model";
 
 import {
     modifyDrillsForInsightWidget,
+    removeDrillDownForInsightWidget,
     removeDrillsForInsightWidget,
+    selectAllowMultipleInteractionsPerAttributeAndMeasure,
     selectDrillTargetsByWidgetRef,
+    selectGlobalDrillsDownAttributeHierarchyByWidgetRef,
     selectInvalidUrlDrillParameterDrillLocalIdsByWidgetRef,
     selectSettings,
     selectWidgetByRef,
     useDashboardDispatch,
     useDashboardSelector,
+    selectInsightByRef,
+    addDrillDownForInsightWidget,
+    modifyDrillDownForInsightWidget,
+    selectSupportsAttributeHierarchies,
 } from "../../../../../model/index.js";
-import { invariant } from "ts-invariant";
-import { getMappedConfigForWidget } from "./drillConfigMapper.js";
-import { IDrillConfigItem } from "../../../../drill/types.js";
-import { IAvailableDrillTargets } from "@gooddata/sdk-ui";
+import { getGlobalDrillDownMappedConfigForWidget, getMappedConfigForWidget } from "./drillConfigMapper.js";
+import {
+    DRILL_TARGET_TYPE,
+    IDrillConfigItem,
+    IDrillDownAttributeHierarchyConfig,
+    IDrillDownAttributeHierarchyDefinition,
+    isDrillDownToAttributeHierarchyConfig,
+    isDrillDownToAttributeHierarchyDefinition,
+} from "../../../../drill/types.js";
 import { useIncompleteItems } from "./useDrillConfigIncompleteItems.js";
 
 const messages = defineMessages({
@@ -27,6 +47,7 @@ const messages = defineMessages({
 
 const mergeDrillConfigItems = (
     drillConfigItems: IDrillConfigItem[],
+    globalDrillDownItems: IDrillConfigItem[],
     incompleteItems: IDrillConfigItem[],
 ): IDrillConfigItem[] => {
     return incompleteItems.reduce(
@@ -41,20 +62,29 @@ const mergeDrillConfigItems = (
             }
             return acc;
         },
-        [...drillConfigItems],
+        [...(globalDrillDownItems ?? []), ...(drillConfigItems ?? [])],
     );
 };
 
 const getUnusedDrillTargets = (
     availableDrillTargets: IAvailableDrillTargets | undefined,
     mergedItems: IDrillConfigItem[],
+    allowMultipleInteractionsPerAttributeAndMeasure: boolean,
+    supportsAttributeHierarchies: boolean,
 ) => {
+    if (allowMultipleInteractionsPerAttributeAndMeasure && supportsAttributeHierarchies) {
+        return {
+            measures: availableDrillTargets?.measures,
+            attributes: availableDrillTargets?.attributes,
+        };
+    }
+
     const availableDrillTargetMeasures = availableDrillTargets?.measures?.filter(
         (measure) =>
             !mergedItems.some(
                 (item) =>
                     item.type === "measure" &&
-                    item.localIdentifier === measure.measure.measureHeaderItem.localIdentifier,
+                    item.originLocalIdentifier === measure.measure.measureHeaderItem.localIdentifier,
             ),
     );
     const availableDrillTargetAttributes = availableDrillTargets?.attributes?.filter(
@@ -62,7 +92,7 @@ const getUnusedDrillTargets = (
             !mergedItems.some(
                 (item) =>
                     item.type === "attribute" &&
-                    item.localIdentifier === attribute.attribute.attributeHeader.localIdentifier,
+                    item.originLocalIdentifier === attribute.attribute.attributeHeader.localIdentifier,
             ),
     );
 
@@ -87,13 +117,21 @@ export const useInsightDrillConfigPanel = (props: IUseDrillConfigPanelProps) => 
     const { widgetRef } = props;
     const widget = useDashboardSelector(selectWidgetByRef(widgetRef));
     invariant(isInsightWidget(widget), "must be insight widget");
-
+    const insight = useDashboardSelector(selectInsightByRef(widget.insight));
     const { drills: widgetDrills } = widget;
     const { incompleteItems, deleteIncompleteItem, onChangeItem, onOriginSelect, completeItem, isItemNew } =
         useIncompleteItems({ widgetDrills });
 
     const { addSuccess } = useToastMessage();
     const dispatch = useDashboardDispatch();
+
+    const supportsAttributeHierarchies = useDashboardSelector(selectSupportsAttributeHierarchies);
+    const allowMultipleInteractionsPerAttributeAndMeasure = useDashboardSelector(
+        selectAllowMultipleInteractionsPerAttributeAndMeasure,
+    );
+    const widgetGlobalDrillDowns = useDashboardSelector(
+        selectGlobalDrillsDownAttributeHierarchyByWidgetRef(widgetRef),
+    );
 
     const configItems = useDashboardSelector(selectDrillTargetsByWidgetRef(widgetRef));
     const invalidCustomUrlDrillLocalIds = useDashboardSelector(
@@ -106,29 +144,92 @@ export const useInsightDrillConfigPanel = (props: IUseDrillConfigPanelProps) => 
 
     const drillItems = useMemo(() => {
         return availableDrillTargets
-            ? getMappedConfigForWidget(widgetDrills, availableDrillTargets, invalidCustomUrlDrillLocalIds)
+            ? getMappedConfigForWidget(
+                  widgetDrills,
+                  availableDrillTargets,
+                  invalidCustomUrlDrillLocalIds,
+                  widgetRef,
+              )
             : [];
     }, [availableDrillTargets, widgetDrills, invalidCustomUrlDrillLocalIds]);
 
+    const globalDrillDownItems = useMemo(() => {
+        return availableDrillTargets
+            ? getGlobalDrillDownMappedConfigForWidget(
+                  widgetGlobalDrillDowns,
+                  availableDrillTargets,
+                  widgetRef,
+              )
+            : [];
+    }, [widgetGlobalDrillDowns, availableDrillTargets]);
+
     const mergedItems = useMemo(
-        () => mergeDrillConfigItems(drillItems, incompleteItems),
-        [drillItems, incompleteItems],
+        () => mergeDrillConfigItems(drillItems, globalDrillDownItems, incompleteItems),
+        [drillItems, globalDrillDownItems, incompleteItems],
     );
 
     const originSelectorItems = useMemo(
-        () => getUnusedDrillTargets(availableDrillTargets, mergedItems),
-        [availableDrillTargets, mergedItems],
+        () =>
+            getUnusedDrillTargets(
+                availableDrillTargets,
+                mergedItems,
+                allowMultipleInteractionsPerAttributeAndMeasure,
+                supportsAttributeHierarchies,
+            ),
+        [
+            availableDrillTargets,
+            mergedItems,
+            allowMultipleInteractionsPerAttributeAndMeasure,
+            supportsAttributeHierarchies,
+        ],
     );
 
     const onSetupItem = useCallback(
-        (drill: InsightDrillDefinition, changedItem: IDrillConfigItem) => {
+        (
+            drill: InsightDrillDefinition | IDrillDownAttributeHierarchyDefinition,
+            changedItem: IDrillConfigItem,
+        ) => {
             const isNew = isItemNew(changedItem);
-            dispatch(modifyDrillsForInsightWidget(widgetRef, [drill]));
+            if (!isDrillDownToAttributeHierarchyDefinition(drill)) {
+                const blacklistHierarchiesToUpdate = isDrillDownToAttributeHierarchyConfig(changedItem)
+                    ? buildBlacklistHierarchies(changedItem)
+                    : [];
+
+                dispatch(modifyDrillsForInsightWidget(widgetRef, [drill], blacklistHierarchiesToUpdate));
+            }
 
             // we are not able remove incomplete items directly,it will change items in panel while command is processing
             // and this will not keep correct scroll.
             // we mark item complete and remove is done in useIncompleteItems when widget drills changed
             completeItem(changedItem);
+
+            if (changedItem.drillTargetType === DRILL_TARGET_TYPE.DRILL_DOWN) {
+                const attributeDescriptor = changedItem.attributes.find(
+                    (attr) => attr.attributeHeader.localIdentifier === changedItem.originLocalIdentifier,
+                );
+
+                if (changedItem.complete) {
+                    dispatch(
+                        modifyDrillDownForInsightWidget(
+                            widgetRef,
+                            attributeDescriptor!.attributeHeader.formOf.ref,
+                            (changedItem as IDrillDownAttributeHierarchyConfig).attributeHierarchyRef,
+                            buildBlacklistHierarchies(drill as IDrillDownAttributeHierarchyDefinition),
+                        ),
+                    );
+                } else {
+                    dispatch(
+                        addDrillDownForInsightWidget(
+                            widgetRef,
+                            attributeDescriptor!.attributeHeader.formOf.ref,
+                            changedItem.localIdentifier,
+                            (changedItem as IDrillDownAttributeHierarchyConfig).attributeHierarchyRef,
+                        ),
+                    );
+                }
+
+                deleteIncompleteItem(changedItem);
+            }
             addSuccess(isNew ? messages.added : messages.modified, { duration: 3000 });
         },
         [widgetRef, completeItem, addSuccess, isItemNew, dispatch],
@@ -137,7 +238,14 @@ export const useInsightDrillConfigPanel = (props: IUseDrillConfigPanelProps) => 
     const onDeleteItem = useCallback(
         (item: IDrillConfigItem) => {
             if (item.complete) {
-                dispatch(removeDrillsForInsightWidget(widgetRef, [item]));
+                item.drillTargetType === DRILL_TARGET_TYPE.DRILL_DOWN
+                    ? dispatch(
+                          removeDrillDownForInsightWidget(
+                              widgetRef,
+                              buildBlacklistHierarchies(item as IDrillDownAttributeHierarchyConfig),
+                          ),
+                      )
+                    : dispatch(removeDrillsForInsightWidget(widgetRef, [localIdRef(item.localIdentifier!)]));
             }
             deleteIncompleteItem(item);
         },
@@ -146,6 +254,7 @@ export const useInsightDrillConfigPanel = (props: IUseDrillConfigPanelProps) => 
 
     return {
         widget,
+        insight,
         enableKDZooming,
         drillConfigItems: mergedItems,
         originSelectorItems,
@@ -157,3 +266,31 @@ export const useInsightDrillConfigPanel = (props: IUseDrillConfigPanelProps) => 
         onDeleteItem,
     };
 };
+
+export function buildBlacklistHierarchies(
+    item: IDrillDownAttributeHierarchyDefinition | IDrillDownAttributeHierarchyConfig,
+): IDrillDownReference[] {
+    const attributeDescriptor = item.attributes.find(
+        (attr) => attr.attributeHeader.localIdentifier === item.originLocalIdentifier,
+    );
+    if (!attributeDescriptor) {
+        return [];
+    }
+    const isDateAttribute = !!attributeDescriptor.attributeHeader.granularity;
+    if (isDateAttribute) {
+        return [
+            {
+                type: "dateHierarchyReference",
+                dateHierarchyTemplate: item.attributeHierarchyRef,
+                dateDatasetAttribute: attributeDescriptor.attributeHeader.formOf.ref,
+            },
+        ];
+    }
+    return [
+        {
+            type: "attributeHierarchyReference",
+            attributeHierarchy: item.attributeHierarchyRef,
+            attribute: attributeDescriptor.attributeHeader.formOf.ref,
+        },
+    ];
+}

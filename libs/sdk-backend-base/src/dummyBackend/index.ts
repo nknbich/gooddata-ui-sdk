@@ -1,4 +1,4 @@
-// (C) 2019-2023 GoodData Corporation
+// (C) 2019-2024 GoodData Corporation
 import {
     IAnalyticalBackendConfig,
     IAuthenticatedPrincipal,
@@ -56,6 +56,10 @@ import {
     IElementsQueryResult,
     IPagedResource,
     IEntitlements,
+    IOrganizationPermissionService,
+    IOrganizationUserService,
+    IAttributeHierarchiesService,
+    IDataSourcesService,
 } from "@gooddata/sdk-backend-spi";
 import {
     defFingerprint,
@@ -175,6 +179,9 @@ export function dummyBackend(config: DummyBackendConfig = defaultDummyBackendCon
             return dummyWorkspace(id, config);
         },
         entitlements(): IEntitlements {
+            throw new NotSupported("not supported");
+        },
+        dataSources(): IDataSourcesService {
             throw new NotSupported("not supported");
         },
         workspaces(): IWorkspacesQueryFactory {
@@ -304,6 +311,9 @@ function dummyWorkspace(workspace: string, config: DummyBackendConfig): IAnalyti
             throw new NotSupported("not supported");
         },
         accessControl(): IWorkspaceAccessControlService {
+            throw new NotSupported("not supported");
+        },
+        attributeHierarchies(): IAttributeHierarchiesService {
             throw new NotSupported("not supported");
         },
     };
@@ -730,6 +740,47 @@ class DummyOrganization implements IOrganization {
             getSettings: () => Promise.resolve({}),
         };
     }
+
+    permissions(): IOrganizationPermissionService {
+        return {
+            getOrganizationPermissionForUser: () => Promise.resolve([]),
+            getOrganizationPermissionForUserGroup: () => Promise.resolve([]),
+            updateOrganizationPermissions: () => Promise.resolve(),
+            getPermissionsForUser: () =>
+                Promise.resolve({ workspacePermissions: [], dataSourcePermissions: [] }),
+            getPermissionsForUserGroup: () =>
+                Promise.resolve({ workspacePermissions: [], dataSourcePermissions: [] }),
+            assignPermissions: () => Promise.resolve(),
+            revokePermissions: () => Promise.resolve(),
+        };
+    }
+
+    users(): IOrganizationUserService {
+        return {
+            createUser: () => {
+                throw new NotSupported("not supported");
+            },
+            getUsersQuery: () => {
+                throw new NotSupported("not supported");
+            },
+            getUserGroupsQuery: () => {
+                throw new NotSupported("not supported");
+            },
+            addUsersToUserGroups: () => Promise.resolve(),
+            createUserGroup: () => Promise.resolve(),
+            deleteUsers: () => Promise.resolve(),
+            deleteUserGroups: () => Promise.resolve(),
+            getUser: () => Promise.resolve(undefined),
+            getUserGroup: () => Promise.resolve(undefined),
+            getUserGroups: () => Promise.resolve([]),
+            getUserGroupsOfUser: () => Promise.resolve([]),
+            getUsersOfUserGroup: () => Promise.resolve([]),
+            getUsers: () => Promise.resolve([]),
+            removeUsersFromUserGroups: () => Promise.resolve(),
+            updateUser: () => Promise.resolve(),
+            updateUserGroup: () => Promise.resolve(),
+        };
+    }
 }
 
 class DummyWorkspaceSettingsService implements IWorkspaceSettingsService {
@@ -825,6 +876,11 @@ class DummyElementsQuery implements IElementsQuery {
     withMeasures(_measures: IMeasure<IMeasureDefinitionType>[]): IElementsQuery {
         throw new NotSupported("not supported");
     }
+
+    withAvailableElementsOnly(_validateBy: ObjRef[]): IElementsQuery {
+        throw new NotSupported("not supported");
+    }
+
     withOptions(_options: IElementsQueryOptions): IElementsQuery {
         throw new NotSupported("not supported");
     }
@@ -917,6 +973,9 @@ class DummyWorkspaceAttributesService implements IWorkspaceAttributesService {
     }
     getAttributeDatasetMeta(_ref: ObjRef): Promise<IMetadataObject> {
         throw new NotSupported("not supported");
+    }
+    getConnectedAttributesByDisplayForm(_ref: ObjRef): Promise<ObjRef[]> {
+        throw new NotSupported("Not supported");
     }
 }
 
